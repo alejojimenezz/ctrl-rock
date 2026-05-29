@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ctrl + Rock | Configura tu Guitarra</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+</head>
+<body>
+
+    <header class="header">
+        <div class="logo">Ctrl + Rock</div>
+        <nav>
+            <a href="modelos.html">← Volver a Modelos</a>
+        </nav>
+    </header>
+
+    <main class="config-container">
+        <h2 id="modelo-titulo">Configurando tu Guitarra</h2>
+        
+        <div class="config-grid">
+            <div class="preview-box">
+                <div id="guitar-preview" class="model-image-placeholder">
+                    Cargando modelo...
+                </div>
+                <p style="text-align: center; margin-top: 15px; color: #5c3a21; font-style: italic;">
+                    "La madera y el metal se unen en tu design."
+                </p>
+            </div>
+
+            <div class="form-box">
+                <h3>Datos de la Cotización</h3>
+                <form id="cotizacion-form">
+                    <div class="form-group">
+                        <label for="id_type">Tipo de Documento</label>
+                        <select id="id_type" required>
+                            <option value="C.C">Cédula de Ciudadanía (C.C)</option>
+                            <option value="NIT">NIT</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_number">Número de Identificación</label>
+                        <input type="text" id="id_number" placeholder="Ej: 10102020" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="name">Nombre Completo o Razón Social</label>
+                        <input type="text" id="name" placeholder="Ej: Juan Pérez o Mi Empresa S.A.S" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone_number">Teléfono de Contacto</label>
+                        <input type="text" id="phone_number" placeholder="Ej: +57 300 123 4567" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Correo Electrónico</label>
+                        <input type="email" id="email" placeholder="ejemplo@correo.com" required>
+                    </div>
+
+                    <button type="submit" id="btn-enviar" class="btn-primary" style="width: 100%; margin-top: 10px;">
+                        Enviar Cotización Ahora
+                    </button>
+                </form>
+
+                <div id="mensaje-status" style="margin-top: 20px; padding: 10px; border-radius: 5px; display: none;"></div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // === 1. CONFIGURACIÓN DE CREDENCIALES ===
+        // Supabase (Mantén tus datos actuales aquí)
+        const SUPABASE_URL = 'https://exbkgwglryserymzyyzj.supabase.co'; 
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4Ymtnd2dscnlzZXJ5bXp5eXpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNzM3NDMsImV4cCI6MjA5NTY0OTc0M30.nYx3HWEPZFng82Mo83j9Wz-5PHcfjqTfpYzGZxDJQC0';
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // EmailJS (Reemplaza con tus datos de EmailJS)
+        const EMAILJS_PUBLIC_KEY = 'x1RB_jxPs_cCADQG0';
+        const EMAILJS_SERVICE_ID = 'service_fx9j9ci';
+        const EMAILJS_TEMPLATE_ID = 'template_r5h0php';
+        
+        // Inicializar EmailJS
+        emailjs.init(EMAILJS_PUBLIC_KEY);
+
+        // === 2. LEER EL MODELO SELECCIONADO DE LA URL ===
+        const urlParams = new URLSearchParams(window.location.search);
+        const modeloId = urlParams.get('modelo') || 'No definido';
+        
+        document.getElementById('modelo-titulo').innerText = `Personalizando tu modelo: ${modeloId}`;
+        document.getElementById('guitar-preview').innerHTML = `🎸 <br> Base: ${modeloId}`;
+
+        // === 3. LÓGICA DE ENVÍO ===
+        const form = document.getElementById('cotizacion-form');
+        const btnEnviar = document.getElementById('btn-enviar');
+        const statusDiv = document.getElementById('mensaje-status');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            btnEnviar.disabled = true;
+            btnEnviar.innerText = "Procesando...";
+            statusDiv.style.display = "block";
+            statusDiv.style.backgroundColor = "#eee";
+            statusDiv.style.color = "#333";
+            statusDiv.innerText = "Guardando cotización y enviando correo...";
+
+            // Recolectar datos
+            const datosCotizacion = {
+                id_type: document.getElementById('id_type').value,
+                id_number: document.getElementById('id_number').value,
+                name: document.getElementById('name').value,
+                phone_number: document.getElementById('phone_number').value,
+                email: document.getElementById('email').value,
+                modelo_base: modeloId
+            };
+
+            try {
+                // A. GUARDAR EN SUPABASE
+                const { error: supabaseError } = await _supabase
+                    .from('cotizaciones')
+                    .insert([datosCotizacion]);
+
+                if (supabaseError) throw new Error("Error en Base de Datos: " + supabaseError.message);
+
+                // B. ENVIAR CORREO CON EMAILJS
+                // Los nombres de las propiedades deben coincidir con las etiquetas {{}} de tu plantilla de EmailJS
+                const parametrosEmail = {
+                    name: datosCotizacion.name,
+                    email: datosCotizacion.email, // EmailJS detectará a quién enviarlo si lo mapeas en su panel
+                    modelo_base: datosCotizacion.modelo_base,
+                    to_email: datosCotizacion.email // Usualmente se configura esto en el campo "To Email" de EmailJS
+                };
+
+                await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, parametrosEmail);
+
+                // C. RESPUESTA EXITOSA MODIFICADA
+                statusDiv.style.backgroundColor = "#d4edda";
+                statusDiv.style.color = "#155724";
+                statusDiv.innerText = "¡Excelente! Tu cotización ha sido guardada. En el correo electrónico registrado podrás consultarla.";
+                form.reset();
+                } catch (err) {
+                console.error("Error completo:", err); // Esto lo enviará a la consola para verlo a detalle
+                statusDiv.style.backgroundColor = "#f8d7da";
+                statusDiv.style.color = "#721c24";
+                // Ajustamos esto para que atrape el error de EmailJS o de Supabase
+                statusDiv.innerText = "Hubo un problema: " + (err.text || err.message || "Error desconocido");
+            } finally {
+                btnEnviar.disabled = false;
+                btnEnviar.innerText = "Enviar Cotización Ahora";
+            }
+        });
+    </script>
+</body>
+</html>
