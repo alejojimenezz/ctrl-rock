@@ -2,6 +2,7 @@
 
 - [Ctrl + Rock](#ctrl--rock)
   - [Mapa mental](#mapa-mental)
+    - [Propuestas](#propuestas)
   - [Estructura de sitio web](#estructura-de-sitio-web)
 
 
@@ -25,6 +26,11 @@ mindmap
             3 estilos
             Parametrización
 ```
+
+### Propuestas
+
+- [ ] Agregar sonido a página web. Tipo prueba de sonido de la guitarra diseñada
+- [ ] Extracción de información para precios de componentes
 
 ## Estructura de sitio web
 
