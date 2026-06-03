@@ -71,6 +71,11 @@ body {
     box-shadow: 0 4px 20px rgba(0,0,0,0.15);
 }
 
+.header div a {
+    text-decoration: none;
+    color: var(--blanco-puro);
+}
+
 .logo {
     font-family: var(--fuente-titulo);
     font-size: 1.8rem;
