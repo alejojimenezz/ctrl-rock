@@ -3,16 +3,226 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ctrl + Rock | Inicio</title>
+    <title>Ctrl + Rock | Configuración CAD de Guitarras en 3D</title>
+    <meta name="description" content="Diseña, personaliza y exporta parámetros de tu guitarra 3D a Autodesk Inventor y otros softwares CAD.">
     <link rel="stylesheet" href="style.css">
+    <!-- Three.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body class="landing-body">
 
     <main class="landing-container">
-        <h1 class="main-title">Ctrl + Rock</h1>
-        <p class="main-subtitle">Elige tu punto de partida entre nuestros 3 modelos base y personaliza cada detalle visual y sonoro a tu medida.</p>
-        <a href="modelos.html" class="btn-primary">Empezar a Personalizar</a>
+        <div class="landing-content">
+            <span class="main-tag" id="cad-tag">Visualización CAD 3D</span>
+            <h1 class="main-title" id="landing-title">Ctrl + <span>Rock</span></h1>
+            <p class="main-subtitle" id="landing-subtitle">El lienzo en blanco para tu próxima gran creación. Modifica parámetros de diseño en tiempo real, personaliza estética y sonido, y exporta directamente a Autodesk Inventor.</p>
+            <a href="modelos.html" id="btn-start" class="btn-primary">
+                Empezar a Personalizar
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+            </a>
+        </div>
+        
+        <div class="landing-3d-viewport" id="viewport-container">
+            <canvas id="canvas-landing"></canvas>
+        </div>
     </main>
 
+    <script>
+        // === RENDERIZADO WIREFRAME 3D EN EL HOME ===
+        const container = document.getElementById('viewport-container');
+        const canvas = document.getElementById('canvas-landing');
+        
+        // 1. Escena y Cámara
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
+        camera.position.set(0, 0, 8);
+        
+        // 2. Renderizador
+        const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        
+        // 3. Crear Guitarra Wireframe Procedural
+        const guitarGroup = new THREE.Group();
+        
+        // A. Cuerpo de la guitarra (Utilizando un contorno de Stratocaster simple para el wireframe)
+        const bodyShape = new THREE.Shape();
+        const length = 3.2;
+        const width = 2.4;
+        bodyShape.moveTo(0, -length/2);
+        bodyShape.quadraticCurveTo(width/2, -length/2, width*0.5, -length*0.2);
+        bodyShape.quadraticCurveTo(width*0.55, length*0.1, width*0.35, length*0.25);
+        bodyShape.quadraticCurveTo(width*0.4, length*0.35, width*0.25, length*0.48); // Horn
+        bodyShape.quadraticCurveTo(width*0.1, length*0.4, width*0.05, length*0.25);
+        bodyShape.quadraticCurveTo(0, length*0.3, -width*0.05, length*0.25);
+        bodyShape.quadraticCurveTo(-width*0.1, length*0.4, -width*0.25, length*0.48); // Horn
+        bodyShape.quadraticCurveTo(-width*0.4, length*0.35, -width*0.35, length*0.25);
+        bodyShape.quadraticCurveTo(-width*0.55, length*0.1, -width*0.5, -length*0.2);
+        bodyShape.quadraticCurveTo(-width/2, -length/2, 0, -length/2);
+        
+        const extrudeSettings = {
+            depth: 0.35,
+            bevelEnabled: true,
+            bevelSegments: 3,
+            steps: 1,
+            bevelSize: 0.03,
+            bevelThickness: 0.03
+        };
+        
+        const bodyGeometry = new THREE.ExtrudeGeometry(bodyShape, extrudeSettings);
+        bodyGeometry.center(); // Centrar geometría
+        
+        // Material de alambre (wireframe) color caoba-claro / rojo brillante
+        const wireMaterial = new THREE.MeshBasicMaterial({
+            color: 0xd13d2f, // rojo brillante
+            wireframe: true,
+            transparent: true,
+            opacity: 0.75
+        });
+        
+        const bodyMesh = new THREE.Mesh(bodyGeometry, wireMaterial);
+        guitarGroup.add(bodyMesh);
+        
+        // B. Mástil de alambre
+        const neckGeom = new THREE.BoxGeometry(0.18, 2.6, 0.1);
+        const neckWireGeom = new THREE.WireframeGeometry(neckGeom);
+        const neckMaterial = new THREE.LineBasicMaterial({ color: 0x8d5b38, transparent: true, opacity: 0.6 });
+        const neckLine = new THREE.LineSegments(neckWireGeom, neckMaterial);
+        neckLine.position.set(0, 2.0, 0);
+        guitarGroup.add(neckLine);
+        
+        // C. Cabeza (Headstock) de alambre
+        const headGeom = new THREE.BoxGeometry(0.24, 0.6, 0.07);
+        const headWireGeom = new THREE.WireframeGeometry(headGeom);
+        const headLine = new THREE.LineSegments(headWireGeom, neckMaterial);
+        headLine.position.set(0, 3.5, 0);
+        guitarGroup.add(headLine);
+        
+        // D. Pastillas e incidentales
+        const pickupGeom = new THREE.BoxGeometry(0.3, 0.7, 0.1);
+        const pickupWireGeom = new THREE.WireframeGeometry(pickupGeom);
+        const pickupMaterial = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.5 });
+        
+        const pickup1 = new THREE.LineSegments(pickupWireGeom, pickupMaterial);
+        pickup1.position.set(0, 0.2, 0.2);
+        guitarGroup.add(pickup1);
+        
+        const pickup2 = new THREE.LineSegments(pickupWireGeom, pickupMaterial);
+        pickup2.position.set(0, -0.4, 0.2);
+        guitarGroup.add(pickup2);
+        
+        scene.add(guitarGroup);
+        
+        // Ajustar la inclinación inicial para exhibición
+        guitarGroup.rotation.x = 0.2;
+        guitarGroup.rotation.y = -0.5;
+        guitarGroup.rotation.z = -0.3;
+        
+        // 4. Luces (opcionales en MeshBasicMaterial pero buenas para expandir)
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambientLight);
+        
+        // Variables para rotación interactiva por arrastre
+        let isDragging = false;
+        let previousMousePosition = { x: 0, y: 0 };
+        
+        container.addEventListener('mousedown', (e) => {
+            isDragging = true;
+        });
+        
+        container.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const deltaMove = {
+                x: e.clientX - rect.left - previousMousePosition.x,
+                y: e.clientY - rect.top - previousMousePosition.y
+            };
+            
+            if (isDragging) {
+                const deltaRotationQuaternion = new THREE.Quaternion()
+                    .setFromEuler(new THREE.Euler(
+                        toRadians(deltaMove.y * 0.5),
+                        toRadians(deltaMove.x * 0.5),
+                        0,
+                        'XYZ'
+                    ));
+                guitarGroup.quaternion.multiplyQuaternions(deltaRotationQuaternion, guitarGroup.quaternion);
+            }
+            
+            previousMousePosition = {
+                x: e.clientX - rect.left,
+                y: e.clientY - rect.top
+            };
+        });
+        
+        window.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+        
+        // Soporte móvil
+        container.addEventListener('touchstart', (e) => {
+            isDragging = true;
+            const rect = canvas.getBoundingClientRect();
+            previousMousePosition = {
+                x: e.touches[0].clientX - rect.left,
+                y: e.touches[0].clientY - rect.top
+            };
+        });
+        
+        container.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            const rect = canvas.getBoundingClientRect();
+            const deltaMove = {
+                x: e.touches[0].clientX - rect.left - previousMousePosition.x,
+                y: e.touches[0].clientY - rect.top - previousMousePosition.y
+            };
+            
+            const deltaRotationQuaternion = new THREE.Quaternion()
+                .setFromEuler(new THREE.Euler(
+                    toRadians(deltaMove.y * 0.5),
+                    toRadians(deltaMove.x * 0.5),
+                    0,
+                    'XYZ'
+                ));
+            guitarGroup.quaternion.multiplyQuaternions(deltaRotationQuaternion, guitarGroup.quaternion);
+            
+            previousMousePosition = {
+                x: e.touches[0].clientX - rect.left,
+                y: e.touches[0].clientY - rect.top
+            };
+        });
+        
+        window.addEventListener('touchend', () => {
+            isDragging = false;
+        });
+        
+        function toRadians(angle) {
+            return angle * (Math.PI / 180);
+        }
+        
+        // 5. Animación de renderizado continuo
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Si el usuario no está arrastrando, rota sutilmente solo
+            if (!isDragging) {
+                guitarGroup.rotation.y += 0.005;
+                guitarGroup.rotation.x = Math.sin(Date.now() * 0.001) * 0.15;
+            }
+            
+            renderer.render(scene, camera);
+        }
+        
+        // 6. Manejo de Redimensión
+        window.addEventListener('resize', () => {
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+            renderer.setSize(width, height);
+        });
+        
+        // Iniciar animación
+        animate();
+    </script>
 </body>
 </html>
