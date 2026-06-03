@@ -3,47 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ctrl + Rock | Selecciona tu Modelo</title>
+    <title>Ctrl + Rock | Selecciona tu Modelo Base</title>
+    <meta name="description" content="Elige entre Strat, Les Paul o Flying V como tu modelo base de guitarra CAD en 3D.">
     <link rel="stylesheet" href="style.css">
+    <!-- Three.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
-<body>
+<body class="cad-grid-bg">
 
     <header class="header">
-        <div class="logo"><a href="index.html">Ctrl + Rock</a></div>
+        <a href="index.html" class="logo" style="text-decoration: none;">Ctrl + Rock</a>
         <nav>
-            <a href="#" class="nav-link">Contáctenos</a>
+            <a href="index.html" class="nav-link">Inicio</a>
         </nav>
     </header>
 
     <main class="models-section">
         <h2>Selecciona tu Modelo Base</h2>
-        <p style="margin-bottom: 40px; color: #5c3a21;">Cada modelo es el lienzo en blanco para tu próxima gran creación.</p>
+        <p class="section-subtitle">Cada modelo es el lienzo en blanco para tu próxima gran creación. Haz clic y arrastra sobre los modelos 3D para verlos en detalle.</p>
         
         <div class="models-grid">
             
             <div class="model-card">
-                <div class="model-image-placeholder">🎸 Estilo Strat</div>
+                <div class="model-3d-card-viewport" id="viewport-Strat" data-model="Strat"></div>
                 <h3>La Clásica</h3>
-                <p>Versátil, con un tono brillante y un cuerpo ergonómico ideal para largas sesiones.</p>
+                <p>Estilo Stratocaster: Versátil, con un contorno de cuerpo ergonómico de doble corte y tono brillante ideal para solos y ritmos ágiles.</p>
                 <a href="configurador.html?modelo=Strat" class="btn-secondary-link">Elegir y Personalizar</a>
             </div>
 
             <div class="model-card">
-                <div class="model-image-placeholder">🎸 Estilo Les</div>
+                <div class="model-3d-card-viewport" id="viewport-LesPaul" data-model="LesPaul"></div>
                 <h3>La Pesada</h3>
-                <p>Tono grueso, sustain infinito y esa elegancia atemporal del rock clásico.</p>
+                <p>Estilo Les Paul: Tono grueso y cálido, con un cuerpo robusto de corte simple y un sustain infinito que definió la historia del rock clásico.</p>
                 <a href="configurador.html?modelo=LesPaul" class="btn-secondary-link">Elegir y Personalizar</a>
             </div>
 
             <div class="model-card">
-                <div class="model-image-placeholder">🎸 Estilo V</div>
+                <div class="model-3d-card-viewport" id="viewport-V-Agresiva" data-model="V-Agresiva"></div>
                 <h3>La Agresiva</h3>
-                <p>Diseño radical y sonido potente para quienes no temen destacar en el escenario.</p>
+                <p>Estilo Flying V: Diseño angular y radical con una simetría potente. Ideal para el metal y guitarristas que no temen destacar en el escenario.</p>
                 <a href="configurador.html?modelo=V-Agresiva" class="btn-secondary-link">Elegir y Personalizar</a>
             </div>
 
         </div>
     </main>
 
+    <!-- Script de control 3D para las tarjetas -->
+    <script src="modelos.js"></script>
 </body>
 </html>
