@@ -20,10 +20,18 @@ mindmap
         Sitio Web
             Mapa mental
             Mockup
-            Estructura de documentos
+            Estructura de archivos
+                Página principal
+                    index
+                Selección de modelo base
+                    modelos
+                Personalización
+                    configurador
             Base de datos
+                Generar cotización
         Modelación
             3 estilos
+                Sonido de muestra
             Parametrización
 ```
 
@@ -48,6 +56,7 @@ config:
 ---
 treeView-beta
     "ctrl-rock"
+        "assets"
         "Frontend"
             "configurador.html"
             "index.html"
