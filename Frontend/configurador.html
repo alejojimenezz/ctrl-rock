@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ctrl + Rock | Configura tu Guitarra 3D</title>
     <meta name="description" content="Personaliza tu guitarra, define parámetros de diseño y exporta directamente a Autodesk Inventor.">
+    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico"/>
     <link rel="stylesheet" href="style.css">
     <!-- Supabase y EmailJS (CDNs originales) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -16,7 +17,9 @@
 <body class="cad-grid-bg">
 
     <header class="header">
-        <a href="index.html" class="logo" style="text-decoration: none;">Ctrl + Rock</a>
+        <a href="index.html" class="logo" style="text-decoration: none;">
+            <img src="/assets/LogoCTRL+ROCK.png" alt="Logo CTRL+ROCK">
+        </a>
         <nav>
             <a href="modelos.html">← Volver a Modelos</a>
         </nav>
@@ -444,7 +447,8 @@ End If</pre>
         const urlParams = new URLSearchParams(window.location.search);
         const modeloId = urlParams.get('modelo') || 'Strat';
         
-        document.getElementById('modelo-titulo').innerText = `Personalizando tu modelo: ${modeloId}`;
+        // document.getElementById('modelo-titulo').innerText = `Personalizando tu modelo: ${modeloId}`;
+        document.getElementById('modelo-titulo').innerText = `Personalizando tu modelo`;
         document.getElementById('sum-modelo').innerText = modeloId;
         document.getElementById('wiz-sum-modelo').innerText = modeloId;
 
