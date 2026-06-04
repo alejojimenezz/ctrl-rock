@@ -61,7 +61,7 @@ body {
     backdrop-filter: blur(10px);
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     color: var(--blanco-puro);
-    padding: 1.2rem 8%;
+    padding: 0.3rem 8%;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -78,7 +78,7 @@ body {
 
 .logo {
     font-family: var(--fuente-titulo);
-    font-size: 1.8rem;
+    font-size: 1rem;
     font-weight: 800;
     letter-spacing: 2px;
     text-transform: uppercase;
@@ -86,6 +86,11 @@ body {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     position: relative;
+}
+
+.logo img {
+    width: 110px;
+    height: auto;
 }
 
 .logo::after {
@@ -139,6 +144,17 @@ body {
     background-size: 40px 40px;
 }
 
+.landing-logo {
+    display: flex;
+    text-align: center;
+    animation: fadeInUp 1s ease;
+}
+
+.landing-logo img {
+    width: 400px;
+    height: auto;
+}
+
 .landing-content {
     z-index: 10;
     max-width: 650px;
@@ -161,7 +177,7 @@ body {
 
 .main-title {
     font-family: var(--fuente-titulo);
-    font-size: clamp(3rem, 6vw, 5.5rem);
+    font-size: clamp(3rem, 1vw, 5.5rem);
     font-weight: 900;
     line-height: 1.05;
     margin-bottom: 20px;
@@ -1017,6 +1033,17 @@ body {
         max-width: 100%;
         margin-bottom: 40px;
     }
+    .landing-logo {
+        display: flex;
+        text-align: center;
+        justify-content: center;
+    }
+
+    .landing-logo img {
+        width: 300px;
+        height: auto;
+    }
+
     .landing-3d-viewport {
         height: 50vh;
     }
