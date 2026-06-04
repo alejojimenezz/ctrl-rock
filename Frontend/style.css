@@ -1000,6 +1000,26 @@ body {
     flex: 1;
     padding: 14px 20px;
 }
+/* Estilo divertido y rockero para el lema */
+.rock-slogan {
+    font-size: 1.6rem !important; /* Lo hace más grande y vistoso */
+    font-weight: 800;             /* Súper negrita */
+    text-transform: uppercase;    /* Todo en mayúsculas para más impacto */
+    letter-spacing: 1px;          /* Espaciado entre letras */
+    color: #fff;
+    margin: 20px 0;
+    display: inline-block;
+    
+    /* El truco maestro: una inclinación de contracultura rockera */
+    transform: rotate(-1.5deg); 
+}
+
+/* Destacar la acción en el color rojo de tu marca */
+.highlight-rock {
+    color: #d13d2f; /* El rojo brillante de la guitarra */
+    display: inline-block;
+    text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.5); /* Sombra estilo cómic/póster */
+}
 
 /* ==========================================================
    ANIMACIONES Y RESPONSIVIDAD
