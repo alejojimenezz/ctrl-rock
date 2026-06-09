@@ -81,7 +81,7 @@
                             <p class="step-desc">Selecciona tu estilo preferido. Ajustaremos las pastillas y maderas óptimas en tiempo real en la guitarra 3D.</p>
                             
                             <div class="wizard-options-grid">
-                                <div class="wizard-card selected" data-wiz-sound="heavy">
+                                <div class="wizard-card" data-wiz-sound="heavy">
                                     <div class="wizard-card-badge"></div>
                                     <div class="wizard-card-title">🎸 Cálido y Pesado (Metal, Hard Rock)</div>
                                     <div class="wizard-card-desc">Cuerpo robusto de Caoba y pastillas Humbucker de doble bobina. Máximo sustain y ganancia.</div>
@@ -487,6 +487,12 @@ End If</pre>
         let wizFeel = 'light';
         let wizLook = 'classic';
 
+        const audioHeavy = new Audio('../assets/sounds/Xiphos HH.m4a');
+        const audioBright = new Audio('../assets/sounds/Les Paul HH.m4a');
+        const audioBalanced = new Audio('../assets/sounds/Strat SSS.m4a');
+
+        let currentAudio = null;
+
         // Manejar selección de tarjetas del wizard
         document.querySelectorAll('.wizard-card').forEach(card => {
             card.addEventListener('click', () => {
@@ -497,6 +503,21 @@ End If</pre>
                 // Almacenar el valor elegido
                 if (card.hasAttribute('data-wiz-sound')) {
                     wizSound = card.getAttribute('data-wiz-sound');
+
+                    if (currentAudio) {
+                        currentAudio.pause();
+                        currentAudio.currentTime = 0;
+                    }
+
+                    if (wizSound === 'heavy') {
+                        currentAudio = audioHeavy;
+                    } else if (wizSound === 'bright') {
+                        currentAudio = audioBright;
+                    } else if (wizSound === 'balanced') {
+                        currentAudio = audioBalanced;
+                    }
+                    currentAudio.play();
+
                 } else if (card.hasAttribute('data-wiz-feel')) {
                     wizFeel = card.getAttribute('data-wiz-feel');
                 } else if (card.hasAttribute('data-wiz-look')) {
