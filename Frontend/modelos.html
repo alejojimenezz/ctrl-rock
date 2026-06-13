@@ -14,10 +14,13 @@
 
     <header class="header">
         <a href="index.html" class="logo" style="text-decoration: none;">
-            <img src="../assets/LogoCTRL+ROCK.png" alt="Logo CTRL+ROCK">
+        <img src="../assets/LogoCTRL+ROCK.png" alt="Logo CTRL+ROCK">
         </a>
         <nav>
             <a href="index.html" class="nav-link">Inicio</a>
+        </nav>
+        <nav>
+            <a href="#footer" class="nav-link">Contáctanos</a>
         </nav>
     </header>
 
@@ -47,11 +50,59 @@
                 <p>Estilo Flying V: Diseño angular y radical con una simetría potente. Ideal para el metal y guitarristas que no temen destacar en el escenario.</p>
                 <a href="configurador.html?modelo=V-Agresiva" class="btn-secondary-link">Elegir y Personalizar</a>
             </div>
+            
+            <div class="model-card">
+                <div class="model-3d-card-viewport" id="viewport-Electroacustica" data-model="Electroacustica"></div>
+                <h3>Electroacustica</h3>
+                <p>Estilo Electroacústica: Combina la calidez natural de una guitarra acústica con la posibilidad de amplificarse. Perfecta para escenarios íntimos y presentaciones en vivo.</p>
+                <a href="configurador.html?modelo=Electroacustica" class="btn-secondary-link">Elegir y Personalizar</a>
+            </div>
+
+            <div class="model-card">
+               <div class="model-3d-card-viewport" id="viewport-Electrica" data-model="Electrica"></div>
+               <h3>Electrica</h3>
+               <p>Estilo Eléctrica: Cuerpo sólido y versátil, diseñada para explorar cualquier género musical con potencia y claridad. La herramienta definitiva del guitarrista moderno.</p>
+               <a href="configurador.html?modelo=Electrica" class="btn-secondary-link">Elegir y Personalizar</a>
+            </div>
+
+            <div class="model-card">
+                <div class="model-3d-card-viewport" id="viewport-Acustica" data-model="Acustica"></div>
+                <h3>Acustica</h3>
+                <p>Estilo Acústica: Sonido natural y resonante sin necesidad de amplificación. Ideal para composición, fingerpicking y todo guitarrista que busca autenticidad pura.</p>
+                <a href="configurador.html?modelo=Acustica" class="btn-secondary-link">Elegir y Personalizar</a>
+            </div>
 
         </div>
     </main>
+<footer class="site-footer" id="footer">
+        <div class="footer-grid">
 
+            <div class="footer-col">
+                <h4>Ctrl + Rock</h4>
+                <p>Diseña tu guitarra eléctrica ideal con herramientas CAD 3D en tiempo real.</p>
+            </div>
+
+            <div class="footer-col">
+                <h4>Contacto</h4>
+                <div class="contact-item">+57 xxx xxx xxxx</div>
+                <div class="contact-item">+57 xxx xxx xxxx</div>
+                <div class="contact-item"><a href="mailto:contacto@ctrlrock.com">contacto@ctrlrock.com</a></div>
+                <div class="contact-item"><a href="mailto:soporte@ctrlrock.com">soporte@ctrlrock.com</a></div>
+            </div>
+
+            <div class="footer-col">
+                <h4>Atención</h4>
+                <p>Lun – Vie: 9:00 am – 6:00 pm</p>
+                <p>Sáb: 10:00 am – 2:00 pm</p>
+            </div>
+
+        </div>
+        <div class="footer-bottom">
+            <p>2026 <span>Ctrl + Rock</span>. Todos los derechos reservados.</p>
+        </div>
+    </footer>
     <!-- Script de control 3D para las tarjetas -->
     <script src="modelos.js"></script>
+
 </body>
 </html>

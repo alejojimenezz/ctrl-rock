@@ -1000,6 +1000,26 @@ body {
     flex: 1;
     padding: 14px 20px;
 }
+/* Estilo divertido y rockero para el lema */
+.rock-slogan {
+    font-size: 1.6rem !important; /* Lo hace más grande y vistoso */
+    font-weight: 800;             /* Súper negrita */
+    text-transform: uppercase;    /* Todo en mayúsculas para más impacto */
+    letter-spacing: 1px;          /* Espaciado entre letras */
+    color: #fff;
+    margin: 20px 0;
+    display: inline-block;
+    
+    /* El truco maestro: una inclinación de contracultura rockera */
+    transform: rotate(-1.5deg); 
+}
+
+/* Destacar la acción en el color rojo de tu marca */
+.highlight-rock {
+    color: #d13d2f; /* El rojo brillante de la guitarra */
+    display: inline-block;
+    text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.5); /* Sombra estilo cómic/póster */
+}
 
 /* ==========================================================
    ANIMACIONES Y RESPONSIVIDAD
@@ -1054,8 +1074,79 @@ body {
         position: static;
     }
 }
+/* ==========================================================
+   FOOTER
+   ========================================================== */
+.site-footer {
+    background: var(--caoba-oscuro);
+    border-top: 3px solid var(--rojo-cereza);
+    padding: 3rem 8% 1.5rem;
+    color: var(--crema-madera);
+}
+
+.footer-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 2.5rem;
+    max-width: 1400px;
+    margin: 0 auto 2rem;
+}
+
+.footer-col h4 {
+    font-family: var(--fuente-titulo);
+    color: var(--rojo-brillante);
+    font-size: 0.75rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.footer-col p,
+.footer-col .contact-item {
+    font-size: 0.9rem;
+    color: #c9b3a7;
+    line-height: 2.2;
+}
+
+.footer-col a {
+    color: #c9b3a7;
+    text-decoration: none;
+    transition: var(--transicion);
+}
+
+.footer-col a:hover {
+    color: var(--crema-madera);
+}
+
+.footer-bottom {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding-top: 1.2rem;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.78rem;
+    color: var(--texto-mutado);
+}
+
+.footer-bottom span {
+    color: var(--rojo-brillante);
+}
+
 
 @media (max-width: 768px) {
+    .footer-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    .footer-bottom {
+        flex-direction: column;
+        gap: 0.4rem;
+        text-align: center;
+    }
     .header {
         padding: 1.2rem 5%;
     }
@@ -1064,5 +1155,6 @@ body {
     }
     .config-container {
         padding: 30px 5% 60px 5%;
+       
     }
 }
