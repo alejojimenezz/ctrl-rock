@@ -1,9 +1,13 @@
 # Ctrl + Rock
+> **Controla el diseño, desata el ruido**
 
 - [Ctrl + Rock](#ctrl--rock)
   - [Mapa mental](#mapa-mental)
     - [Propuestas](#propuestas)
   - [Estructura de sitio web](#estructura-de-sitio-web)
+  - [Página principal](#página-principal)
+  - [Seleccionar modelo](#seleccionar-modelo)
+  - [Configurador](#configurador)
 
 
 ## Mapa mental
@@ -37,30 +41,42 @@ mindmap
 
 ### Propuestas
 
-- [ ] Agregar sonido a página web. Tipo prueba de sonido de la guitarra diseñada
+- [X] Agregar sonido a página web. Tipo prueba de sonido de la guitarra diseñada
 - [ ] Extracción de información para precios de componentes
 
 ## Estructura de sitio web
 
-```mermaid
----
-config:
-    treeView:
-        rowIndent: 30
-        lineThickness: 2
-    themeVariables:
-        treeView:
-            labelFontSize: '20px'
-            labelColor: '#ff9100'
-            lineColor: '#00FF00'
----
-treeView-beta
-    "ctrl-rock"
-        "assets"
-        "Frontend"
-            "configurador.html"
-            "index.html"
-            "modelos.html"
-            "styles.css"
-        "README.md"
 ```
+└── 📁ctrl-rock
+    └── 📁assets
+        └── 📁sounds
+            ├── Les Paul HH.m4a
+            ├── Strat HSS.m4a
+            ├── Strat SSS.m4a
+            ├── Xiphos HH.m4a
+        ├── favicon.ico
+        ├── LogoCTRL+ROCK.png
+    └── 📁Frontend
+        ├── configurador.html
+        ├── configurador.js
+        ├── index.html
+        ├── modelos.html
+        ├── modelos.js
+        ├── style.css
+    └── README.md
+```
+
+## Página principal
+> `index.html`
+
+Primera página - bienvenida a los usuarios.
+
+## Seleccionar modelo
+> `modelos.html`
+
+Muestra de opciones para base de los modelados de guitarra.
+
+## Configurador
+> `configurador.html`
+
+Pagina para personalizar el modelado de la guitarra
