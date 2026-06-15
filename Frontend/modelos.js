@@ -1,39 +1,142 @@
-// === RENDERIZADO 3D INTERACTIVO PARA TARJETAS DE MODELOS ===
+// === MÓDULO GLOBAL CTRL+ROCK: RENDERIZADO 3D Y AUDIO INTERACTIVO ===
 
 document.addEventListener("DOMContentLoaded", () => {
+    // 1. INICIALIZACIÓN DE MODELOS 3D
     const viewports = document.querySelectorAll(".model-3d-card-viewport");
+    
+    if (viewports.length === 0) {
+        console.error("Ctrl+Rock Error: No se encontraron elementos con la clase '.model-3d-card-viewport' en el HTML.");
+    }
     
     viewports.forEach(viewport => {
         const modelType = viewport.getAttribute("data-model");
         initCard3D(viewport, modelType);
     });
+
+    // 2. GESTOR INTERACTIVO DE AUDIO PARA PREVISUALIZACIÓN DE TONOS
+    const playButtons = document.querySelectorAll(".btn-audio-play");
+    let currentAudio = null;
+    let currentButton = null;
+
+    playButtons.forEach(button => {
+        button.addEventListener("click", () => {
+            let soundPath = button.getAttribute("data-sound");
+            const icon = button.querySelector(".icon-play");
+
+            // CORRECCIÓN: Si el archivo se abre localmente (protocolo file://) 
+            // y la ruta es absoluta (empieza con '/'), la volvemos relativa 
+            // para evitar el error "Failed to load" buscando en la raíz del disco duro.
+            if (window.location.protocol === 'file:' && soundPath.startsWith('/')) {
+                soundPath = '.' + soundPath;
+            }
+
+            // Si se hace clic en el botón que ya está sonando, pausarlo/reanudarlo
+            if (currentButton === button) {
+                if (!currentAudio.paused) {
+                    currentAudio.pause();
+                    icon.textContent = "▶";
+                    button.classList.remove("playing");
+                } else {
+                    currentAudio.play()
+                        .then(() => {
+                            icon.textContent = "⏸";
+                            button.classList.add("playing");
+                        })
+                        .catch(err => console.error("Error al reanudar:", err));
+                }
+                return;
+            }
+
+            // Detener audio anterior si se hace clic en un botón diferente
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio.src = "";
+
+                if (currentButton) {
+                    currentButton.querySelector(".icon-play").textContent = "▶";
+                    currentButton.classList.remove("playing");
+                }
+            }
+
+            // Crear y reproducir nuevo audio
+            try {
+                currentAudio = new Audio(soundPath);
+                currentAudio.preload = "auto";
+                currentAudio.volume = 1.0;
+                currentButton = button;
+
+                currentAudio.play()
+                    .then(() => {
+                        icon.textContent = "⏸";
+                        button.classList.add("playing");
+                    })
+                    .catch(error => {
+                        console.error("Error reproduciendo audio:", error);
+                    });
+
+                currentAudio.addEventListener("ended", () => {
+                    icon.textContent = "▶";
+                    button.classList.remove("playing");
+
+                    currentAudio = null;
+                    currentButton = null;
+                });
+
+            } catch (error) {
+                console.error("Error creando Audio:", error);
+            }
+        });
+    });
 });
 
+// === FUNCIÓN CONSTRUCTORA DEL ENTORNO 3D (THREE.JS) ===
 function initCard3D(container, type) {
     const width = container.clientWidth || 320;
     const height = container.clientHeight || 320;
     
+    const normalizedType = type ? type.toLowerCase().trim() : '';
+
     const scene = new THREE.Scene();
+    
+    // Cámara de frente con perspectiva óptima
     const camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 100);
     camera.position.set(0, 0.5, 7.5);
     
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    // CONFIGURACIÓN ULTRA DEL RENDERIZADOR
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap; 
+    renderer.toneMapping = THREE.ACESFilmicToneMapping; 
+    renderer.toneMappingExposure = 1.3;
     container.appendChild(renderer.domElement);
     
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.65);
+    // ILUMINACIÓN DE ESTUDIO FOTOGRÁFICO
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.3); 
     scene.add(ambientLight);
     
-    const dirLight = new THREE.DirectionalLight(0xffffff, 0.85);
-    dirLight.position.set(5, 8, 5);
-    dirLight.castShadow = true;
-    scene.add(dirLight);
+    const mainLight = new THREE.DirectionalLight(0xffffff, 1.8); 
+    mainLight.position.set(4, 6, 5);
+    mainLight.castShadow = true;
+    mainLight.shadow.mapSize.width = 2048;
+    mainLight.shadow.mapSize.height = 2048;
+    mainLight.shadow.bias = -0.0005; 
+    scene.add(mainLight);
     
-    const pointLight = new THREE.PointLight(0xffeedd, 0.5, 10);
-    pointLight.position.set(-4, -2, 3);
-    scene.add(pointLight);
+    const fillLight = new THREE.DirectionalLight(0xadd8e6, 0.7); 
+    fillLight.position.set(-5, 2, 3);
+    scene.add(fillLight);
+    
+    const rimLight = new THREE.DirectionalLight(0xffffff, 1.2); 
+    rimLight.position.set(0, 4, -6);
+    scene.add(rimLight);
+
+    // Generación de reflejos de entorno dinámicos (PBR)
+    const pmremGenerator = new THREE.PMREMGenerator(renderer);
+    pmremGenerator.compileEquirectangularShader();
+    const sceneEnv = pmremGenerator.fromScene(new THREE.Scene()).texture;
+    scene.environment = sceneEnv;
 
     const guitarGroup = new THREE.Group();
     scene.add(guitarGroup);
@@ -42,114 +145,135 @@ function initCard3D(container, type) {
     const length = 2.8;
     const widthFactor = 2.1;
     
-    if (type === 'Strat') {
-        bodyShape.moveTo(0, -length/2);
-        bodyShape.quadraticCurveTo(widthFactor/2, -length/2, widthFactor*0.5, -length*0.2);
-        bodyShape.quadraticCurveTo(widthFactor*0.55, length*0.1, widthFactor*0.35, length*0.25);
-        bodyShape.quadraticCurveTo(widthFactor*0.4, length*0.35, widthFactor*0.23, length*0.48);
-        bodyShape.quadraticCurveTo(widthFactor*0.1, length*0.4, widthFactor*0.05, length*0.25);
-        bodyShape.quadraticCurveTo(0, length*0.3, -widthFactor*0.05, length*0.25);
-        bodyShape.quadraticCurveTo(-widthFactor*0.1, length*0.4, -widthFactor*0.23, length*0.48);
-        bodyShape.quadraticCurveTo(-widthFactor*0.4, length*0.35, -widthFactor*0.35, length*0.25);
-        bodyShape.quadraticCurveTo(-widthFactor*0.55, length*0.1, -widthFactor*0.5, -length*0.2);
-        bodyShape.quadraticCurveTo(-widthFactor/2, -length/2, 0, -length/2);
+    let modelMatched = true;
 
-    } else if (type === 'LesPaul') {
+    // === TRAZADOS GEOMÉTRICOS DE LOS MODELOS REALES ===
+    if (normalizedType === 'lespaul') {
         bodyShape.moveTo(0, -length/2);
-        bodyShape.quadraticCurveTo(widthFactor*0.46, -length/2, widthFactor*0.48, -length*0.25);
-        bodyShape.quadraticCurveTo(widthFactor*0.48, length*0.05, widthFactor*0.25, length*0.13);
-        bodyShape.quadraticCurveTo(widthFactor*0.33, length*0.3, widthFactor*0.15, length*0.45);
-        bodyShape.quadraticCurveTo(0, length*0.44, -widthFactor*0.15, length*0.45);
-        bodyShape.quadraticCurveTo(-widthFactor*0.32, length*0.32, -widthFactor*0.32, length*0.18);
-        bodyShape.quadraticCurveTo(-widthFactor*0.2, length*0.08, -widthFactor*0.32, -0.05);
-        bodyShape.quadraticCurveTo(-widthFactor*0.48, -length*0.25, -widthFactor*0.46, -length*0.25);
+        bodyShape.quadraticCurveTo(widthFactor*0.48, -length/2, widthFactor*0.5, -length*0.22);
+        bodyShape.quadraticCurveTo(widthFactor*0.5, length*0.05, widthFactor*0.26, length*0.12);
+        bodyShape.quadraticCurveTo(widthFactor*0.35, length*0.28, widthFactor*0.12, length*0.45);
+        bodyShape.lineTo(widthFactor*0.08, length*0.32);
+        bodyShape.quadraticCurveTo(widthFactor*0.02, length*0.22, -widthFactor*0.06, length*0.24);
+        bodyShape.quadraticCurveTo(-widthFactor*0.36, length*0.32, -widthFactor*0.34, length*0.16);
+        bodyShape.quadraticCurveTo(-widthFactor*0.22, length*0.06, -widthFactor*0.44, -length*0.08);
+        bodyShape.quadraticCurveTo(-widthFactor*0.52, -length*0.28, -widthFactor*0.46, -length*0.22);
         bodyShape.quadraticCurveTo(-widthFactor*0.46, -length/2, 0, -length/2);
 
-    } else if (type === 'V-Agresiva') {
-        bodyShape.moveTo(0, length*0.42);
-        bodyShape.lineTo(widthFactor*0.46, -length*0.45);
-        bodyShape.lineTo(widthFactor*0.25, -length*0.48);
-        bodyShape.lineTo(0, -length*0.12);
-        bodyShape.lineTo(-widthFactor*0.25, -length*0.48);
-        bodyShape.lineTo(-widthFactor*0.46, -length*0.45);
-        bodyShape.lineTo(0, length*0.42);
-
-    } else if (type === 'Electroacustica') {
-        // Cuerpo acústico con doble corte suave (similar a Strat pero más redondeado y simétrico)
+    } else if (normalizedType === 'telecaster') {
         bodyShape.moveTo(0, -length/2);
-        bodyShape.quadraticCurveTo(widthFactor*0.52, -length/2, widthFactor*0.52, -length*0.1);
-        bodyShape.quadraticCurveTo(widthFactor*0.52, length*0.15, widthFactor*0.3, length*0.28);
-        bodyShape.quadraticCurveTo(widthFactor*0.38, length*0.38, widthFactor*0.2, length*0.5);
-        bodyShape.quadraticCurveTo(0, length*0.52, -widthFactor*0.2, length*0.5);
-        bodyShape.quadraticCurveTo(-widthFactor*0.38, length*0.38, -widthFactor*0.3, length*0.28);
-        bodyShape.quadraticCurveTo(-widthFactor*0.52, length*0.15, -widthFactor*0.52, -length*0.1);
-        bodyShape.quadraticCurveTo(-widthFactor*0.52, -length/2, 0, -length/2);
+        bodyShape.quadraticCurveTo(widthFactor*0.44, -length/2, widthFactor*0.46, -length*0.18);
+        bodyShape.quadraticCurveTo(widthFactor*0.46, length*0.08, widthFactor*0.32, length*0.14);
+        bodyShape.quadraticCurveTo(widthFactor*0.38, length*0.26, widthFactor*0.16, length*0.44);
+        bodyShape.lineTo(widthFactor*0.14, length*0.3);
+        bodyShape.lineTo(-widthFactor*0.04, length*0.3);
+        bodyShape.lineTo(-widthFactor*0.06, length*0.44);
+        bodyShape.quadraticCurveTo(-widthFactor*0.42, length*0.44, -widthFactor*0.44, length*0.14);
+        bodyShape.quadraticCurveTo(-widthFactor*0.44, -length*0.18, -widthFactor*0.42, -length*0.22);
+        bodyShape.quadraticCurveTo(-widthFactor*0.42, -length/2, 0, -length/2);
 
-    } else if (type === 'Electrica') {
-        // Cuerpo eléctrico tipo offset: asimétrico, un cuerno más largo que el otro
-        bodyShape.moveTo(0, -length/2);
-        bodyShape.quadraticCurveTo(widthFactor*0.5, -length/2, widthFactor*0.5, -length*0.15);
-        bodyShape.quadraticCurveTo(widthFactor*0.5, length*0.08, widthFactor*0.28, length*0.2);
-        bodyShape.quadraticCurveTo(widthFactor*0.36, length*0.32, widthFactor*0.18, length*0.44); // Cuerno corto
-        bodyShape.quadraticCurveTo(widthFactor*0.05, length*0.38, 0, length*0.28);
-        bodyShape.quadraticCurveTo(-widthFactor*0.05, length*0.38, -widthFactor*0.22, length*0.52); // Cuerno largo
-        bodyShape.quadraticCurveTo(-widthFactor*0.42, length*0.42, -widthFactor*0.38, length*0.22);
-        bodyShape.quadraticCurveTo(-widthFactor*0.52, length*0.08, -widthFactor*0.5, -length*0.15);
-        bodyShape.quadraticCurveTo(-widthFactor*0.5, -length/2, 0, -length/2);
+    } else if (normalizedType === 'ibanezxp') {
+        bodyShape.moveTo(0, -length*0.1); 
+        bodyShape.lineTo(widthFactor*0.45, -length*0.48);
+        bodyShape.lineTo(widthFactor*0.22, -length*0.22); 
+        bodyShape.lineTo(widthFactor*0.52, length*0.18);
+        bodyShape.lineTo(widthFactor*0.12, length*0.15);  
+        bodyShape.lineTo(0, length*0.35);
+        bodyShape.lineTo(-widthFactor*0.12, length*0.15); 
+        bodyShape.lineTo(-widthFactor*0.52, length*0.18);
+        bodyShape.lineTo(-widthFactor*0.22, -length*0.22);
+        bodyShape.lineTo(-widthFactor*0.45, -length*0.48);
+        bodyShape.lineTo(0, -length*0.1);
 
-    } else if (type === 'Acustica') {
-        // Cuerpo acústico clásico: figura de 8 simétrica con cintura marcada
+    } else if (normalizedType === 'mockingbird') {
+        bodyShape.moveTo(-widthFactor*0.2, -length*0.48);
+        bodyShape.lineTo(widthFactor*0.35, -length*0.35);
+        bodyShape.quadraticCurveTo(widthFactor*0.46, -length*0.1, widthFactor*0.48, length*0.05);
+        bodyShape.lineTo(widthFactor*0.15, length*0.12);
+        bodyShape.lineTo(0, length*0.32);
+        bodyShape.lineTo(-widthFactor*0.25, length*0.46);
+        bodyShape.lineTo(-widthFactor*0.32, length*0.18);  
+        bodyShape.lineTo(-widthFactor*0.52, length*0.12);
+        bodyShape.lineTo(-widthFactor*0.26, -length*0.22);
+        bodyShape.lineTo(-widthFactor*0.2, -length*0.48);
+
+    } else if (normalizedType === 'espex') {
+        bodyShape.moveTo(-widthFactor*0.45, -length*0.46);
+        bodyShape.lineTo(widthFactor*0.25, -length*0.46);
+        bodyShape.lineTo(widthFactor*0.48, -length*0.12);
+        bodyShape.lineTo(widthFactor*0.18, length*0.12);
+        bodyShape.lineTo(0, length*0.36);
+        bodyShape.lineTo(-widthFactor*0.28, length*0.22);
+        bodyShape.lineTo(-widthFactor*0.22, -0.05);
+        bodyShape.lineTo(-widthFactor*0.45, -length*0.46);
+
+    } else if (normalizedType === 'danelectro') {
         bodyShape.moveTo(0, -length/2);
-        bodyShape.quadraticCurveTo(widthFactor*0.48, -length/2, widthFactor*0.48, -length*0.18); // Tapa inferior
-        bodyShape.quadraticCurveTo(widthFactor*0.48, -length*0.02, widthFactor*0.22, length*0.02); // Cintura
-        bodyShape.quadraticCurveTo(widthFactor*0.44, length*0.1, widthFactor*0.44, length*0.28); // Tapa superior
-        bodyShape.quadraticCurveTo(widthFactor*0.44, length*0.5, 0, length*0.5);
-        bodyShape.quadraticCurveTo(-widthFactor*0.44, length*0.5, -widthFactor*0.44, length*0.28);
-        bodyShape.quadraticCurveTo(-widthFactor*0.44, length*0.1, -widthFactor*0.22, length*0.02); // Cintura
-        bodyShape.quadraticCurveTo(-widthFactor*0.48, -length*0.02, -widthFactor*0.48, -length*0.18);
-        bodyShape.quadraticCurveTo(-widthFactor*0.48, -length/2, 0, -length/2);
+        bodyShape.quadraticCurveTo(widthFactor*0.42, -length/2, widthFactor*0.44, -length*0.15);
+        bodyShape.quadraticCurveTo(widthFactor*0.44, length*0.02, widthFactor*0.25, length*0.08);
+        bodyShape.quadraticCurveTo(widthFactor*0.35, length*0.18, widthFactor*0.28, length*0.38);
+        bodyShape.quadraticCurveTo(widthFactor*0.18, length*0.36, widthFactor*0.08, length*0.22);
+        bodyShape.lineTo(0, length*0.24);
+        bodyShape.lineTo(-widthFactor*0.08, length*0.22);
+        bodyShape.quadraticCurveTo(-widthFactor*0.18, length*0.36, -widthFactor*0.28, length*0.38);
+        bodyShape.quadraticCurveTo(-widthFactor*0.35, length*0.18, -widthFactor*0.25, length*0.08);
+        bodyShape.quadraticCurveTo(-widthFactor*0.44, length*0.02, -widthFactor*0.44, -length*0.15);
+        bodyShape.quadraticCurveTo(-widthFactor*0.42, -length/2, 0, -length/2);
+    } else {
+        modelMatched = false;
+        bodyShape.moveTo(-widthFactor/3, -length/2);
+        bodyShape.lineTo(widthFactor/3, -length/2);
+        bodyShape.lineTo(widthFactor/3, length/2);
+        bodyShape.lineTo(-widthFactor/3, length/2);
+        bodyShape.lineTo(-widthFactor/3, -length/2);
     }
 
     const extrudeSettings = {
-        depth: 0.28,
+        depth: 0.22,
         bevelEnabled: true,
-        bevelSegments: 4,
+        bevelSegments: 5,
         steps: 1,
-        bevelSize: 0.03,
-        bevelThickness: 0.03
+        bevelSize: 0.025,
+        bevelThickness: 0.025
     };
 
     const bodyGeometry = new THREE.ExtrudeGeometry(bodyShape, extrudeSettings);
     bodyGeometry.center();
     
-    let bodyColor = 0xb73225; // Strat - Rojo Cereza
-    let metalness = 0.1;
-    let roughness = 0.2;
+    let bodyColor = 0xb73225; 
+    let metalness = 0.05;
+    let roughness = 0.15;
     
-    if (type === 'LesPaul') {
-        bodyColor = 0x5c3a21;
+    if (normalizedType === 'lespaul') {
+        bodyColor = 0xe5983b; 
         roughness = 0.1;
-    } else if (type === 'V-Agresiva') {
-        bodyColor = 0x351c15;
-        roughness = 0.3;
-    } else if (type === 'Electroacustica') {
-        bodyColor = 0xa0522d; // Sienna - madera cálida
-        roughness = 0.4;
-        metalness = 0.05;
-    } else if (type === 'Electrica') {
-        bodyColor = 0x1a3a5c; // Azul noche
+    } else if (normalizedType === 'telecaster') {
+        bodyColor = 0xf3dfa2; 
+        roughness = 0.12;
+    } else if (normalizedType === 'ibanezxp') {
+        bodyColor = 0x0d0d0d; 
         roughness = 0.15;
-        metalness = 0.2;
-    } else if (type === 'Acustica') {
-        bodyColor = 0xc8a96e; // Abeto natural
-        roughness = 0.55;
-        metalness = 0.0;
+        metalness = 0.6;
+    } else if (normalizedType === 'mockingbird') {
+        bodyColor = 0x7a1c2e; 
+        roughness = 0.08;
+    } else if (normalizedType === 'espex') {
+        bodyColor = 0x1a1a1a; 
+        roughness = 0.4;
+    } else if (normalizedType === 'danelectro') {
+        bodyColor = 0x5a8286; 
+        roughness = 0.2;
+    } else if (!modelMatched) {
+        bodyColor = 0x333333;
     }
     
-    const bodyMaterial = new THREE.MeshStandardMaterial({
+    const bodyMaterial = new THREE.MeshPhysicalMaterial({
         color: bodyColor,
-        roughness: roughness,
-        metalness: metalness
+        roughness: roughness,   
+        metalness: metalness,
+        clearcoat: 1.0,               
+        clearcoatRoughness: 0.04,     
+        reflectivity: 0.85
     });
     
     const bodyMesh = new THREE.Mesh(bodyGeometry, bodyMaterial);
@@ -157,59 +281,60 @@ function initCard3D(container, type) {
     bodyMesh.receiveShadow = true;
     guitarGroup.add(bodyMesh);
     
-    // Mástil y Diapasón
-    const neckMaterial = new THREE.MeshStandardMaterial({ color: 0xe4d5c7, roughness: 0.6 });
-    const neckGeom = new THREE.BoxGeometry(0.16, 2.2, 0.08);
-    const neckMesh = new THREE.Mesh(neckMaterial, neckGeom);
-    neckMesh.position.set(0, 1.6, 0.08);
+    const neckMaterial = new THREE.MeshStandardMaterial({ color: 0xe2d4c1, roughness: 0.45 });
+    const neckGeom = new THREE.BoxGeometry(0.14, 2.3, 0.07);
+    const neckMesh = new THREE.Mesh(neckGeom, neckMaterial); 
+    neckMesh.position.set(0, 1.6, 0.06);
+    neckMesh.castShadow = true;
     guitarGroup.add(neckMesh);
     
-    const fretboardMaterial = new THREE.MeshStandardMaterial({ color: 0x351c15, roughness: 0.8 });
-    const fretGeom = new THREE.BoxGeometry(0.15, 2.1, 0.02);
-    const fretMesh = new THREE.Mesh(fretboardMaterial, fretGeom);
-    fretMesh.position.set(0, 1.55, 0.13);
+    const fretboardMaterial = new THREE.MeshStandardMaterial({ color: 0x221308, roughness: 0.8 });
+    const fretGeom = new THREE.BoxGeometry(0.13, 2.2, 0.02);
+    const fretMesh = new THREE.Mesh(fretGeom, fretboardMaterial);
+    fretMesh.position.set(0, 1.55, 0.1);
+    fretMesh.castShadow = true;
     guitarGroup.add(fretMesh);
     
-    // Cabeza (Headstock)
-    const headGeom = new THREE.BoxGeometry(0.22, 0.5, 0.06);
-    const headMaterial = new THREE.MeshStandardMaterial({ color: bodyColor, roughness: roughness });
-    const headMesh = new THREE.Mesh(headMaterial, headGeom);
-    headMesh.position.set(0, 2.8, 0.08);
+    const headGeom = new THREE.BoxGeometry(0.2, 0.5, 0.05);
+    const headMaterial = new THREE.MeshPhysicalMaterial({ color: bodyColor, roughness: roughness, clearcoat: 0.8 });
+    const headMesh = new THREE.Mesh(headGeom, headMaterial);
+    headMesh.position.set(0, 2.8, 0.06);
+    headMesh.castShadow = true;
     guitarGroup.add(headMesh);
     
-    // Herrajes Metálicos
-    const metalMaterial = new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: 0.9, roughness: 0.1 });
+    const metalMaterial = new THREE.MeshPhysicalMaterial({ 
+        color: 0xf5f5f5, 
+        metalness: 1.0, 
+        roughness: 0.05,
+        reflectivity: 1.0
+    });
     
-    const bridgeGeom = new THREE.BoxGeometry(0.24, 0.12, 0.06);
-    const bridgeMesh = new THREE.Mesh(metalMaterial, bridgeGeom);
-    bridgeMesh.position.set(0, -0.6, 0.18);
+    const bridgeGeom = new THREE.BoxGeometry(0.22, 0.12, 0.05);
+    const bridgeMesh = new THREE.Mesh(bridgeGeom, metalMaterial);
+    bridgeMesh.position.set(0, -0.6, 0.14);
+    bridgeMesh.castShadow = true;
     guitarGroup.add(bridgeMesh);
     
-    const pickupGeom = new THREE.BoxGeometry(0.12, 0.28, 0.04);
-    const pickup1 = new THREE.Mesh(metalMaterial, pickupGeom);
+    const pickupGeom = new THREE.BoxGeometry(0.12, 0.26, 0.04);
+    const pickup1 = new THREE.Mesh(pickupGeom, metalMaterial);
     pickup1.rotation.z = Math.PI / 2;
-    pickup1.position.set(0, -0.2, 0.18);
+    pickup1.position.set(0, -0.2, 0.14);
+    pickup1.castShadow = true;
     guitarGroup.add(pickup1);
 
-    // Soundhole para acústicas (boca circular)
-    if (type === 'Acustica' || type === 'Electroacustica') {
-        const holeGeom = new THREE.RingGeometry(0.18, 0.22, 32);
-        const holeMaterial = new THREE.MeshStandardMaterial({ color: 0x1a0f00, side: THREE.DoubleSide });
-        const holeMesh = new THREE.Mesh(holeGeom, holeMaterial);
-        holeMesh.position.set(0, 0.1, 0.15);
-        guitarGroup.add(holeMesh);
-    } else {
-        // Segunda pastilla solo para eléctricas
-        const pickup2 = pickup1.clone();
-        pickup2.position.set(0, 0.2, 0.18);
-        guitarGroup.add(pickup2);
-    }
+    const pickup2 = pickup1.clone();
+    pickup2.position.set(0, 0.2, 0.14);
+    pickup2.castShadow = true;
+    guitarGroup.add(pickup2);
     
-    guitarGroup.position.y = -0.5;
-    guitarGroup.rotation.y = -0.4;
-    guitarGroup.rotation.x = 0.15;
+    guitarGroup.position.set(0, -0.4, 0);
+    guitarGroup.rotation.set(0, 0, 0);
     
-    // Interactividad Mouse / Touch
+    let isHovered = false;
+
+    container.addEventListener('pointerover', () => { isHovered = true; });
+    container.addEventListener('pointerout', () => { isHovered = false; });
+
     let isDragging = false;
     let previousMousePosition = { x: 0, y: 0 };
     
@@ -225,56 +350,43 @@ function initCard3D(container, type) {
             guitarGroup.rotation.y += deltaMove.x * 0.01;
             guitarGroup.rotation.x += deltaMove.y * 0.01;
         }
-        previousMousePosition = {
-            x: e.clientX - rect.left,
-            y: e.clientY - rect.top
-        };
+        previousMousePosition = { x: e.clientX - rect.left, y: e.clientY - rect.top };
     });
     
     window.addEventListener('mouseup', () => { isDragging = false; });
     
-    container.addEventListener('touchstart', (e) => {
-        isDragging = true;
-        const rect = container.getBoundingClientRect();
-        previousMousePosition = {
-            x: e.touches[0].clientX - rect.left,
-            y: e.touches[0].clientY - rect.top
-        };
-    });
-    
-    container.addEventListener('touchmove', (e) => {
-        if (!isDragging) return;
-        const rect = container.getBoundingClientRect();
-        const deltaMove = {
-            x: e.touches[0].clientX - rect.left - previousMousePosition.x,
-            y: e.touches[0].clientY - rect.top - previousMousePosition.y
-        };
-        guitarGroup.rotation.y += deltaMove.x * 0.01;
-        guitarGroup.rotation.x += deltaMove.y * 0.01;
-        previousMousePosition = {
-            x: e.touches[0].clientX - rect.left,
-            y: e.touches[0].clientY - rect.top
-        };
-    });
-    
-    window.addEventListener('touchend', () => { isDragging = false; });
-    
-    // Loop de Animación
     function animate() {
         requestAnimationFrame(animate);
-        if (!isDragging) {
-            guitarGroup.rotation.y += 0.007;
+
+        const targetBodyZ = isHovered ? -1.2 : 0;      
+        const targetNeckY = isHovered ? 2.6 : 1.6;      
+        const targetNeckZ = isHovered ? 0.4 : 0.06;     
+        const targetFretY = isHovered ? 2.55 : 1.55;    
+        const targetFretZ = isHovered ? 0.9 : 0.1;      
+        const targetHeadY = isHovered ? 3.9 : 2.8;      
+        const targetHeadZ = isHovered ? 0.4 : 0.06;
+        const targetBridgeZ = isHovered ? 1.1 : 0.14;   
+        const targetPickup1Z = isHovered ? 1.4 : 0.14;  
+        const targetPickup2Z = isHovered ? 1.4 : 0.14;
+
+        bodyMesh.position.z += (targetBodyZ - bodyMesh.position.z) * 0.1;
+        neckMesh.position.y += (targetNeckY - neckMesh.position.y) * 0.1;
+        neckMesh.position.z += (targetNeckZ - neckMesh.position.z) * 0.1;
+        fretMesh.position.y += (targetFretY - fretMesh.position.y) * 0.1;
+        fretMesh.position.z += (targetFretZ - fretMesh.position.z) * 0.1;
+        headMesh.position.y += (targetHeadY - headMesh.position.y) * 0.1;
+        headMesh.position.z += (targetHeadZ - headMesh.position.z) * 0.1;
+        bridgeMesh.position.z += (targetBridgeZ - bridgeMesh.position.z) * 0.1;
+        pickup1.position.z += (targetPickup1Z - pickup1.position.z) * 0.1;
+        pickup2.position.z += (targetPickup2Z - pickup2.position.z) * 0.1;
+        
+        if (!isDragging && !isHovered) {
+            guitarGroup.rotation.y += (0 - guitarGroup.rotation.y) * 0.08;
+            guitarGroup.rotation.x += (0 - guitarGroup.rotation.x) * 0.08;
         }
+        
         renderer.render(scene, camera);
     }
     
     animate();
-    
-    window.addEventListener('resize', () => {
-        const w = container.clientWidth;
-        const h = container.clientHeight;
-        camera.aspect = w / h;
-        camera.updateProjectionMatrix();
-        renderer.setSize(w, h);
-    });
 }

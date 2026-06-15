@@ -1135,8 +1135,9 @@ body {
 .footer-bottom span {
     color: var(--rojo-brillante);
 }
-
-
+/* ==========================================================
+   RESPONSIVIDAD PARA PANTALLAS MÓVILES (MÁXIMO 768px)
+   ========================================================== */
 @media (max-width: 768px) {
     .footer-grid {
         grid-template-columns: 1fr;
@@ -1155,6 +1156,49 @@ body {
     }
     .config-container {
         padding: 30px 5% 60px 5%;
-       
     }
+} /* <--- Aquí se cierra correctamente la media query móvil */
+
+/* ==========================================================
+   PREVISUALIZADOR DE AUDIO GLOBAL (Cualquier tamaño de pantalla)
+   ========================================================== */
+.audio-preview-container {
+    margin: 15px 0 25px 0; /* Añadido margen inferior para separarlo simétricamente del botón "Elegir y Personalizar" */
+    min-height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
+
+.btn-audio-play {
+    background-color: #2e1a0c; 
+    color: #f5f5f5;
+    border: 1px solid var(--rojo-cereza); /* Cambiado por tu variable nativa para mejor consistencia */
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: var(--transicion); /* Integrado con tus transiciones fluidas de diseño */
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-audio-play:hover {
+    background-color: var(--rojo-cereza);
+    color: var(--blanco-puro);
+    transform: translateY(-2px); /* Un sutil salto hacia arriba que hace match con tus otros botones */
+}
+
+.btn-audio-play.playing {
+    background-color: var(--rojo-cereza);
+    box-shadow: var(--glow-rojo); /* Integrado con tu variable de resplandor para que se vea premium al sonar */
+}
+
+.audio-placeholder {
+    font-size: 0.8rem;
+    color: var(--texto-mutado); /* Usando tu variable mutada para mantener la gama de colores */
+    font-style: italic;
+}
+
