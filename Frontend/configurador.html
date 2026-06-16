@@ -7,10 +7,8 @@
     <meta name="description" content="Personaliza tu guitarra, define parámetros de diseño y exporta directamente a Autodesk Inventor.">
     <link rel="icon" type="image/x-icon" href="../assets/favicon.ico"/>
     <link rel="stylesheet" href="style.css">
-    <!-- Supabase y EmailJS (CDNs originales) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-    <!-- Three.js y OrbitControls -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 </head>
@@ -18,7 +16,7 @@
 
     <header class="header">
         <a href="index.html" class="logo" style="text-decoration: none;">
-        <img src="../assets/LogoCTRL+ROCK.png" alt="Logo CTRL+ROCK">
+            <img src="../assets/LogoCTRL+ROCK.png" alt="Logo CTRL+ROCK">
         </a>
         <nav>
             <a href="modelos.html">← Volver a Modelos</a>
@@ -30,25 +28,15 @@
         
         <div class="config-grid">
             
-            <!-- LADO IZQUIERDO: VISOR 3D INTERACTIVO -->
             <div class="preview-box">
                 <div id="guitar-preview-container">
                     <canvas id="guitar-preview-canvas"></canvas>
                     
-                    <!-- Barra de herramientas para el viewport 3D -->
                     <div class="viewport-toolbar">
-                        <button id="btn-reset-cam" class="toolbar-btn">
-                            Restablecer Vista
-                        </button>
-                        <button id="btn-toggle-wireframe" class="toolbar-btn">
-                            Estructura Alámbrica
-                        </button>
-                        <button id="btn-toggle-grid" class="toolbar-btn">
-                            Grilla CAD
-                        </button>
-                        <button id="btn-toggle-axes" class="toolbar-btn">
-                            Ejes CAD
-                        </button>
+                        <button id="btn-reset-cam" class="toolbar-btn">Restablecer Vista</button>
+                        <button id="btn-toggle-wireframe" class="toolbar-btn">Estructura Alámbrica</button>
+                        <button id="btn-toggle-grid" class="toolbar-btn">Grilla CAD</button>
+                        <button id="btn-toggle-axes" class="toolbar-btn">Ejes CAD</button>
                     </div>
                 </div>
                 <p style="text-align: center; margin-top: 15px; color: var(--texto-mutado); font-style: italic; font-size: 0.9rem;">
@@ -56,32 +44,25 @@
                 </p>
             </div>
 
-            <!-- LADO DERECHO: PANEL DE CONFIGURACIÓN SEGMENTADO -->
             <div class="control-panel">
                 
-                <!-- Selector de experiencia de usuario -->
-                <div class="user-mode-selector">
+                <div class="user-mode-selector" id="selector-modos">
                     <button class="mode-btn active" id="btn-mode-asistido">Asistente de Compra</button>
                     <button class="mode-btn" id="btn-mode-experto">Diseño Libre (CAD)</button>
                 </div>
                 
-                <!-- ==========================================
-                     MODO ASISTIDO: WIZARD PASO A PASO
-                     ========================================== -->
                 <div id="panel-asistido">
                     <div class="tabs-content">
-                        <!-- Barra de progreso -->
                         <div class="wizard-progress-container">
                             <div class="wizard-progress-bar" id="wiz-progress" style="width: 25%;"></div>
                         </div>
 
-                        <!-- PASO 1: SONIDO Y GÉNERO -->
                         <div class="wizard-step active" data-step="1">
                             <h4>Paso 1: ¿Qué sonido y estilo buscas?</h4>
                             <p class="step-desc">Selecciona tu estilo preferido. Ajustaremos las pastillas y maderas óptimas en tiempo real en la guitarra 3D.</p>
                             
                             <div class="wizard-options-grid">
-                                <div class="wizard-card" data-wiz-sound="heavy">
+                                <div class="wizard-card selected" data-wiz-sound="heavy">
                                     <div class="wizard-card-badge"></div>
                                     <div class="wizard-card-title">🎸 Cálido y Pesado (Metal, Hard Rock)</div>
                                     <div class="wizard-card-desc">Cuerpo robusto de Caoba y pastillas Humbucker de doble bobina. Máximo sustain y ganancia.</div>
@@ -99,7 +80,6 @@
                             </div>
                         </div>
 
-                        <!-- PASO 2: PESO Y TACTO -->
                         <div class="wizard-step" data-step="2">
                             <h4>Paso 2: ¿Cómo prefieres sentir el instrumento?</h4>
                             <p class="step-desc">Define la ergonomía del cuerpo. Cambiará el grosor y tamaño en milímetros CAD de la guitarra.</p>
@@ -123,7 +103,6 @@
                             </div>
                         </div>
 
-                        <!-- PASO 3: ESTILO VISUAL -->
                         <div class="wizard-step" data-step="3">
                             <h4>Paso 3: ¿Qué personalidad visual prefieres?</h4>
                             <p class="step-desc">Elige la estética que definirá la presencia de tu instrumento en el escenario.</p>
@@ -132,17 +111,16 @@
                                 <div class="wizard-card selected" data-wiz-look="classic">
                                     <div class="wizard-card-badge"></div>
                                     <div class="wizard-card-title">🕰️ Tradicional / Vintage</div>
-                                    <div class="wizard-card-desc">Acabados elegantes como Rojo Cereza o Sunburst clásico, adornados con herrajes metálicos de Cromo.</div>
+                                    <div class="wizard-card-desc">Acabados elegantes como Rojo Cereza o Sunburst clásico, herrajes de Cromo.</div>
                                 </div>
                                 <div class="wizard-card" data-wiz-look="modern">
                                     <div class="wizard-card-badge"></div>
                                     <div class="wizard-card-title">🌌 Técnico / Moderno</div>
-                                    <div class="wizard-card-desc">Tonalidades sobrias como Negro Mate o Oro Vintage, combinadas con herrajes oscuros de Oro o Negro Obsidian.</div>
+                                    <div class="wizard-card-desc">Tonalidades sobrias como Negro Mate u Oro Vintage, combinadas con herrajes oscuros o dorados.</div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- PASO 4: FORMULARIO Y RESUMEN ASISTIDO -->
                         <div class="wizard-step" data-step="4">
                             <h4>Paso 4: Tu Recomendación Asistida</h4>
                             <p class="step-desc">Este es el instrumento sugerido en base a tus preferencias acústicas y ergonómicas.</p>
@@ -199,7 +177,6 @@
                             <div id="mensaje-status-asistido" style="display: none;"></div>
                         </div>
 
-                        <!-- Acciones del asistente -->
                         <div class="wizard-actions" style="margin-top: 25px;">
                             <button id="wiz-prev-btn" class="btn-outline" style="display: none;">← Atrás</button>
                             <button id="wiz-next-btn" class="btn-primary">Continuar →</button>
@@ -207,9 +184,6 @@
                     </div>
                 </div>
 
-                <!-- ==========================================
-                     MODO EXPERTO: TABS TRADICIONALES
-                     ========================================== -->
                 <div id="panel-experto" style="display: none;">
                     <div class="tabs-header">
                         <button class="tab-btn active" data-tab="tab-estetica">Estética</button>
@@ -219,9 +193,7 @@
                     
                     <div class="tabs-content">
                         
-                        <!-- PESTAÑA 1: AJUSTES ESTÉTICOS -->
                         <div class="tab-pane active" id="tab-estetica">
-                            <!-- Madera del cuerpo -->
                             <div class="config-section">
                                 <h4>Madera del Cuerpo</h4>
                                 <div class="swatch-group">
@@ -237,7 +209,6 @@
                                 </div>
                             </div>
 
-                            <!-- Color del acabado -->
                             <div class="config-section">
                                 <h4>Color de Acabado</h4>
                                 <div class="swatch-group">
@@ -259,7 +230,6 @@
                                 </div>
                             </div>
 
-                            <!-- Acabado de Herrajes -->
                             <div class="config-section">
                                 <h4>Herrajes (Metales)</h4>
                                 <div class="swatch-group">
@@ -275,28 +245,21 @@
                                 </div>
                             </div>
 
-                            <!-- Configuración de pastillas -->
                             <div class="config-section">
                                 <h4>Pastillas (Micrófonos)</h4>
                                 <div class="swatch-group">
-                                    <div class="option-swatch active" data-pickups="humbucker">
-                                        Humbucker (Doble)
-                                    </div>
-                                    <div class="option-swatch" data-pickups="singlecoil">
-                                        Single Coil (Sencilla)
-                                    </div>
+                                    <div class="option-swatch active" data-pickups="humbucker">Humbucker (Doble)</div>
+                                    <div class="option-swatch" data-pickups="singlecoil">Single Coil (Sencilla)</div>
                                 </div>
                             </div>
                         </div>
                         
-                        <!-- PESTAÑA 2: PARÁMETROS CAD E INTEGRACIÓN INVENTOR -->
                         <div class="tab-pane" id="tab-cad">
                             <p style="margin-bottom: 25px; font-size: 0.9rem; color: var(--texto-mutado);">
                                 Modifica las dimensiones en milímetros (mm). El modelo 3D cambiará su geometría automáticamente de manera paramétrica.
                             </p>
                             
                             <div class="cad-sliders">
-                                <!-- Slider 1: Largo Cuerpo -->
                                 <div class="slider-group">
                                     <div class="slider-label-row">
                                         <span>Largo del Cuerpo</span>
@@ -305,7 +268,6 @@
                                     <input type="range" class="cad-input-range" id="bodyLength" min="300" max="450" value="360">
                                 </div>
 
-                                <!-- Slider 2: Ancho Cuerpo -->
                                 <div class="slider-group">
                                     <div class="slider-label-row">
                                         <span>Ancho del Cuerpo</span>
@@ -314,7 +276,6 @@
                                     <input type="range" class="cad-input-range" id="bodyWidth" min="220" max="340" value="280">
                                 </div>
 
-                                <!-- Slider 3: Espesor Cuerpo -->
                                 <div class="slider-group">
                                     <div class="slider-label-row">
                                         <span>Espesor del Cuerpo</span>
@@ -323,7 +284,6 @@
                                     <input type="range" class="cad-input-range" id="bodyThickness" min="30" max="55" value="40">
                                 </div>
 
-                                <!-- Slider 4: Escala Mástil -->
                                 <div class="slider-group">
                                     <div class="slider-label-row">
                                         <span>Escala de Afinación (Tiro)</span>
@@ -340,7 +300,6 @@
                                 </button>
                             </div>
 
-                            <!-- Bloque de código iLogic de Inventor -->
                             <div class="code-box">
                                 <div class="code-box-header">
                                     <span class="code-box-title">iLogic Rule (Autodesk Inventor)</span>
@@ -350,13 +309,11 @@
 Dim jsonPath As String = "C:\ruta\a\guitar_parameters.json"
 If File.Exists(jsonPath) Then
     Dim jsonText As String = File.ReadAllText(jsonPath)
-    ' Parsea valores del JSON
     Dim bodyL As Double = Val(jsonText.Split(Chr(34) & "bodyLength" & Chr(34) & ":")(1).Split(",")(0))
     Dim bodyW As Double = Val(jsonText.Split(Chr(34) & "bodyWidth" & Chr(34) & ":")(1).Split(",")(0))
     Dim bodyT As Double = Val(jsonText.Split(Chr(34) & "bodyThickness" & Chr(34) & ":")(1).Split(",")(0))
     Dim scaleL As Double = Val(jsonText.Split(Chr(34) & "scaleLength" & Chr(34) & ":")(1).Split("}")(0))
     
-    ' Actualiza parámetros de usuario en Inventor
     Parameter("LargoCuerpo") = bodyL
     Parameter("AnchoCuerpo") = bodyW
     Parameter("EspesorCuerpo") = bodyT
@@ -371,9 +328,7 @@ End If</pre>
                             </div>
                         </div>
                         
-                        <!-- PESTAÑA 3: SOLICITAR COTIZACIÓN -->
                         <div class="tab-pane" id="tab-cotizacion">
-                            <!-- Caja resumen -->
                             <div class="quote-summary-box">
                                 <h5>Tu Guitarra Personalizada</h5>
                                 <ul class="summary-list">
@@ -443,258 +398,46 @@ End If</pre>
         
         emailjs.init(EMAILJS_PUBLIC_KEY);
 
-        // === 2. LEER MODELO DE URL ===
-        const urlParams = new URLSearchParams(window.location.search);
-        const modeloId = urlParams.get('modelo') || 'Strat';
-        
-        // document.getElementById('modelo-titulo').innerText = `Personalizando tu modelo: ${modeloId}`;
-        document.getElementById('modelo-titulo').innerText = `Personalizando tu modelo`;
-        document.getElementById('sum-modelo').innerText = modeloId;
-        document.getElementById('wiz-sum-modelo').innerText = modeloId;
-
-        // === 3. SELECCIÓN DE EXPERIENCIA (MODOS DE USUARIO) ===
+        // === 2. DECLARACIÓN DE ELEMENTOS DEL DOM CRÍTICOS ===
         const btnModeAsistido = document.getElementById('btn-mode-asistido');
         const btnModeExperto = document.getElementById('btn-mode-experto');
         const panelAsistido = document.getElementById('panel-asistido');
         const panelExperto = document.getElementById('panel-experto');
+
+        // === 3. LEER PARÁMETROS DE LA URL ===
+        const urlParams = new URLSearchParams(window.location.search);
+        const modeloId = urlParams.get('modelo') || 'Strat';
+        const modoElegido = urlParams.get('modo') || 'asistido';
+
+        document.getElementById('modelo-titulo').innerText = `Personalizando tu modelo: ${modeloId}`;
+        document.getElementById('sum-modelo').innerText = modeloId;
+        document.getElementById('wiz-sum-modelo').innerText = modeloId;
+
+        // Cambiar dinámicamente de vista según el parámetro de la URL
+        window.addEventListener('DOMContentLoaded', () => {
+            if (modoElegido === 'experto') {
+                btnModeExperto.click();
+            } else {
+                btnModeAsistido.click();
+            }
+        });
+
+        // Eventos de los botones superiores de cambio de Modo
+        btnModeExperto.addEventListener('click', () => {
+            btnModeExperto.classList.add('active');
+            btnModeAsistido.classList.remove('active');
+            panelAsistido.style.display = "none";
+            panelExperto.style.display = "block";
+        });
 
         btnModeAsistido.addEventListener('click', () => {
             btnModeAsistido.classList.add('active');
             btnModeExperto.classList.remove('active');
             panelAsistido.style.display = "block";
             panelExperto.style.display = "none";
-            syncWizardTo3D();
         });
 
-        btnModeExperto.addEventListener('click', () => {
-            btnModeExperto.classList.add('active');
-            btnModeAsistido.classList.remove('active');
-            panelAsistido.style.display = "none";
-            panelExperto.style.display = "block";
-            // Sincronizar hacia los sliders del modo experto
-            document.dispatchEvent(new CustomEvent('syncExpertControls'));
-        });
-
-        // === 4. LÓGICA DEL WIZARD ASISTIDO ===
-        let wizardStep = 1;
-        const wizProgress = document.getElementById('wiz-progress');
-        const wizSteps = document.querySelectorAll('.wizard-step');
-        const wizPrevBtn = document.getElementById('wiz-prev-btn');
-        const wizNextBtn = document.getElementById('wiz-next-btn');
-
-        // Valores seleccionados en el Asistente
-        let wizSound = 'heavy';
-        let wizFeel = 'light';
-        let wizLook = 'classic';
-
-        const audioHeavy = new Audio('../assets/sounds/Xiphos HH.m4a');
-        const audioBright = new Audio('../assets/sounds/Les Paul HH.m4a');
-        const audioBalanced = new Audio('../assets/sounds/Strat SSS.m4a');
-
-        let currentAudio = null;
-
-        // Manejar selección de tarjetas del wizard
-        document.querySelectorAll('.wizard-card').forEach(card => {
-            card.addEventListener('click', () => {
-                const stepElement = card.closest('.wizard-step');
-                stepElement.querySelectorAll('.wizard-card').forEach(c => c.classList.remove('selected'));
-                card.classList.add('selected');
-
-                // Almacenar el valor elegido
-                if (card.hasAttribute('data-wiz-sound')) {
-                    wizSound = card.getAttribute('data-wiz-sound');
-
-                    if (currentAudio) {
-                        currentAudio.pause();
-                        currentAudio.currentTime = 0;
-                    }
-
-                    if (wizSound === 'heavy') {
-                        currentAudio = audioHeavy;
-                    } else if (wizSound === 'bright') {
-                        currentAudio = audioBright;
-                    } else if (wizSound === 'balanced') {
-                        currentAudio = audioBalanced;
-                    }
-                    currentAudio.play();
-
-                } else if (card.hasAttribute('data-wiz-feel')) {
-                    wizFeel = card.getAttribute('data-wiz-feel');
-                } else if (card.hasAttribute('data-wiz-look')) {
-                    wizLook = card.getAttribute('data-wiz-look');
-                }
-
-                // Actualizar escena 3D en tiempo real mientras responde
-                syncWizardTo3D();
-            });
-        });
-
-        // Navegación de botones
-        wizNextBtn.addEventListener('click', () => {
-            if (wizardStep < 4) {
-                wizardStep++;
-                updateWizardUI();
-            }
-        });
-
-        wizPrevBtn.addEventListener('click', () => {
-            if (wizardStep > 1) {
-                wizardStep--;
-                updateWizardUI();
-            }
-        });
-
-        function updateWizardUI() {
-            // Mostrar/Ocultar Pasos
-            wizSteps.forEach(step => {
-                step.classList.remove('active');
-                if (parseInt(step.getAttribute('data-step')) === wizardStep) {
-                    step.classList.add('active');
-                }
-            });
-
-            // Actualizar barra de progreso
-            wizProgress.style.width = `${wizardStep * 25}%`;
-
-            // Botón Atrás
-            if (wizardStep === 1) {
-                wizPrevBtn.style.display = "none";
-            } else {
-                wizPrevBtn.style.display = "inline-flex";
-            }
-
-            // Botón Siguiente / Continuar
-            if (wizardStep === 4) {
-                wizNextBtn.style.display = "none"; // Ocultar Continuar al llegar al formulario final
-                generateWizardRecommendation();
-            } else {
-                wizNextBtn.style.display = "inline-flex";
-            }
-        }
-
-        // Traducir respuestas a parámetros y maderas para Three.js
-        function getWizardSettings() {
-            const settings = {
-                wood: 'caoba',
-                pickups: 'humbucker',
-                length: 360,
-                width: 280,
-                thickness: 40,
-                scale: 648,
-                color: 'cherry',
-                hardware: 'chrome'
-            };
-
-            // 1. Sonido -> Madera y Pastillas
-            if (wizSound === 'heavy') {
-                settings.wood = 'caoba';
-                settings.pickups = 'humbucker';
-            } else if (wizSound === 'bright') {
-                settings.wood = 'fresno';
-                settings.pickups = 'singlecoil';
-            } else if (wizSound === 'balanced') {
-                settings.wood = 'arce';
-                settings.pickups = 'humbucker';
-            }
-
-            // 2. Sentir -> Dimensiones CAD en mm
-            if (wizFeel === 'light') {
-                settings.length = 330;
-                settings.width = 240;
-                settings.thickness = 32;
-                settings.scale = 610;
-            } else if (wizFeel === 'heavy') {
-                settings.length = 400;
-                settings.width = 300;
-                settings.thickness = 48;
-                settings.scale = 650;
-            } else if (wizFeel === 'standard') {
-                settings.length = 360;
-                settings.width = 280;
-                settings.thickness = 40;
-                settings.scale = 648;
-            }
-
-            // 3. Estilo Visual -> Colores y Herrajes
-            if (wizLook === 'classic') {
-                settings.color = (wizSound === 'bright') ? 'sunburst' : 'cherry';
-                settings.hardware = 'chrome';
-            } else if (wizLook === 'modern') {
-                settings.color = (wizSound === 'heavy') ? 'negro' : 'goldtop';
-                settings.hardware = (wizSound === 'heavy') ? 'black' : 'gold';
-            }
-
-            return settings;
-        }
-
-        function syncWizardTo3D() {
-            const settings = getWizardSettings();
-            // Disparar evento personalizado para actualizar el render de Three.js
-            const event = new CustomEvent('update3DFromWizard', { detail: settings });
-            document.dispatchEvent(event);
-        }
-
-        function generateWizardRecommendation() {
-            const settings = getWizardSettings();
-            
-            // Textos legibles en español
-            const maderasNombres = { caoba: 'Caoba de Alta Densidad', fresno: 'Fresno Americano Ligero', arce: 'Arce del Norte Duro' };
-            const coloresNombres = { cherry: 'Brillante Rojo Cereza', natural: 'Natural Protegido', sunburst: 'Sunburst Gradiente Vintage', negro: 'Negro Mate Texturizado', goldtop: 'Oro Metálico Vintage' };
-            const hwNombres = { chrome: 'Cromo Espejado', gold: 'Oro Bañado', black: 'Negro Obsidiana' };
-            const pkNombres = { humbucker: 'Humbucker Dobles (Sonido Grueso y Redondo)', singlecoil: 'Single Coils Triples (Tono Brillante y Limpio)' };
-
-            // Texto coloquial personalizado
-            let recText = `Hemos configurado una excelente combinación. Sugerimos usar <strong>madera de ${maderasNombres[settings.wood]}</strong> para el cuerpo por su resonancia, con pastillas <strong>${pkNombres[settings.pickups]}</strong>. `;
-            if (wizFeel === 'light') {
-                recText += `Para asegurar la ligereza que buscas, hemos ajustado las dimensiones paramétricas a un espesor delgado de 32mm y escala de mástil recortada a 610mm. `;
-            } else if (wizFeel === 'heavy') {
-                recText += `Diseñamos una escala extendida de 650mm y un cuerpo grueso de 48mm para maximizar el sustain y volumen. `;
-            } else {
-                recText += `La escala estándar de 648mm mantendrá una tensión familiar y un balance de peso equilibrado. `;
-            }
-            recText += `Estéticamente, el acabado en color <strong>${coloresNombres[settings.color]}</strong> con herrajes metálicos en <strong>${hwNombres[settings.hardware]}</strong> le darán el look ideal a tu guitarra.`;
-
-            document.getElementById('wiz-colloquial-summary').innerHTML = recText;
-            
-            // Actualizar spans en la lista resumen del wizard
-            document.getElementById('wiz-sum-madera').innerText = maderasNombres[settings.wood].split(' ')[0];
-            document.getElementById('wiz-sum-color').innerText = coloresNombres[settings.color];
-            document.getElementById('wiz-sum-hardware').innerText = hwNombres[settings.hardware].split(' ')[0];
-            document.getElementById('wiz-sum-pickups').innerText = (settings.pickups === 'humbucker') ? 'Humbucker' : 'Single Coil';
-            document.getElementById('wiz-sum-cad').innerText = `${settings.length} x ${settings.width} x ${settings.thickness} mm (Escala: ${settings.scale}mm)`;
-        }
-
-        // === 5. MANEJO DE PESTAÑAS (TABS EXPERTO) ===
-        const tabButtons = document.querySelectorAll('.tab-btn');
-        const tabPanes = document.querySelectorAll('.tab-pane');
-
-        tabButtons.forEach(btn => {
-            btn.addEventListener('click', () => {
-                tabButtons.forEach(b => b.classList.remove('active'));
-                tabPanes.forEach(p => p.classList.remove('active'));
-
-                btn.classList.add('active');
-                const targetTab = btn.getAttribute('data-tab');
-                document.getElementById(targetTab).classList.add('active');
-            });
-        });
-
-        // === 6. COPIAR REGLA ILOGIC ===
-        const copyBtn = document.getElementById('btn-copy-code');
-        const codePre = document.getElementById('code-ilogic');
-
-        copyBtn.addEventListener('click', () => {
-            navigator.clipboard.writeText(codePre.innerText).then(() => {
-                copyBtn.innerText = "¡Copiado!";
-                setTimeout(() => {
-                    copyBtn.innerText = "Copiar Regla";
-                }, 2000);
-            }).catch(err => {
-                console.error("Error al copiar:", err);
-            });
-        });
-
-        // === 7. ENVIAR COTIZACIÓN MODO EXPERTO ===
+        // === 4. ENVIAR COTIZACIÓN MODO EXPERTO ===
         const form = document.getElementById('cotizacion-form');
         const btnEnviar = document.getElementById('btn-enviar');
         const statusDiv = document.getElementById('mensaje-status');
@@ -704,7 +447,7 @@ End If</pre>
             await enviarFormGenerico(form, btnEnviar, statusDiv, 'experto');
         });
 
-        // === 8. ENVIAR COTIZACIÓN MODO ASISTIDO ===
+        // === 5. ENVIAR COTIZACIÓN MODO ASISTIDO ===
         const formAsistido = document.getElementById('cotizacion-form-asistido');
         const btnEnviarAsistido = document.getElementById('btn-enviar-asistido');
         const statusDivAsistido = document.getElementById('mensaje-status-asistido');
@@ -724,17 +467,13 @@ End If</pre>
             statusEl.innerText = "Guardando cotización y enviando correo...";
 
             let richModelDescription = "";
-            let emailClient = "";
-            let emailName = "";
-            let idType = "";
-            let idNum = "";
-            let phoneNum = "";
+            let emailClient = "", emailName = "", idType = "", idNum = "", phoneNum = "";
 
             if (modo === 'experto') {
-                const woodSel = document.querySelector('[data-wood].active').innerText.trim();
-                const colorSel = document.querySelector('[data-color].active').innerText.trim();
-                const hwSel = document.querySelector('[data-hardware].active').innerText.trim();
-                const pkSel = document.querySelector('[data-pickups].active').innerText.trim();
+                const woodSel = document.querySelector('[data-wood].active')?.innerText.trim() || 'Caoba';
+                const colorSel = document.querySelector('[data-color].active')?.innerText.trim() || 'Rojo Cereza';
+                const hwSel = document.querySelector('[data-hardware].active')?.innerText.trim() || 'Cromo';
+                const pkSel = document.querySelector('[data-pickups].active')?.innerText.trim() || 'Humbucker';
                 const cadL = document.getElementById('bodyLength').value;
                 const cadW = document.getElementById('bodyWidth').value;
                 const cadT = document.getElementById('bodyThickness').value;
@@ -747,14 +486,28 @@ End If</pre>
                 phoneNum = document.getElementById('phone_number').value;
                 emailClient = document.getElementById('email').value;
             } else {
-                // Modo Asistido
-                const settings = getWizardSettings();
-                const maderasNombres = { caoba: 'Caoba', fresno: 'Fresno', arce: 'Arce' };
-                const coloresNombres = { cherry: 'Rojo Cereza', natural: 'Natural', sunburst: 'Sunburst', negro: 'Negro Mate', goldtop: 'Oro Vintage' };
-                const hwNombres = { chrome: 'Cromo', gold: 'Oro', black: 'Negro' };
-                const pkNombres = { humbucker: 'Humbucker', singlecoil: 'Single Coil' };
+                // Extracción independiente y robusta del estado visual seleccionado en las tarjetas del Wizard
+                const soundSel = document.querySelector('.wizard-card[data-wiz-sound].selected')?.getAttribute('data-wiz-sound') || 'heavy';
+                const feelSel = document.querySelector('.wizard-card[data-wiz-feel].selected')?.getAttribute('data-wiz-feel') || 'standard';
+                const lookSel = document.querySelector('.wizard-card[data-wiz-look].selected')?.getAttribute('data-wiz-look') || 'classic';
 
-                richModelDescription = `${modeloId} (Asistido) [Madera: ${maderasNombres[settings.wood]}, Acabado: ${coloresNombres[settings.color]}, Herrajes: ${hwNombres[settings.hardware]}, Pastillas: ${pkNombres[settings.pickups]}, CAD: ${settings.length}x${settings.width}x${settings.thickness}mm, Escala: ${settings.scale}mm]`;
+                const maderasNombres = { heavy: 'Caoba', bright: 'Fresno', balanced: 'Arce' };
+                const pkNombres = { heavy: 'Humbucker', bright: 'Single Coil', balanced: 'Humbucker' };
+                const coloresNombres = {
+                    classic: (soundSel === 'bright' ? 'Sunburst' : 'Rojo Cereza'),
+                    modern: (soundSel === 'heavy' ? 'Negro Mate' : 'Oro Vintage')
+                };
+                const hwNombres = {
+                    classic: 'Cromo',
+                    modern: (soundSel === 'heavy' ? 'Negro' : 'Oro')
+                };
+                const cadDims = {
+                    light: '330x240x32mm, Escala: 610mm',
+                    heavy: '400x300x48mm, Escala: 650mm',
+                    standard: '360x280x40mm, Escala: 648mm'
+                };
+
+                richModelDescription = `${modeloId} (Asistido) [Madera: ${maderasNombres[soundSel]}, Acabado: ${coloresNombres[lookSel]}, Herrajes: ${hwNombres[lookSel]}, Pastillas: ${pkNombres[soundSel]}, CAD: ${cadDims[feelSel]}]`;
                 idType = document.getElementById('id_type_asistido').value;
                 idNum = document.getElementById('id_number_asistido').value;
                 emailName = document.getElementById('name_asistido').value;
@@ -763,36 +516,22 @@ End If</pre>
             }
 
             const datosCotizacion = {
-                id_type: idType,
-                id_number: idNum,
-                name: emailName,
-                phone_number: phoneNum,
-                email: emailClient,
-                modelo_base: richModelDescription
+                id_type: idType, id_number: idNum, name: emailName, phone_number: phoneNum, email: emailClient, modelo_base: richModelDescription
             };
 
             try {
-                // A. GUARDAR EN SUPABASE
-                const { error: supabaseError } = await _supabase
-                    .from('cotizaciones')
-                    .insert([datosCotizacion]);
-
+                const { error: supabaseError } = await _supabase.from('cotizaciones').insert([datosCotizacion]);
                 if (supabaseError) throw new Error("Error en Base de Datos: " + supabaseError.message);
 
-                // B. ENVIAR CORREO CON EMAILJS
                 const parametrosEmail = {
-                    name: datosCotizacion.name,
-                    email: datosCotizacion.email,
-                    modelo_base: datosCotizacion.modelo_base,
-                    to_email: datosCotizacion.email
+                    name: datosCotizacion.name, email: datosCotizacion.email, modelo_base: datosCotizacion.modelo_base, to_email: datosCotizacion.email
                 };
 
                 await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, parametrosEmail);
 
-                // C. RESPUESTA EXITOSA
                 statusEl.style.backgroundColor = "#d4edda";
                 statusEl.style.color = "#155724";
-                statusEl.innerText = "¡Excelente! Tu cotización asistida ha sido guardada. En el correo electrónico registrado podrás consultarla.";
+                statusEl.innerText = "¡Excelente! Tu cotización ha sido guardada. En el correo electrónico registrado podrás consultarla.";
                 formEl.reset();
             } catch (err) {
                 console.error("Error completo:", err);
@@ -806,7 +545,6 @@ End If</pre>
         }
     </script>
     
-    <!-- Script de rendering y control Three.js para el Configurador -->
     <script src="configurador.js"></script>
 </body>
 </html>

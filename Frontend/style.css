@@ -1201,4 +1201,135 @@ body {
     color: var(--texto-mutado); /* Usando tu variable mutada para mantener la gama de colores */
     font-style: italic;
 }
+/* ========================================= */
+/* ESTILOS DEL POP-UP (MODAL DE SELECCIÓN)   */
+/* ========================================= */
 
+/* El fondo oscuro que cubre toda la pantalla */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.85); /* Fondo negro al 85% de opacidad */
+    z-index: 9999; /* Asegura que quede por encima del header y los modelos 3D */
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(5px); /* Efecto de desenfoque en el fondo (opcional, se ve muy bien) */
+}
+
+/* La caja principal del pop-up */
+.modal-content {
+    background-color: #1e1e1e; /* Gris muy oscuro, casi negro */
+    color: #ffffff;
+    padding: 40px;
+    border-radius: 12px;
+    max-width: 500px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
+    border: 1px solid #333;
+}
+
+.modal-content h3 {
+    margin-top: 0;
+    font-size: 1.6rem;
+    margin-bottom: 10px;
+}
+
+/* Contenedor de los dos botones principales */
+.modal-buttons {
+    display: flex;
+    flex-direction: column; /* Coloca un botón sobre otro */
+    gap: 15px;
+    margin-top: 20px;
+}
+
+/* Efectos hover para que los botones se sientan interactivos */
+.modal-buttons button {
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.modal-buttons button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Ajustes específicos para los botones si no tienes estas clases creadas */
+#btn-modal-asistido.btn-primary {
+    background-color: #e53935; /* Un rojo rockero, cámbialo por tu color principal si tienes otro */
+    color: white;
+    border: none;
+}
+
+#btn-modal-asistido.btn-primary:hover {
+    background-color: #ef5350;
+}
+
+#btn-modal-experto.btn-outline {
+    background-color: transparent;
+    color: #ffffff;
+    border: 2px solid #555;
+}
+
+#btn-modal-experto.btn-outline:hover {
+    border-color: #fff;
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Efecto hover para el botón de cancelar */
+#btn-cerrar-modal:hover {
+    color: #fff !important;
+}
+/* Estilos para el Formulario del Asistente */
+.wizard-header {
+    margin-bottom: 25px;
+}
+.progress-bar {
+    background: #333;
+    height: 6px;
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 10px;
+}
+#wizard-progress {
+    background: #e53935; /* Color rojo principal */
+    height: 100%;
+    transition: width 0.3s ease;
+}
+.step-desc {
+    font-size: 0.9rem;
+    color: #aaa;
+    margin-bottom: 20px;
+}
+.wizard-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.btn-wizard-opt {
+    background: #2a2a2a;
+    border: 1px solid #444;
+    color: #fff;
+    padding: 14px;
+    border-radius: 8px;
+    text-align: left;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+}
+.btn-wizard-opt:hover {
+    background: #333;
+    border-color: #666;
+}
+.btn-wizard-opt.active {
+    background: rgba(229, 57, 53, 0.15);
+    border-color: #e53935;
+    color: #fff;
+    font-weight: bold;
+}
