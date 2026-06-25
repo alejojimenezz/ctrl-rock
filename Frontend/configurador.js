@@ -554,3 +554,92 @@ document.addEventListener("DOMContentLoaded", () => {
         renderer.setSize(container.clientWidth, container.clientHeight);
     });
 });
+// ===============================
+// BOTÓN COTIZAR
+// ===============================
+
+const btnCotizar = document.getElementById("btn-enviar");
+
+if (btnCotizar) {
+
+    btnCotizar.addEventListener("click", async () => {
+
+        try {
+
+            btnCotizar.disabled = true;
+            btnCotizar.textContent = "Calculando...";
+
+            const response = await fetch(
+                "http://localhost:5000/cotizar"
+            );
+
+            const data = await response.json();
+
+            const modal = document.getElementById("modal-cotizacion");
+
+            document.getElementById("precio-final").textContent =
+                `$${data.precio_final_cop.toLocaleString('es-CO')} COP`;
+
+            modal.classList.add("active");
+
+        } catch (error) {
+
+            console.error(error);
+
+            alert(
+                "No fue posible generar la cotización."
+            );
+
+        } finally {
+
+            btnCotizar.disabled = false;
+            btnCotizar.textContent = "Cotizar mi guitarra";
+
+        }
+
+    });
+
+}
+const modal = document.getElementById("modal-cotizacion");
+
+document
+    .getElementById("btn-cancelar")
+    ?.addEventListener("click", () => {
+
+        modal.classList.remove("active");
+
+    });
+
+document
+    .getElementById("btn-comprar")
+    ?.addEventListener("click", () => {
+
+        window.location.href =
+            "mailto:ventas@ctrlrock.com?subject=Compra de guitarra personalizada";
+
+    });
+    // Abrir formulario de compra
+document
+    .getElementById("btn-comprar")
+    ?.addEventListener("click", () => {
+
+        document
+            .getElementById("modal-cotizacion")
+            .classList.remove("active");
+
+        document
+            .getElementById("modal-compra")
+            .classList.add("active");
+
+    });
+
+// Cancelar compra
+document
+    .getElementById("btn-cancelar-compra")
+    ?.addEventListener("click", () => {
+
+        document
+            .getElementById("modal-compra")
+            .classList.remove("active");
+
+    });
