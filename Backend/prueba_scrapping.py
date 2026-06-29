@@ -197,6 +197,13 @@ for precio in resultados.values():
 
 total_cop = total_usd * USD_A_COP
 precio_final = total_cop + COSTO_FABRICACION
+# Guardar resumen para el frontend
+with open("resultado_cotizacion.json", "w", encoding="utf-8") as archivo:
+    json.dump({
+        "precio_final_cop": round(precio_final),
+        "precio_componentes_cop": round(total_cop),
+        "total_usd": round(total_usd, 2)
+    }, archivo, indent=4)
 
 print("\n==============================")
 print(f"TOTAL USD: ${total_usd:.2f}")

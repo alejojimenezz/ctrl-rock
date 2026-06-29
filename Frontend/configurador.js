@@ -553,10 +553,15 @@ document.addEventListener("DOMContentLoaded", () => {
         camera.updateProjectionMatrix();
         renderer.setSize(container.clientWidth, container.clientHeight);
     });
+    window.addEventListener('resize', () => {
+    camera.aspect = container.clientWidth / container.clientHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(container.clientWidth, container.clientHeight);
 });
-// ===============================
+
+// =====================================
 // BOTÓN COTIZAR
-// ===============================
+// =====================================
 
 const btnCotizar = document.getElementById("btn-enviar");
 
@@ -569,26 +574,22 @@ if (btnCotizar) {
             btnCotizar.disabled = true;
             btnCotizar.textContent = "Calculando...";
 
-            const response = await fetch(
-                "http://localhost:5000/cotizar"
-            );
+            const response = await fetch("http://localhost:5000/cotizar");
 
             const data = await response.json();
 
-            const modal = document.getElementById("modal-cotizacion");
-
             document.getElementById("precio-final").textContent =
-                `$${data.precio_final_cop.toLocaleString('es-CO')} COP`;
+                `$${data.precio_final_cop.toLocaleString("es-CO")} COP`;
 
-            modal.classList.add("active");
+            document
+                .getElementById("modal-cotizacion")
+                .classList.add("active");
 
         } catch (error) {
 
             console.error(error);
 
-            alert(
-                "No fue posible generar la cotización."
-            );
+            alert("No fue posible generar la cotización.");
 
         } finally {
 
@@ -600,28 +601,18 @@ if (btnCotizar) {
     });
 
 }
-const modal = document.getElementById("modal-cotizacion");
 
-document
-    .getElementById("btn-cancelar")
-    ?.addEventListener("click", () => {
+// =====================================
+// MODALES
+// =====================================
 
-        modal.classList.remove("active");
+const btnComprar = document.getElementById("btn-comprar");
+const btnCancelar = document.getElementById("btn-cancelar");
+const btnCancelarCompra = document.getElementById("btn-cancelar-compra");
 
-    });
+if (btnComprar) {
 
-document
-    .getElementById("btn-comprar")
-    ?.addEventListener("click", () => {
-
-        window.location.href =
-            "mailto:ventas@ctrlrock.com?subject=Compra de guitarra personalizada";
-
-    });
-    // Abrir formulario de compra
-document
-    .getElementById("btn-comprar")
-    ?.addEventListener("click", () => {
+    btnComprar.addEventListener("click", () => {
 
         document
             .getElementById("modal-cotizacion")
@@ -633,13 +624,29 @@ document
 
     });
 
-// Cancelar compra
-document
-    .getElementById("btn-cancelar-compra")
-    ?.addEventListener("click", () => {
+}
+
+if (btnCancelar) {
+
+    btnCancelar.addEventListener("click", () => {
+
+        document
+            .getElementById("modal-cotizacion")
+            .classList.remove("active");
+
+    });
+
+}
+
+if (btnCancelarCompra) {
+
+    btnCancelarCompra.addEventListener("click", () => {
 
         document
             .getElementById("modal-compra")
             .classList.remove("active");
 
     });
+
+}
+});

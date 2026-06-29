@@ -89,14 +89,14 @@
                         <div class="config-section">
                             <h4>Picks (Púas) de Cortesía</h4>
                             <div class="swatch-group" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;">
-                                <div class="option-swatch active" data-picks="negro">
-                                    <span class="color-circle" style="background-color: #1a1a1a;"></span> Negro
+                                <div class="option-swatch active" data-picks="verde">
+                                    <span class="color-circle" style="background-color: #298900;"></span> Verde
                                 </div>
                                 <div class="option-swatch" data-picks="blanco">
-                                    <span class="color-circle" style="background-color: #f5f5f5; border: 1px solid #ccc;"></span> Blanco
+                                    <span class="color-circle" style="background-color: #f640e7; border: 1px solid #ccc;"></span> Rosado
                                 </div>
                                 <div class="option-swatch" data-picks="carey">
-                                    <span class="color-circle" style="background: radial-gradient(circle, #8b4513 0%, #2b1810 100%);"></span> Carey
+                                    <span class="color-circle" style="background: radial-gradient(circle, #0696e9 0%, #0c81db 100%);"></span> Azul
                                 </div>
                             </div>
                         </div>
@@ -106,6 +106,7 @@
                             <button id="btn-enviar" class="btn-primary" style="width: 100%;">
                                 Cotizar mi guitarra
                             </button>
+                            
                         </div>
 
                     </div>
@@ -113,7 +114,32 @@
             </div>
 
         </div>
+                        <div id="modal-cotizacion" class="modal-overlay">
+                        <div class="modal-content">
 
+                            <h2>🎸 Tu guitarra está lista</h2>
+
+                                 <p class="modal-subtitle">
+                                    Este es el precio final estimado incluyendo fabricación y envío.
+                                </p>
+
+                        <div id="precio-final" class="precio-final">
+                            $0 COP
+                        </div>
+
+                        <div class="modal-actions">
+                            <button id="btn-comprar" class="btn-comprar">
+                                Comprar
+                            </button>
+
+                            <button id="btn-cancelar" class="btn-cancelar">
+                                Cancelar
+                            </button>
+                        </div>
+
+                            </div>
+                        </div>
+                        
         <div id="modal-compra" class="modal-overlay">
             <div class="modal-content modal-form">
                 <h2>Finalizar compra</h2>
@@ -142,6 +168,8 @@
                 </form>
             </div>
         </div>
+     </div>
+
     </main>
 
     <script>
@@ -189,59 +217,74 @@
         // Inicializar la primera imagen al cargar la página
         window.addEventListener('DOMContentLoaded', actualizarImagenGuitarra);
 
-        // === 4. ENVIAR COTIZACIÓN ===
-        const btnEnviar = document.getElementById('btn-enviar');
-        const statusDiv = document.getElementById('mensaje-status');
+// === 4. COTIZAR GUITARRA ===
 
-        btnEnviar.addEventListener('click', async (e) => {
-            e.preventDefault();
-            
-            btnEnviar.disabled = true;
-            btnEnviar.innerText = "Procesando...";
-            statusDiv.style.display = "block";
-            statusDiv.style.backgroundColor = "rgba(53, 28, 21, 0.05)";
-            statusDiv.style.color = "#333";
-            statusDiv.innerText = "Guardando cotización y enviando correo...";
+const btnEnviar = document.getElementById("btn-enviar");
 
-            const woodSel = document.querySelector('[data-wood].active')?.innerText.trim() || 'Fresno';
-            const finishSel = document.querySelector('[data-finish].active')?.innerText.trim() || 'Rojo Cereza';
-            const sizeSel = document.querySelector('[data-size].active')?.getAttribute('data-size') || '4/4';
-            const picksSel = document.querySelector('[data-picks].active')?.innerText.trim() || 'Negro';
+btnEnviar.addEventListener("click", async () => {
 
-            // Usamos un modal o prompt rápido para simular la recolección si no hay inputs de usuario directos en el DOM
-            const emailName = prompt("Ingresa tu nombre completo:") || "Cliente Ctrl+Rock";
-            const emailClient = prompt("Ingresa tu correo electrónico:") || "test@ctrlrock.com";
-            const phoneNum = prompt("Ingresa tu número telefónico:") || "000000";
+    try {
 
-            const richModelDescription = `${modeloId.toUpperCase()} [Madera: ${woodSel}, Acabado: ${finishSel}, Tamaño: ${sizeSel}, Picks: ${picksSel}]`;
+        btnEnviar.disabled = true;
+        btnEnviar.innerText = "Calculando...";
 
-            const datosCotizacion = {
-                id_type: "CC", id_number: "123456", name: emailName, phone_number: phoneNum, email: emailClient, modelo_base: richModelDescription
-            };
+        const response = await fetch(
+            "http://localhost:5000/cotizar"
+        );
 
-            try {
-                const { error: supabaseError } = await _supabase.from('cotizaciones').insert([datosCotizacion]);
-                if (supabaseError) throw new Error("Error en Base de Datos: " + supabaseError.message);
+        if (!response.ok) {
+            throw new Error("No fue posible obtener la cotización.");
+        }
 
-                const parametrosEmail = {
-                    name: datosCotizacion.name, email: datosCotizacion.email, modelo_base: datosCotizacion.modelo_base, to_email: datosCotizacion.email
-                };
+        const data = await response.json();
 
-                await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, parametrosEmail);
+        document.getElementById("precio-final").textContent =
+            `$${data.precio_final_cop.toLocaleString("es-CO")} COP`;
 
-                statusDiv.style.backgroundColor = "#d4edda";
-                statusDiv.style.color = "#155724";
-                statusDiv.innerText = "¡Excelente! Tu cotización ha sido guardada y enviada a tu correo electrónico.";
-            } catch (err) {
-                console.error("Error completo:", err);
-                statusDiv.style.backgroundColor = "#f8d7da";
-                statusDiv.style.color = "#721c24";
-                statusDiv.innerText = "Hubo un problema: " + (err.message || "Error desconocido");
-            } finally {
-                btnEnviar.disabled = false;
-                btnEnviar.innerText = "Cotizar mi guitarra";
-            }
-        });
+        document
+            .getElementById("modal-cotizacion")
+            .classList.add("active");
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert("Error al calcular la cotización.");
+
+    } finally {
+
+        btnEnviar.disabled = false;
+        btnEnviar.innerText = "Cotizar mi guitarra";
+
+    }
+
+});
+// =============================
+// CONTROL DE MODALES
+// =============================
+
+const modalCotizacion = document.getElementById("modal-cotizacion");
+const modalCompra = document.getElementById("modal-compra");
+
+document.getElementById("btn-comprar").addEventListener("click", () => {
+
+    modalCotizacion.classList.remove("active");
+    modalCompra.classList.add("active");
+
+});
+
+document.getElementById("btn-cancelar").addEventListener("click", () => {
+
+    modalCotizacion.classList.remove("active");
+
+});
+
+document.getElementById("btn-cancelar-compra").addEventListener("click", () => {
+
+    modalCompra.classList.remove("active");
+
+});
     </script>
+</div>
 </body>
 </html>
