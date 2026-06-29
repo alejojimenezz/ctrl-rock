@@ -3,14 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ctrl + Rock | Configura tu Guitarra 3D</title>
+    <title>Ctrl + Rock | Configura tu Guitarra</title>
     <meta name="description" content="Personaliza tu guitarra, define parámetros de diseño y exporta directamente a Autodesk Inventor.">
     <link rel="icon" type="image/x-icon" href="../assets/favicon.ico"/>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 </head>
 <body class="cad-grid-bg">
 
@@ -26,287 +24,128 @@
     <main class="config-container">
         <h2 id="modelo-titulo">Configurando tu Guitarra</h2>
         
-        <div class="config-grid">
+            <div class="config-grid">
             
-            <div class="preview-box">
-                <div id="guitar-preview-container">
-                    <canvas id="guitar-preview-canvas"></canvas>                
-                </div>
+            <div class="preview-box" style="display: flex; align-items: center; justify-content: center; background:    #8f796d ; padding: 20px; border-radius: 8px; width: 100%; min-height: 630px; height: 100%;">
+                <img id="guitar-preview" src="" alt="Previsualización de la Guitarra" style="max-width: 100%; max-height: 630px; width: auto; height: auto; object-fit: contain; filter: drop-shadow(0px 10px 20px rgba(0,0,0,0.5)); transition: src 0.2s ease-in-out;">
             </div>
 
             <div class="control-panel">
-               <div id="panel-experto" style="display: none;">
-                    <div class="tabs-header">
-                    </div>
+                <div id="panel-experto">
                     <div class="tabs-content">
                         
-                        <div class="tab-pane active" id="tab-estetica">
-                            <div class="config-section">
-                                <h4>Madera del Cuerpo</h4>
-                                <div class="swatch-group">
-                                    <div class="option-swatch active" data-wood="caoba">
-                                        <span class="color-circle" style="background-color: #5c3a21;"></span> Caoba
-                                    </div>
-                                    <div class="option-swatch" data-wood="fresno">
-                                        <span class="color-circle" style="background-color: #e4d5c7;"></span> Fresno
-                                    </div>
-                                    <div class="option-swatch" data-wood="arce">
-                                        <span class="color-circle" style="background-color: #f5efe6;"></span> Arce
-                                    </div>
+                        <div class="config-section">
+                            <h4>Madera del Cuerpo</h4>
+                            <div class="swatch-group">
+                                <div class="option-swatch active" data-wood="fresno">
+                                    <span class="color-circle" style="background-color: #e4d5c7;"></span> Fresno Americano
                                 </div>
-                            </div>
-
-                            <div class="config-section">
-                                <h4>Color de Acabado</h4>
-                                <div class="swatch-group">
-                                    <div class="option-swatch active" data-color="cherry">
-                                        <span class="color-circle" style="background-color: #b73225;"></span> Rojo Cereza
-                                    </div>
-                                    <div class="option-swatch" data-color="natural">
-                                        <span class="color-circle" style="background-color: #8d5b38;"></span> Natural Caoba
-                                    </div>
-                                    <div class="option-swatch" data-color="sunburst">
-                                        <span class="color-circle" style="background: radial-gradient(circle, #f0a500 0%, #1e120f 100%);"></span> Sunburst
-                                    </div>
-                                    <div class="option-swatch" data-color="negro">
-                                        <span class="color-circle" style="background-color: #1a0f0d;"></span> Negro Mate
-                                    </div>
-                                    <div class="option-swatch" data-color="goldtop">
-                                        <span class="color-circle" style="background-color: #d4af37;"></span> Oro Vintage
-                                    </div>
+                                <div class="option-swatch" data-wood="caoba">
+                                    <span class="color-circle" style="background-color: #5c3a21;"></span> Caoba de Honduras
                                 </div>
-                            </div>
-
-                            <div class="config-section">
-                                <h4>Herrajes (Metales)</h4>
-                                <div class="swatch-group">
-                                    <div class="option-swatch active" data-hardware="chrome">
-                                        <span class="color-circle" style="background-color: #e6e6e6;"></span> Cromo
-                                    </div>
-                                    <div class="option-swatch" data-hardware="gold">
-                                        <span class="color-circle" style="background-color: #ffd700;"></span> Oro
-                                    </div>
-                                    <div class="option-swatch" data-hardware="black">
-                                        <span class="color-circle" style="background-color: #222222;"></span> Negro Obsidian
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="config-section">
-                                <h4>Pastillas (Micrófonos)</h4>
-                                <div class="swatch-group">
-                                    <div class="option-swatch active" data-pickups="humbucker">Humbucker (Doble)</div>
-                                    <div class="option-swatch" data-pickups="singlecoil">Single Coil (Sencilla)</div>
+                                <div class="option-swatch" data-wood="nogal">
+                                    <span class="color-circle" style="background-color: #3e2723;"></span> Nogal Negro Exótico
                                 </div>
                             </div>
                         </div>
-  
+
+                        <div class="config-section">
+                            <h4>Color de Acabado</h4>
+                            <div class="swatch-group">
+                                <div class="option-swatch active" data-finish="cherry">
+                                    <span class="color-circle" style="background-color: #B73225;"></span> Rojo Cereza
+                                </div>
+                                <div class="option-swatch" data-finish="natural">
+                                    <span class="color-circle" style="background-color: #8d5b38;"></span> Natural
+                                </div>
+                                <div class="option-swatch" data-finish="carbon">
+                                    <span class="color-circle" style="background-color: #2C2C2C;"></span> Negro Carbón
+                                </div>
                             </div>
                         </div>
-                                <div class="action-area">
-                                    <div id="mensaje-status" style="display: none;"></div>
 
-                                    <button type="submit" id="btn-enviar" class="btn-primary">
-                                        Cotizar mi guitarra
-                                    </button>
+                        <div class="config-section">
+                            <h4>Tamaño del Instrumento (De acuerdo a la estatura)</h4>
+                            <div class="swatch-group" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px;">
+                                <div class="option-swatch" data-size="1_4" style="padding: 4px 2px; font-size: 0.8rem; flex-direction: column; text-align: center; cursor: pointer; gap: 2px;">
+                                    <span style="font-weight: bold; font-size: 0.85rem;">1/4</span>
+                                    <span style="font-size: 0.65rem; color: #888; display: block;">1.00m - 1.15m</span>
                                 </div>
+                                <div class="option-swatch" data-size="1_2" style="padding: 4px 2px; font-size: 0.8rem; flex-direction: column; text-align: center; cursor: pointer; gap: 2px;">
+                                    <span style="font-weight: bold; font-size: 0.85rem;">1/2</span>
+                                    <span style="font-size: 0.65rem; color: #888; display: block;">1.15m - 1.35m</span>
+                                </div>
+                                <div class="option-swatch" data-size="3_4" style="padding: 4px 2px; font-size: 0.8rem; flex-direction: column; text-align: center; cursor: pointer; gap: 2px;">
+                                    <span style="font-weight: bold; font-size: 0.85rem;">3/4</span>
+                                    <span style="font-size: 0.65rem; color: #888; display: block;">1.35m - 1.50m</span>
+                                </div>
+                                <div class="option-swatch active" data-size="4_4" style="padding: 4px 2px; font-size: 0.8rem; flex-direction: column; text-align: center; cursor: pointer; gap: 2px;">
+                                    <span style="font-weight: bold; font-size: 0.85rem;">4/4</span>
+                                    <span style="font-size: 0.65rem; color: #888; display: block;">> 1.50m</span>
+                                </div>
+                            </div>
+                        </div>
 
+                        <div class="config-section">
+                            <h4>Picks (Púas) de Cortesía</h4>
+                            <div class="swatch-group" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;">
+                                <div class="option-swatch active" data-picks="negro">
+                                    <span class="color-circle" style="background-color: #1a1a1a;"></span> Negro
+                                </div>
+                                <div class="option-swatch" data-picks="blanco">
+                                    <span class="color-circle" style="background-color: #f5f5f5; border: 1px solid #ccc;"></span> Blanco
+                                </div>
+                                <div class="option-swatch" data-picks="carey">
+                                    <span class="color-circle" style="background: radial-gradient(circle, #8b4513 0%, #2b1810 100%);"></span> Carey
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="action-area" style="margin-top: 20px;">
+                            <div id="mensaje-status" style="display: none; padding: 10px; border-radius: 4px; margin-bottom: 10px;"></div>
+                            <button id="btn-enviar" class="btn-primary" style="width: 100%;">
+                                Cotizar mi guitarra
+                            </button>
+                        </div>
 
                     </div>
                 </div>
-                
             </div>
-            
-        </div>
-<!-- ==========================
-     MODAL DE COTIZACIÓN
-========================== -->
-<div id="modal-cotizacion" class="modal-overlay">
-
-    <div class="modal-content">
-
-        <h2>🎸 Tu guitarra está lista</h2>
-
-        <p class="modal-subtitle">
-            Este es el precio final incluyendo el envío.
-        </p>
-
-        <div id="precio-final" class="precio-final">
-            $0 COP
-        </div>
-
-        <div class="modal-actions">
-
-            <button id="btn-comprar" class="btn-comprar">
-                Comprar
-            </button>
-
-            <button id="btn-cancelar" class="btn-cancelar">
-                Cancelar
-            </button>
 
         </div>
 
-    </div>
-
-</div>
-
-<!-- ==========================
-     MODAL DE COMPRA
-========================== -->
-<div id="modal-compra" class="modal-overlay">
-
-    <div class="modal-content modal-form">
-
-        <h2>Finalizar compra</h2>
-
-        <p class="modal-subtitle">
-            Completa tus datos para procesar el pedido.
-        </p>
-
-        <form id="form-compra">
-
-            <div class="campo-form">
-                <label for="nombre">Nombre(s)</label>
-                <input
-                    type="text"
-                    id="nombre"
-                    required
-                >
+        <div id="modal-compra" class="modal-overlay">
+            <div class="modal-content modal-form">
+                <h2>Finalizar compra</h2>
+                <p class="modal-subtitle">Completa tus datos para procesar el pedido.</p>
+                <form id="form-compra">
+                    <div class="campo-form"><label for="nombre">Nombre(s)</label><input type="text" id="nombre" required></div>
+                    <div class="campo-form"><label for="apellidos">Apellido(s)</label><input type="text" id="apellidos" required></div>
+                    <div class="campo-form">
+                        <label for="tipo-identificacion">Tipo de identificación</label>
+                        <select id="tipo-identificacion" required>
+                            <option value="">Seleccione una opción</option>
+                            <option value="CC">C.C.</option>
+                            <option value="NIT">NIT</option>
+                        </select>
+                    </div>
+                    <div class="campo-form"><label for="identificacion">Número de identificación</label><input type="text" id="identificacion" required></div>
+                    <div class="campo-form"><label for="correo">Correo electrónico</label><input type="email" id="correo" required></div>
+                    <div class="campo-form"><label for="telefono">Teléfono</label><input type="tel" id="telefono" required></div>
+                    <div class="campo-form"><label for="direccion">Dirección de envío</label><input type="text" id="direccion" required></div>
+                    <div class="campo-form"><label for="departamento">Departamento</label><input type="text" id="departamento" required></div>
+                    <div class="campo-form"><label for="ciudad">Ciudad</label><input type="text" id="ciudad" required></div>
+                    <div class="modal-actions">
+                        <button type="submit" class="btn-comprar">Confirmar compra</button>
+                        <button type="button" id="btn-cancelar-compra" class="btn-cancelar">Cancelar</button>
+                    </div>
+                </form>
             </div>
-
-            <div class="campo-form">
-                <label for="apellidos">Apellido(s)</label>
-                <input
-                    type="text"
-                    id="apellidos"
-                    required
-                >
-            </div>
-
-            <div class="campo-form">
-                <label for="tipo-identificacion">
-                    Tipo de identificación
-                </label>
-
-                <select
-                    id="tipo-identificacion"
-                    required
-                >
-                    <option value="">
-                        Seleccione una opción
-                    </option>
-
-                    <option value="CC">
-                        C.C.
-                    </option>
-
-                    <option value="NIT">
-                        NIT
-                    </option>
-                </select>
-            </div>
-
-            <div class="campo-form">
-                <label for="identificacion">
-                    Número de identificación
-                </label>
-
-                <input
-                    type="text"
-                    id="identificacion"
-                    placeholder="Ingrese su número de identificación"
-                    required
-                >
-            </div>
-
-            <div class="campo-form">
-                <label for="correo">
-                    Correo electrónico
-                </label>
-
-                <input
-                    type="email"
-                    id="correo"
-                    required
-                >
-            </div>
-
-            <div class="campo-form">
-                <label for="telefono">
-                    Teléfono
-                </label>
-
-                <input
-                    type="tel"
-                    id="telefono"
-                    required
-                >
-            </div>
-
-            <div class="campo-form">
-                <label for="direccion">
-                    Dirección de envío
-                </label>
-
-                <input
-                    type="text"
-                    id="direccion"
-                    required
-                >
-            </div>
-            <div class="campo-form">
-                <label for="departamento">
-                     Departamento
-                 </label>
-
-        <input
-            type="text"
-            id="departamento"
-            required
-        >
-    </div>
-
-            <div class="campo-form">
-                <label for="ciudad">
-                    Ciudad
-                </label>
-
-                <input
-                    type="text"
-                    id="ciudad"
-                    required
-                >
-            </div>
-
-            <div class="modal-actions">
-
-                <button
-                    type="submit"
-                    class="btn-comprar"
-                >
-                    Confirmar compra
-                </button>
-
-                <button
-                    type="button"
-                    id="btn-cancelar-compra"
-                    class="btn-cancelar"
-                >
-                    Cancelar
-                </button>
-
-            </div>
-
-        </form>
-
-    </div>
-
-</div>
+        </div>
     </main>
 
     <script>
-        // === 1. CONFIGURACIÓN DE CREDENCIALES ORIGINALES ===
+        // === 1. CONFIGURACIÓN DE CREDENCIALES ===
         const SUPABASE_URL = 'https://exbkgwglryserymzyyzj.supabase.co'; 
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4Ymtnd2dscnlzZXJ5bXp5eXpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNzM3NDMsImV4cCI6MjA5NTY0OTc0M30.nYx3HWEPZFng82Mo83j9Wz-5PHcfjqTfpYzGZxDJQC0';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -317,125 +156,67 @@
         
         emailjs.init(EMAILJS_PUBLIC_KEY);
 
-        // === 2. DECLARACIÓN DE ELEMENTOS DEL DOM CRÍTICOS ===
-        const btnModeAsistido = document.getElementById('btn-mode-asistido');
-        const btnModeExperto = document.getElementById('btn-mode-experto');
-        const panelAsistido = document.getElementById('panel-asistido');
-        const panelExperto = document.getElementById('panel-experto');
-
-        // === 3. LEER PARÁMETROS DE LA URL ===
+        // === 2. LEER PARÁMETROS DE LA URL ===
         const urlParams = new URLSearchParams(window.location.search);
-        const modeloId = urlParams.get('modelo') || 'Strat';
-        const modoElegido = urlParams.get('modo') || 'asistido';
+        const modeloId = urlParams.get('modelo') || 'lespaul';
 
-        document.getElementById('modelo-titulo').innerText = `Personalizando tu modelo`;
-        document.getElementById('sum-modelo').innerText = modeloId;
-        document.getElementById('wiz-sum-modelo').innerText = modeloId;
+        document.getElementById('modelo-titulo').innerText = `Personalizando tu modelo `;
 
-        // Cambiar dinámicamente de vista según el parámetro de la URL
-        window.addEventListener('DOMContentLoaded', () => {
-            if (modoElegido === 'experto') {
-                btnModeExperto.click();
-            } else {
-                btnModeAsistido.click();
-            }
+        // === 3. LÓGICA DINÁMICA DE IMÁGENES PNG ===
+        const guitarPreview = document.getElementById("guitar-preview");
+
+        function actualizarImagenGuitarra() {
+            const maderaActiva = document.querySelector('.option-swatch.active[data-wood]')?.getAttribute('data-wood') || 'fresno';
+            const acabadoActivo = document.querySelector('.option-swatch.active[data-finish]')?.getAttribute('data-finish') || 'cherry';
+            const tamanoActivo = document.querySelector('.option-swatch.active[data-size]')?.getAttribute('data-size') || '4_4';
+
+            // Estructura de nombres: ../assets/images/guitarras/lespaul-fresno-cherry-4_4.png
+            const nuevaRutaImg = `../assets/images/guitarras/${modeloId}-${maderaActiva}-${acabadoActivo}-${tamanoActivo}.png`;
+            guitarPreview.src = nuevaRutaImg;
+        }
+
+        // Intercepción de clicks en los swatches
+        const opciones = document.querySelectorAll(".option-swatch");
+        opciones.forEach(opcion => {
+            opcion.addEventListener("click", () => {
+                const grupo = opcion.closest(".swatch-group");
+                grupo.querySelectorAll(".option-swatch").forEach(el => el.classList.remove("active"));
+                opcion.classList.add("active");
+                actualizarImagenGuitarra();
+            });
         });
 
-        // Eventos de los botones superiores de cambio de Modo
-        btnModeExperto.addEventListener('click', () => {
-            btnModeExperto.classList.add('active');
-            btnModeAsistido.classList.remove('active');
-            panelAsistido.style.display = "none";
-            panelExperto.style.display = "block";
-        });
+        // Inicializar la primera imagen al cargar la página
+        window.addEventListener('DOMContentLoaded', actualizarImagenGuitarra);
 
-        btnModeAsistido.addEventListener('click', () => {
-            btnModeAsistido.classList.add('active');
-            btnModeExperto.classList.remove('active');
-            panelAsistido.style.display = "block";
-            panelExperto.style.display = "none";
-        });
-
-        // === 4. ENVIAR COTIZACIÓN MODO EXPERTO ===
-        const form = document.getElementById('cotizacion-form');
+        // === 4. ENVIAR COTIZACIÓN ===
         const btnEnviar = document.getElementById('btn-enviar');
         const statusDiv = document.getElementById('mensaje-status');
 
-        form.addEventListener('submit', async (e) => {
+        btnEnviar.addEventListener('click', async (e) => {
             e.preventDefault();
-            await enviarFormGenerico(form, btnEnviar, statusDiv, 'experto');
-        });
+            
+            btnEnviar.disabled = true;
+            btnEnviar.innerText = "Procesando...";
+            statusDiv.style.display = "block";
+            statusDiv.style.backgroundColor = "rgba(53, 28, 21, 0.05)";
+            statusDiv.style.color = "#333";
+            statusDiv.innerText = "Guardando cotización y enviando correo...";
 
-        // === 5. ENVIAR COTIZACIÓN MODO ASISTIDO ===
-        const formAsistido = document.getElementById('cotizacion-form-asistido');
-        const btnEnviarAsistido = document.getElementById('btn-enviar-asistido');
-        const statusDivAsistido = document.getElementById('mensaje-status-asistido');
+            const woodSel = document.querySelector('[data-wood].active')?.innerText.trim() || 'Fresno';
+            const finishSel = document.querySelector('[data-finish].active')?.innerText.trim() || 'Rojo Cereza';
+            const sizeSel = document.querySelector('[data-size].active')?.getAttribute('data-size') || '4/4';
+            const picksSel = document.querySelector('[data-picks].active')?.innerText.trim() || 'Negro';
 
-        formAsistido.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            await enviarFormGenerico(formAsistido, btnEnviarAsistido, statusDivAsistido, 'asistido');
-        });
+            // Usamos un modal o prompt rápido para simular la recolección si no hay inputs de usuario directos en el DOM
+            const emailName = prompt("Ingresa tu nombre completo:") || "Cliente Ctrl+Rock";
+            const emailClient = prompt("Ingresa tu correo electrónico:") || "test@ctrlrock.com";
+            const phoneNum = prompt("Ingresa tu número telefónico:") || "000000";
 
-        // Función unificada para guardar en Supabase y enviar EmailJS
-        async function enviarFormGenerico(formEl, btnEl, statusEl, modo) {
-            btnEl.disabled = true;
-            btnEl.innerText = "Procesando...";
-            statusEl.style.display = "block";
-            statusEl.style.backgroundColor = "rgba(53, 28, 21, 0.05)";
-            statusEl.style.color = "var(--texto-oscuro)";
-            statusEl.innerText = "Guardando cotización y enviando correo...";
-
-            let richModelDescription = "";
-            let emailClient = "", emailName = "", idType = "", idNum = "", phoneNum = "";
-
-            if (modo === 'experto') {
-                const woodSel = document.querySelector('[data-wood].active')?.innerText.trim() || 'Caoba';
-                const colorSel = document.querySelector('[data-color].active')?.innerText.trim() || 'Rojo Cereza';
-                const hwSel = document.querySelector('[data-hardware].active')?.innerText.trim() || 'Cromo';
-                const pkSel = document.querySelector('[data-pickups].active')?.innerText.trim() || 'Humbucker';
-                const cadL = document.getElementById('bodyLength').value;
-                const cadW = document.getElementById('bodyWidth').value;
-                const cadT = document.getElementById('bodyThickness').value;
-                const cadS = document.getElementById('scaleLength').value;
-
-                richModelDescription = `${modeloId} (Experto) [Madera: ${woodSel}, Acabado: ${colorSel}, Herrajes: ${hwSel}, Pastillas: ${pkSel}, CAD: ${cadL}x${cadW}x${cadT}mm, Escala: ${cadS}mm]`;
-                idType = document.getElementById('id_type').value;
-                idNum = document.getElementById('id_number').value;
-                emailName = document.getElementById('name').value;
-                phoneNum = document.getElementById('phone_number').value;
-                emailClient = document.getElementById('email').value;
-            } else {
-                // Extracción independiente y robusta del estado visual seleccionado en las tarjetas del Wizard
-                const soundSel = document.querySelector('.wizard-card[data-wiz-sound].selected')?.getAttribute('data-wiz-sound') || 'heavy';
-                const feelSel = document.querySelector('.wizard-card[data-wiz-feel].selected')?.getAttribute('data-wiz-feel') || 'standard';
-                const lookSel = document.querySelector('.wizard-card[data-wiz-look].selected')?.getAttribute('data-wiz-look') || 'classic';
-
-                const maderasNombres = { heavy: 'Caoba', bright: 'Fresno', balanced: 'Arce' };
-                const pkNombres = { heavy: 'Humbucker', bright: 'Single Coil', balanced: 'Humbucker' };
-                const coloresNombres = {
-                    classic: (soundSel === 'bright' ? 'Sunburst' : 'Rojo Cereza'),
-                    modern: (soundSel === 'heavy' ? 'Negro Mate' : 'Oro Vintage')
-                };
-                const hwNombres = {
-                    classic: 'Cromo',
-                    modern: (soundSel === 'heavy' ? 'Negro' : 'Oro')
-                };
-                const cadDims = {
-                    light: '330x240x32mm, Escala: 610mm',
-                    heavy: '400x300x48mm, Escala: 650mm',
-                    standard: '360x280x40mm, Escala: 648mm'
-                };
-
-                richModelDescription = `${modeloId} (Asistido) [Madera: ${maderasNombres[soundSel]}, Acabado: ${coloresNombres[lookSel]}, Herrajes: ${hwNombres[lookSel]}, Pastillas: ${pkNombres[soundSel]}, CAD: ${cadDims[feelSel]}]`;
-                idType = document.getElementById('id_type_asistido').value;
-                idNum = document.getElementById('id_number_asistido').value;
-                emailName = document.getElementById('name_asistido').value;
-                phoneNum = document.getElementById('phone_number_asistido').value;
-                emailClient = document.getElementById('email_asistido').value;
-            }
+            const richModelDescription = `${modeloId.toUpperCase()} [Madera: ${woodSel}, Acabado: ${finishSel}, Tamaño: ${sizeSel}, Picks: ${picksSel}]`;
 
             const datosCotizacion = {
-                id_type: idType, id_number: idNum, name: emailName, phone_number: phoneNum, email: emailClient, modelo_base: richModelDescription
+                id_type: "CC", id_number: "123456", name: emailName, phone_number: phoneNum, email: emailClient, modelo_base: richModelDescription
             };
 
             try {
@@ -448,24 +229,19 @@
 
                 await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, parametrosEmail);
 
-                statusEl.style.backgroundColor = "#d4edda";
-                statusEl.style.color = "#155724";
-                statusEl.innerText = "¡Excelente! Tu cotización ha sido guardada. En el correo electrónico registrado podrás consultarla.";
-                formEl.reset();
+                statusDiv.style.backgroundColor = "#d4edda";
+                statusDiv.style.color = "#155724";
+                statusDiv.innerText = "¡Excelente! Tu cotización ha sido guardada y enviada a tu correo electrónico.";
             } catch (err) {
                 console.error("Error completo:", err);
-                statusEl.style.backgroundColor = "#f8d7da";
-                statusEl.style.color = "#721c24";
-                statusEl.innerText = "Hubo un problema: " + (err.text || err.message || "Error desconocido");
+                statusDiv.style.backgroundColor = "#f8d7da";
+                statusDiv.style.color = "#721c24";
+                statusDiv.innerText = "Hubo un problema: " + (err.message || "Error desconocido");
             } finally {
-                btnEl.disabled = false;
-                btnEl.innerText = (modo === 'experto') ? "Enviar Cotización Ahora" : "Enviar Cotización Asistida";
+                btnEnviar.disabled = false;
+                btnEnviar.innerText = "Cotizar mi guitarra";
             }
-        }
+        });
     </script>
-    
-    <script src="configurador.js"></script>
-
-    
 </body>
 </html>
