@@ -29,9 +29,20 @@
             
             <div class="visualizadores-container" style="width: 100%;">
                 
-                <div class="preview-box" id="contenedor2D" style="display: flex; align-items: center; justify-content: center; background: #797673; padding: 20px; border-radius: 8px; width: 100%; min-height: 630px; height: 100%;">
-                    <img id="guitar-preview" src="" alt="Previsualización de la Guitarra" style="max-width: 100%; max-height: 630px; width: auto; height: auto; object-fit: contain; filter: drop-shadow(0px 10px 20px rgba(0,0,0,0.3)); transition: src 0.2s ease-in-out;">
+                <div class="preview-box" id="contenedor2D" style="position: relative; background: #eadfd4; padding: 20px; border-radius: 8px; max-width: 100%; min-height: 630px; display: flex; align-items: flex-end; justify-content: center; overflow: hidden; flex-direction: row;">
+                    
+                <div id="elemento-referencia" style="position: absolute; left: 100px; bottom: 10px; width: 280px; height: 760px; display: flex; align-items: flex-end; justify-content: center; opacity: 0.75; z-index: 5;">
+                    <img src="../assets/images/referencia-estatura.png" alt="Referencia de Estatura" style="max-height: 100%; width: auto; object-fit: contain;">
                 </div>
+
+                <div id="guitar-scaler" style="position: relative; margin-left: 250px; display: flex; align-items: flex-end; justify-content: center; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform-origin: bottom center;">
+
+                    <img id="guitar-image" src="" alt="Guitarra" style="position: absolute; bottom:0; height:100%; width:auto; max-width:none; filter: drop-shadow(0px 10px 20px rgba(0,0,0,0.3)); z-index: 1;">
+
+                </div>
+
+                </div>
+
 
                 <div id="contenedor3D" style="display: none; width: 100%; height: 630px; background-color: #a09891; border-radius: 8px; padding: 20px;">
                     <model-viewer
@@ -198,20 +209,32 @@
         const modeloId = urlParams.get('modelo') || 'lespaul';
 
         // Corrección del título (añadimos la variable que faltaba)
-        document.getElementById('modelo-titulo').innerText = `Personalizando tu modelo ${modeloId.toUpperCase()}`;
+        document.getElementById('modelo-titulo').innerText = `Personalizando tu modelo`;
 
         // === 3. LÓGICA DINÁMICA DE IMÁGENES PNG ===
         const guitarPreview = document.getElementById("guitar-preview");
 
-        function actualizarImagenGuitarra() {
-            const maderaActiva = document.querySelector('.option-swatch.active[data-wood]')?.getAttribute('data-wood') || 'fresno';
-            const acabadoActivo = document.querySelector('.option-swatch.active[data-finish]')?.getAttribute('data-finish') || 'cherry';
-            const tamanoActivo = document.querySelector('.option-swatch.active[data-size]')?.getAttribute('data-size') || '4_4';
+function actualizarImagenGuitarra() {
+    const maderaActiva = document.querySelector('.option-swatch.active[data-wood]')?.getAttribute('data-wood') || 'fresno';
+    const acabadoActivo = document.querySelector('.option-swatch.active[data-finish]')?.getAttribute('data-finish') || 'cherry';
+    const tamanoActivo = document.querySelector('.option-swatch.active[data-size]')?.getAttribute('data-size') || '4_4';
 
-            const nuevaRutaImg = `../assets/images/guitarras/${modeloId}-${maderaActiva}-${acabadoActivo}-${tamanoActivo}.png`;
-            guitarPreview.src = nuevaRutaImg;
-        }
+    const guitarImg = document.getElementById("guitar-image");
+    guitarImg.src = `../assets/images/guitarras/${modeloId}-${maderaActiva}-${acabadoActivo}.png`;
 
+    // Escalar la guitarra comparada con la referencia estática
+    const scaler = document.getElementById("guitar-scaler");
+    
+    if (tamanoActivo === "1_4") {
+        scaler.style.transform = "scale(0.65)";
+    } else if (tamanoActivo === "1_2") {
+        scaler.style.transform = "scale(0.77)";
+    } else if (tamanoActivo === "3_4") {
+        scaler.style.transform = "scale(0.88)";
+    } else {
+        scaler.style.transform = "scale(1)";
+    }
+}
         const opciones = document.querySelectorAll(".option-swatch");
         opciones.forEach(opcion => {
             opcion.addEventListener("click", () => {
