@@ -649,4 +649,38 @@ if (btnCancelarCompra) {
     });
 
 }
+document.addEventListener('DOMContentLoaded', () => {
+    const btnVer3D = document.getElementById('btnVer3D');
+    const contenedor3D = document.getElementById('contenedor3D');
+    const visorBajo = document.getElementById('visorBajo');
+    const btnCotizar = document.getElementById('btnCotizarFase2');
+
+    btnVer3D.addEventListener('click', function() {
+        // 1. Deshabilitar el botón temporalmente para evitar múltiples clics
+        this.disabled = true;
+        this.textContent = 'Cargando modelo interactivo...';
+
+        // 2. Obtener la ruta del .glb según lo que configuró el usuario
+        // Aquí llamarías a tu función que determina qué archivo cargar
+        const rutaArchivoGLB = obtenerRutaDelGLBGenerado(); 
+
+        // 3. Asignar el archivo al visor
+        visorBajo.src = rutaArchivoGLB;
+
+        // 4. Mostrar el contenedor del visor
+        contenedor3D.style.display = 'block';
+
+        // Opcional: Escuchar el evento de carga completa de Khronos/model-viewer
+        visorBajo.addEventListener('load', () => {
+             btnVer3D.style.display = 'none'; // Ocultamos el botón de ver 3D
+             btnCotizar.style.display = 'block'; // Mostramos el botón de cotizar real
+        });
+    });
+});
+
+// Función simulada: Aquí debes poner tu lógica para saber qué modelo cargar
+function obtenerRutaDelGLBGenerado() {
+    // Ejemplo: Si el usuario eligió Nogal Rojo Tamaño 1/4
+    return 'assets/modelos_3d/stingray_nogal_rojo_1_4.glb'; 
+}
 });

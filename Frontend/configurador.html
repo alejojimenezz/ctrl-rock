@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
 </head>
 <body class="cad-grid-bg">
 
@@ -24,16 +25,34 @@
     <main class="config-container">
         <h2 id="modelo-titulo">Configurando tu Guitarra</h2>
         
-            <div class="config-grid">
+        <div class="config-grid">
             
-            <div class="preview-box" style="display: flex; align-items: center; justify-content: center; background:    #8f796d ; padding: 20px; border-radius: 8px; width: 100%; min-height: 630px; height: 100%;">
-                <img id="guitar-preview" src="" alt="Previsualización de la Guitarra" style="max-width: 100%; max-height: 630px; width: auto; height: auto; object-fit: contain; filter: drop-shadow(0px 10px 20px rgba(0,0,0,0.5)); transition: src 0.2s ease-in-out;">
+            <div class="visualizadores-container" style="width: 100%;">
+                
+                <div class="preview-box" id="contenedor2D" style="display: flex; align-items: center; justify-content: center; background: #797673; padding: 20px; border-radius: 8px; width: 100%; min-height: 630px; height: 100%;">
+                    <img id="guitar-preview" src="" alt="Previsualización de la Guitarra" style="max-width: 100%; max-height: 630px; width: auto; height: auto; object-fit: contain; filter: drop-shadow(0px 10px 20px rgba(0,0,0,0.3)); transition: src 0.2s ease-in-out;">
+                </div>
+
+                <div id="contenedor3D" style="display: none; width: 100%; height: 630px; background-color: #a09891; border-radius: 8px; padding: 20px;">
+                    <model-viewer
+                        id="visorBajo"
+                        src="" 
+                        alt="Modelo 3D interactivo de tu instrumento"
+                        camera-controls
+                        auto-rotate
+                        shadow-intensity="2"
+                        environment-image="neutral" 
+                        exposure="0.8"
+                        style="width: 100%; height: 100%;">
+                    </model-viewer>
+                </div>
+
             </div>
 
             <div class="control-panel">
                 <div id="panel-experto">
                     <div class="tabs-content">
-                        
+                                              
                         <div class="config-section">
                             <h4>Madera del Cuerpo</h4>
                             <div class="swatch-group">
@@ -101,44 +120,28 @@
                             </div>
                         </div>
 
-                        <div class="action-area" style="margin-top: 20px;">
-                            <div id="mensaje-status" style="display: none; padding: 10px; border-radius: 4px; margin-bottom: 10px;"></div>
-                            <button id="btn-enviar" class="btn-primary" style="width: 100%;">
-                                Cotizar mi guitarra
-                            </button>
-                            
-                        </div>
-
+                        <button id="btnVer3D" style="width: 100%; margin-top: 20px;">Ver modelo 3D</button>
+                        <button id="btnCotizarFase2" style="display: none; width: 100%; margin-top: 20px;">Proceder a Cotización</button>
+                        
                     </div>
                 </div>
             </div>
 
+        </div> <div id="modal-cotizacion" class="modal-overlay">
+            <div class="modal-content">
+                <h2>🎸 Tu guitarra está lista</h2>
+                <p class="modal-subtitle">
+                    Este es el precio final estimado incluyendo fabricación y envío.
+                </p>
+                <div id="precio-final" class="precio-final">
+                    $0 COP
+                </div>
+                <div class="modal-actions">
+                    <button id="btn-comprar" class="btn-comprar">Comprar</button>
+                    <button id="btn-cancelar" class="btn-cancelar">Cancelar</button>
+                </div>
+            </div>
         </div>
-                        <div id="modal-cotizacion" class="modal-overlay">
-                        <div class="modal-content">
-
-                            <h2>🎸 Tu guitarra está lista</h2>
-
-                                 <p class="modal-subtitle">
-                                    Este es el precio final estimado incluyendo fabricación y envío.
-                                </p>
-
-                        <div id="precio-final" class="precio-final">
-                            $0 COP
-                        </div>
-
-                        <div class="modal-actions">
-                            <button id="btn-comprar" class="btn-comprar">
-                                Comprar
-                            </button>
-
-                            <button id="btn-cancelar" class="btn-cancelar">
-                                Cancelar
-                            </button>
-                        </div>
-
-                            </div>
-                        </div>
                         
         <div id="modal-compra" class="modal-overlay">
             <div class="modal-content modal-form">
@@ -161,6 +164,7 @@
                     <div class="campo-form"><label for="direccion">Dirección de envío</label><input type="text" id="direccion" required></div>
                     <div class="campo-form"><label for="departamento">Departamento</label><input type="text" id="departamento" required></div>
                     <div class="campo-form"><label for="ciudad">Ciudad</label><input type="text" id="ciudad" required></div>
+                    
                     <div class="modal-actions">
                         <button type="submit" class="btn-comprar">Confirmar compra</button>
                         <button type="button" id="btn-cancelar-compra" class="btn-cancelar">Cancelar</button>
@@ -168,7 +172,6 @@
                 </form>
             </div>
         </div>
-     </div>
 
     </main>
 
@@ -188,7 +191,8 @@
         const urlParams = new URLSearchParams(window.location.search);
         const modeloId = urlParams.get('modelo') || 'lespaul';
 
-        document.getElementById('modelo-titulo').innerText = `Personalizando tu modelo `;
+        // Corrección del título (añadimos la variable que faltaba)
+        document.getElementById('modelo-titulo').innerText = `Personalizando tu modelo ${modeloId.toUpperCase()}`;
 
         // === 3. LÓGICA DINÁMICA DE IMÁGENES PNG ===
         const guitarPreview = document.getElementById("guitar-preview");
@@ -198,12 +202,10 @@
             const acabadoActivo = document.querySelector('.option-swatch.active[data-finish]')?.getAttribute('data-finish') || 'cherry';
             const tamanoActivo = document.querySelector('.option-swatch.active[data-size]')?.getAttribute('data-size') || '4_4';
 
-            // Estructura de nombres: ../assets/images/guitarras/lespaul-fresno-cherry-4_4.png
             const nuevaRutaImg = `../assets/images/guitarras/${modeloId}-${maderaActiva}-${acabadoActivo}-${tamanoActivo}.png`;
             guitarPreview.src = nuevaRutaImg;
         }
 
-        // Intercepción de clicks en los swatches
         const opciones = document.querySelectorAll(".option-swatch");
         opciones.forEach(opcion => {
             opcion.addEventListener("click", () => {
@@ -214,77 +216,93 @@
             });
         });
 
-        // Inicializar la primera imagen al cargar la página
         window.addEventListener('DOMContentLoaded', actualizarImagenGuitarra);
 
-// === 4. COTIZAR GUITARRA ===
+        // === NUEVO: LÓGICA PARA EL VISOR 3D (MODEL-VIEWER) ===
+        const btnVer3D = document.getElementById('btnVer3D');
+        const contenedor3D = document.getElementById('contenedor3D');
+        const visorBajo = document.getElementById('visorBajo');
+        const btnCotizar = document.getElementById('btnCotizarFase2');
+        const contenedor2D = document.querySelector('.preview-box'); 
 
-const btnEnviar = document.getElementById("btn-enviar");
+        btnVer3D.addEventListener('click', function() {
+            this.disabled = true;
+            this.textContent = 'Cargando modelo interactivo...';
 
-btnEnviar.addEventListener("click", async () => {
+            const maderaActiva = document.querySelector('.option-swatch.active[data-wood]')?.getAttribute('data-wood') || 'fresno';
+            const acabadoActivo = document.querySelector('.option-swatch.active[data-finish]')?.getAttribute('data-finish') || 'cherry';
+            const tamanoActivo = document.querySelector('.option-swatch.active[data-size]')?.getAttribute('data-size') || '4_4';
+            
+            const nuevaRutaGLB = `../assets/modelos_3d/${modeloId}-${maderaActiva}-${acabadoActivo}-${tamanoActivo}.glb`;
+            
+            visorBajo.src = nuevaRutaGLB;
 
-    try {
+            contenedor2D.style.display = 'none';
+            contenedor3D.style.display = 'block';
 
-        btnEnviar.disabled = true;
-        btnEnviar.innerText = "Calculando...";
+            // Al cargarse correctamente el modelo 3D
+            visorBajo.addEventListener('load', () => {
+                 btnVer3D.style.display = 'none'; 
+                 btnCotizar.style.display = 'block'; 
+            }, { once: true }); 
 
-        const response = await fetch(
-            "http://localhost:5000/cotizar"
-        );
+            // ALERTA DE ERROR SI EL ARCHIVO NO EXISTE
+            visorBajo.addEventListener('error', () => {
+                console.error("No se encontró el archivo GLB:", nuevaRutaGLB);
+                alert(`Error al cargar el 3D.\nEl archivo no se encontró en:\n${nuevaRutaGLB}\n\nAsegúrate de que el archivo exista con ese nombre exacto y que estés usando Live Server.`);
+                
+                // Restauramos el botón y la imagen 2D para que el usuario no se quede bloqueado
+                this.disabled = false;
+                this.textContent = 'Ver modelo 3D';
+                contenedor2D.style.display = 'flex';
+                contenedor3D.style.display = 'none';
+            }, { once: true });
+        });
 
-        if (!response.ok) {
-            throw new Error("No fue posible obtener la cotización.");
-        }
+        // === 4. COTIZAR GUITARRA ===
+        btnCotizar.addEventListener("click", async () => {
+            try {
+                btnCotizar.disabled = true;
+                btnCotizar.innerText = "Calculando...";
 
-        const data = await response.json();
+                const response = await fetch("http://localhost:5000/cotizar");
 
-        document.getElementById("precio-final").textContent =
-            `$${data.precio_final_cop.toLocaleString("es-CO")} COP`;
+                if (!response.ok) {
+                    throw new Error("No fue posible obtener la cotización.");
+                }
 
-        document
-            .getElementById("modal-cotizacion")
-            .classList.add("active");
+                const data = await response.json();
 
-    } catch (error) {
+                document.getElementById("precio-final").textContent = `$${data.precio_final_cop.toLocaleString("es-CO")} COP`;
+                document.getElementById("modal-cotizacion").classList.add("active");
 
-        console.error(error);
+            } catch (error) {
+                console.error(error);
+                alert("Error al calcular la cotización.");
+            } finally {
+                btnCotizar.disabled = false;
+                btnCotizar.innerText = "Proceder a Cotización";
+            }
+        });
 
-        alert("Error al calcular la cotización.");
+        // =============================
+        // CONTROL DE MODALES
+        // =============================
+        const modalCotizacion = document.getElementById("modal-cotizacion");
+        const modalCompra = document.getElementById("modal-compra");
 
-    } finally {
+        document.getElementById("btn-comprar").addEventListener("click", () => {
+            modalCotizacion.classList.remove("active");
+            modalCompra.classList.add("active");
+        });
 
-        btnEnviar.disabled = false;
-        btnEnviar.innerText = "Cotizar mi guitarra";
+        document.getElementById("btn-cancelar").addEventListener("click", () => {
+            modalCotizacion.classList.remove("active");
+        });
 
-    }
-
-});
-// =============================
-// CONTROL DE MODALES
-// =============================
-
-const modalCotizacion = document.getElementById("modal-cotizacion");
-const modalCompra = document.getElementById("modal-compra");
-
-document.getElementById("btn-comprar").addEventListener("click", () => {
-
-    modalCotizacion.classList.remove("active");
-    modalCompra.classList.add("active");
-
-});
-
-document.getElementById("btn-cancelar").addEventListener("click", () => {
-
-    modalCotizacion.classList.remove("active");
-
-});
-
-document.getElementById("btn-cancelar-compra").addEventListener("click", () => {
-
-    modalCompra.classList.remove("active");
-
-});
+        document.getElementById("btn-cancelar-compra").addEventListener("click", () => {
+            modalCompra.classList.remove("active");
+        });
     </script>
-</div>
 </body>
 </html>

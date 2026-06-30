@@ -1584,3 +1584,44 @@ body {
     font-weight: 700;
     cursor: pointer;
 }
+/* Estilos unificados para botones principales */
+.btn-comprar,
+#btnVer3D,
+#btnCotizarFase2 {
+    background: #c93628;
+    color: white;
+    border: none;
+    border-radius:10px;
+    padding: 18px 24px;
+    font-size: 1.25rem;
+    font-weight: 800;
+    cursor: pointer;
+    text-align: center;
+    letter-spacing: 1px;
+    transition: background 0.3s ease, transform 0.1s ease;
+}
+
+/* Efecto al pasar el mouse */
+.btn-comprar:hover,
+#btnVer3D:hover,
+#btnCotizarFase2:hover {
+    background: #a82d21;
+    transform: translateY(-3px);
+}
+
+/* Efecto al hacer clic */
+.btn-comprar:active,
+#btnVer3D:active,
+#btnCotizarFase2:active {
+    transform: translateY(0);
+}
+
+/* Si el botón de cotizar está calculando (disabled) */
+#btnCotizarFase2:disabled,
+#btnVer3D:disabled {
+    background: #ccc;
+    color: #666;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
