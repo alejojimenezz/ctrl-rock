@@ -1,0 +1,27 @@
+# ==========================================
+# Ctrl+Rock - Dependencias Backend
+# ==========================================
+
+# Framework web
+flask>=3.0.0
+flask-cors>=4.0.0
+
+# Scraping Amazon (ZenRows)
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+
+# Pasarela de pagos
+stripe>=7.0.0
+
+# Conversión de divisas
+pypinyin>=0.50.0
+
+# Email backend
+sendgrid>=6.10.0
+python-dotenv>=1.0.0
+
+# Base de datos
+supabase>=2.0.0
+
+# Utilidades
+cachetools>=5.3.0

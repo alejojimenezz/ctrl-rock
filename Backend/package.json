@@ -1,0 +1,12 @@
+{
+  "name": "ctrl-rock-backend",
+  "version": "0.1.0",
+  "description": "REST API for Ctrl + Rock internal material cost reports.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
