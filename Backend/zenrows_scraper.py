@@ -31,23 +31,32 @@ MAX_INTENTOS = 5
 ESPERA_SEGUNDOS = 2
 
 ASIN_MAP = {
+    # Trastes - Fret packages
     "trastes": "B003B0D4OU",
     "trastes_dunlop": "B003B0D4OU",
     "trastes_jescar": "B07XKQY8VH",
-    "clavijeros": "B082ZNPSGZ",
+    
+    # Clavijeros - Tuners
+    "clavijeros": "B08MQWZ2MD",
     "clavijeros_grover": "B082ZNPSGZ",
     "clavijeros_grover_1by4": "B07FHSQ3VH",
     "clavijeros_shafer": "B09TQ5K3YL",
+    
+    # Knobs - Pot knobs
     "knobs": "B0BLMWPDQ9",
     "knobs_clase": "B0BLMWPDQ9",
-    "knobs_top": "B0C1J8Y7KL",
+    "knobs_top": "B07MKJ8ZQS",
+    
+    # Puentes - Bridges
     "puente": "B0FY5M9G97",
     "puente_gotoh": "B0FY5M9G97",
-    "puente_tremolo": "B0C3K8N2PL",
-    "puente_fixo": "B0BW4H7T9R",
+    "puente_tremolo": "B0064RU7MO",
+    "puente_fixo": "B09PRQSBDC",
+    
+    # Pastillas - Pickups
     "pastillas_alnico": "B0FZKM55QD",
-    "pastillas_ceramicas": "B0C8M3N4QR",
-    "pastillas_luminance": "B0BW9K2T7L",
+    "pastillas_ceramicas": "B0CNKCPGN5",
+    "pastillas_luminance": "B0CN9522K7",
 }
 
 CATEGORIAS = ["trastes", "clavijeros", "knobs", "puente", "pastillas"]
@@ -190,20 +199,20 @@ def obtener_precios_componentes(refresh=False):
         "trastes": {"precio": 15.0, "enlace": "https://www.amazon.com/dp/B003B0D4OU"},
         "trastes_dunlop": {"precio": 15.0, "enlace": "https://www.amazon.com/dp/B003B0D4OU"},
         "trastes_jescar": {"precio": 25.0, "enlace": "https://www.amazon.com/dp/B07XKQY8VH"},
-        "clavijeros": {"precio": 45.0, "enlace": "https://www.amazon.com/dp/B082ZNPSGZ"},
+        "clavijeros": {"precio": 45.0, "enlace": "https://www.amazon.com/dp/B08MQWZ2MD"},
         "clavijeros_grover": {"precio": 45.0, "enlace": "https://www.amazon.com/dp/B082ZNPSGZ"},
         "clavijeros_grover_1by4": {"precio": 80.0, "enlace": "https://www.amazon.com/dp/B07FHSQ3VH"},
         "clavijeros_shafer": {"precio": 120.0, "enlace": "https://www.amazon.com/dp/B09TQ5K3YL"},
         "knobs": {"precio": 12.0, "enlace": "https://www.amazon.com/dp/B0BLMWPDQ9"},
         "knobs_clase": {"precio": 12.0, "enlace": "https://www.amazon.com/dp/B0BLMWPDQ9"},
-        "knobs_top": {"precio": 25.0, "enlace": "https://www.amazon.com/dp/B0C1J8Y7KL"},
+        "knobs_top": {"precio": 25.0, "enlace": "https://www.amazon.com/dp/B07MKJ8ZQS"},
         "puente": {"precio": 65.0, "enlace": "https://www.amazon.com/dp/B0FY5M9G97"},
         "puente_gotoh": {"precio": 65.0, "enlace": "https://www.amazon.com/dp/B0FY5M9G97"},
-        "puente_tremolo": {"precio": 90.0, "enlace": "https://www.amazon.com/dp/B0C3K8N2PL"},
-        "puente_fixo": {"precio": 45.0, "enlace": "https://www.amazon.com/dp/B0BW4H7T9R"},
+        "puente_tremolo": {"precio": 90.0, "enlace": "https://www.amazon.com/dp/B0064RU7MO"},
+        "puente_fixo": {"precio": 45.0, "enlace": "https://www.amazon.com/dp/B09PRQSBDC"},
         "pastillas_alnico": {"precio": 85.0, "enlace": "https://www.amazon.com/dp/B0FZKM55QD"},
-        "pastillas_ceramicas": {"precio": 55.0, "enlace": "https://www.amazon.com/dp/B0C8M3N4QR"},
-        "pastillas_luminance": {"precio": 150.0, "enlace": "https://www.amazon.com/dp/B0BW9K2T7L"},
+        "pastillas_ceramicas": {"precio": 55.0, "enlace": "https://www.amazon.com/dp/B0CNKCPGN5"},
+        "pastillas_luminance": {"precio": 150.0, "enlace": "https://www.amazon.com/dp/B0CN9522K7"},
     }
     for nombre in pendientes:
         resultados[nombre] = default_prices.get(nombre, {"precio": 30.0, "enlace": ""})

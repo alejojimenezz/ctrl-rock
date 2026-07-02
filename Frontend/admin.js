@@ -120,18 +120,26 @@ function generarHTMLPedido(pedido) {
 
     const detalles = pedido.detalles || [];
 
+    const estadoLower = (pedido.estado || 'pagado').toLowerCase();
+    const estaReembolsado = Boolean(pedido.reembolsado);
+    let estadoVisual = estadoLower;
+    let estadoClase = 'pagado';
+    if (estaReembolsado) {
+        estadoVisual = 'reembolsado';
+        estadoClase = 'reembolsado';
+    } else if (estadoLower === 'disputed' || estadoLower === 'disputa') {
+        estadoVisual = 'disputado';
+        estadoClase = 'disputado';
+    } else if (estadoLower === 'fallido' || estadoLower === 'error') {
+        estadoVisual = estadoLower;
+        estadoClase = 'error';
+    }
+
     return `
         <div class="pedido-card">
             <div class="pedido-header">
                 <div class="pedido-id">Pedido #${pedido.id}</div>
-                ${(() => {
-                    const estado = (pedido.estado || 'pagado').toLowerCase();
-                    const clase = estado === 'reembolsado' ? 'reembolsado' :
-                                  estado === 'disputed' || estado === 'disputa' ? 'disputado' :
-                                  estado === 'fallido' || estado === 'error' ? 'error' :
-                                  'pagado';
-                    return `<span class="pedido-estado ${clase}">${pedido.estado || 'pagado'}</span>`;
-                })()}
+                <span class="pedido-estado ${estadoClase}">${estadoVisual}</span>
             </div>
             
             <div class="pedido-info">
@@ -163,7 +171,9 @@ function generarHTMLPedido(pedido) {
 
             <div class="pedido-total">
                 Total: $${(pedido.total_cop || 0).toLocaleString('es-CO')} COP
-                ${pedido.reembolsado ? `<div class="reembolso-info">Reembolsado: $${(pedido.monto_reembolsado || 0).toLocaleString('es-CO')} COP</div>` : ''}
+                ${estaReembolsado ? `<div class="reembolso-info ${estadoClase}">Reembolsado: $${(pedido.monto_reembolsado || 0).toLocaleString('es-CO')} COP</div>` : ''}
+                ${estadoClase === 'disputado' ? `<div class="reembolso-info ${estadoClase}">Disputa registrada en Stripe</div>` : ''}
+                ${estadoClase === 'error' ? `<div class="reembolso-info ${estadoClase}">Pago fallido</div>` : ''}
             </div>
 
             ${detalles.length > 0 ? `
@@ -186,6 +196,10 @@ function generarHTMLPedido(pedido) {
 
 
 function generarHTMLDetalle(detalle) {
+    const precioUSD = detalle.precio_usd || 0;
+    const precioCOP = detalle.precio_cop || 0;
+    const tienePrecio = precioUSD > 0 || precioCOP > 0;
+    
     return `
         <div class="material-item">
             <div class="material-info">
@@ -193,8 +207,10 @@ function generarHTMLDetalle(detalle) {
                 <div class="material-nombre">${escapeHTML(detalle.nombre || '')}</div>
             </div>
             <div class="material-precios">
-                ${detalle.precio_usd ? `<div class="material-precio-usd">$${detalle.precio_usd.toFixed(2)} USD</div>` : ''}
-                <div class="material-precio-cop">$${detalle.precio_cop.toLocaleString('es-CO')} COP</div>
+                ${tienePrecio ? `
+                    ${precioUSD ? `<div class="material-precio-usd">$${precioUSD.toFixed(2)} USD</div>` : ''}
+                    <div class="material-precio-cop">$${precioCOP.toLocaleString('es-CO')} COP</div>
+                ` : '<div class="material-precio-cop" style="color:#999;">Sin precio de mercado</div>'}
             </div>
             ${detalle.enlace ? `
                 <a href="${escapeHTML(detalle.enlace)}" target="_blank" rel="noopener noreferrer" class="btn-amazon">

@@ -27,6 +27,27 @@ def get_connection():
     return conn
 
 
+def migrar_esquema_pedidos():
+    """Agregar columnas faltantes a la tabla pedidos (sincronizacion con Stripe)."""
+    conn = get_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("PRAGMA table_info(pedidos)")
+        columnas = {row[1] for row in cursor.fetchall()}
+        if "reembolsado" not in columnas:
+            cursor.execute("ALTER TABLE pedidos ADD COLUMN reembolsado INTEGER DEFAULT 0")
+            logger.info("Migracion: columna 'reembolsado' agregada a 'pedidos'")
+        if "monto_reembolsado" not in columnas:
+            cursor.execute("ALTER TABLE pedidos ADD COLUMN monto_reembolsado REAL DEFAULT 0")
+            logger.info("Migracion: columna 'monto_reembolsado' agregada a 'pedidos'")
+        conn.commit()
+    except sqlite3.Error as e:
+        logger.error(f"Error en migracion de esquema: {e}")
+        conn.rollback()
+    finally:
+        conn.close()
+
+
 def inicializar_db():
     """Crear tablas si no existen."""
     conn = get_connection()
@@ -62,6 +83,8 @@ def inicializar_db():
                 stripe_payment_intent_id TEXT UNIQUE,
                 fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 estado TEXT DEFAULT 'pagado',
+                reembolsado INTEGER DEFAULT 0,
+                monto_reembolsado REAL DEFAULT 0,
                 FOREIGN KEY (cotizacion_id) REFERENCES cotizaciones(id)
             );
 
@@ -99,6 +122,7 @@ def inicializar_db():
             );
         """)
         conn.commit()
+        migrar_esquema_pedidos()
         logger.info("Base de datos inicializada correctamente")
     except sqlite3.Error as e:
         logger.error(f"Error al inicializar DB: {e}")

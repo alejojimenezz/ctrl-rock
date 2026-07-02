@@ -118,6 +118,7 @@ def cotizar():
             "costo_fabricacion_cop": COSTO_FABRICACION_COP,
             "tasa_cambio_usd_cop": tasa_cambio,
             "desglose": desglose,
+            "detalles": desglose,  # For direct use in guardar_detalles_pedido
             "configuracion": configuracion
         }
         
@@ -192,8 +193,18 @@ def confirm_payment():
     if not pedido_id:
         return jsonify({"error": "No se pudo guardar el pedido"}), 500
 
-    detalles = cotizacion.get("detalles") or cotizacion.get("componentes")
-    tasa_cop = cotizacion.get("tasa_cambio") or 0
+    detalles = cotizacion.get("detalles") or cotizacion.get("componentes") or cotizacion.get("desglose")
+    tasa_cop = cotizacion.get("tasa_cambio") or cotizacion.get("tasa_cambio_usd_cop") or 0
+    
+    # If rate not provided, fetch it now
+    if not tasa_cop and isinstance(detalles, dict):
+        try:
+            from exchange_rates import obtener_tasa_usd_cop
+            tasa_cop = obtener_tasa_usd_cop()
+            logger.info(f"Tasa de cambio obtenida para guardar detalles: {tasa_cop}")
+        except Exception as exc:
+            logger.warning(f"No se pudo obtener tasa de cambio: {exc}")
+    
     if isinstance(detalles, dict):
         guardar_detalles_pedido(pedido_id, detalles, tasa_cop)
     guardar_detalles_configuracion(pedido_id, configuracion)
@@ -268,6 +279,8 @@ def admin_pedidos():
     for pedido in obtener_pedidos():
         intent_id = pedido.get("stripe_payment_intent_id")
         estado = pedido.get("estado", "pagado")
+        reembolsado = bool(pedido.get("reembolsado", 0))
+        monto_reembolsado = pedido.get("monto_reembolsado", 0) or 0
 
         pedidos.append({
             "id": pedido["id"],
@@ -278,8 +291,8 @@ def admin_pedidos():
             "ciudad": pedido["ciudad"],
             "fecha": pedido["fecha_creacion"],
             "estado": estado,
-            "reembolsado": False,
-            "monto_reembolsado": 0,
+            "reembolsado": reembolsado,
+            "monto_reembolsado": monto_reembolsado,
             "total_cop": pedido["precio_cop"],
             "stripe_payment_intent_id": intent_id,
             "detalles": obtener_detalles_pedido(pedido["id"]),
@@ -342,7 +355,7 @@ def admin_sincronizar_pedido(payment_intent_id):
     })
 
 
-@app.route("/api/admin/sincronizar-todos", methods=["POST"])
+@app.route("/api/admin/sincronizar-todos", methods=["GET", "POST"])
 def admin_sincronizar_todos():
     if not validar_admin():
         return jsonify({"error": "Token inválido"}), 403
