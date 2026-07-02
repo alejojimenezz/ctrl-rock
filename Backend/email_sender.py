@@ -186,23 +186,26 @@ def _enviar_via_sendgrid(destinatario, asunto, cuerpo_html):
 
 
 if __name__ == "__main__":
+    import sys
+    sys.stdout.reconfigure(encoding="utf-8")
     logging.basicConfig(level=logging.INFO)
 
     test_html = generar_html_confirmacion_pago(
-        nombre="Juan Pérez",
-        email="juan@test.com",
-        pedido_id=1,
-        precio_cop=2500000,
-        modelo="Stratocaster Custom",
-        telefono="+57 300 1234567",
-        direccion="Calle 123 #45-67",
-        ciudad="Bogotá"
+        nombre="Joel Felipe Suarez Vidarte",
+        email="joelfelipesv@gmail.com",
+        pedido_id="999",
+        precio_cop=1387400,
+        modelo="Stingray",
+        telefono="31667646927",
+        direccion="Reserva Campestre",
+        ciudad="Tenjo"
     )
 
     print("HTML generado para prueba:")
-    print(test_html[:500] + "...")
+    print(test_html[:500])
 
-    if enviar_correo("juan@test.com", "Prueba - Confirmación de Pago Ctrl+Rock", test_html):
-        print("\n✅ Correo enviado exitosamente")
+    destino_prueba = "joelfelipesv@gmail.com"
+    if enviar_correo(destino_prueba, "Prueba Confirmación Pago Ctrl+Rock", test_html):
+        print(f"\n✅ Correo enviado exitosamente a {destino_prueba}")
     else:
-        print("\n❌ Error enviando correo (verifica configuración SMTP/SendGrid)")
+        print(f"\n❌ Error enviando correo a {destino_prueba}")

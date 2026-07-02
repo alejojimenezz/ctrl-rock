@@ -24,6 +24,10 @@ from stripe_payments import (
     procesar_webhook,
     verificar_pago,
 )
+from email_sender import (
+    enviar_correo,
+    generar_html_confirmacion_pago,
+)
 
 BASE_DIR = Path(__file__).resolve().parent
 ADMIN_TOKEN = os.getenv("ADMIN_TOKEN", "admin123")
@@ -194,13 +198,42 @@ def confirm_payment():
         guardar_detalles_pedido(pedido_id, detalles, tasa_cop)
     guardar_detalles_configuracion(pedido_id, configuracion)
 
-    logger.info("Correo de confirmacion simulado para %s - pedido #%s", email, pedido_id)
+    # Enviar correo de confirmación de pago
+    try:
+        modelo = configuracion.get("modelo", "Guitarra personalizada")
+        telefono = cliente.get("telefono", "")
+        direccion = cliente.get("direccion", "")
+        ciudad = cliente.get("ciudad", "")
+        
+        html = generar_html_confirmacion_pago(
+            nombre=nombre,
+            email=email,
+            pedido_id=pedido_id,
+            precio_cop=precio_cop,
+            modelo=modelo,
+            telefono=telefono,
+            direccion=direccion,
+            ciudad=ciudad,
+        )
+        
+        enviado = enviar_correo(
+            destinatario=email,
+            asunto="Confirmación de Pago - Ctrl+Rock",
+            cuerpo_html=html,
+        )
+        
+        if enviado:
+            logger.info("✅ Correo de confirmación enviado a %s", email)
+        else:
+            logger.warning("⚠️ No se pudo enviar el correo de confirmación a %s", email)
+    except Exception as exc:
+        logger.exception("Error enviando correo de confirmación: %s", exc)
 
     return jsonify({
         "ok": True,
         "pedido_id": pedido_id,
         "estado": "pagado",
-        "email_simulado": True,
+        "email_enviado": enviado if 'enviado' in locals() else False,
     })
 
 
