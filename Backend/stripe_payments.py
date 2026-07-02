@@ -35,8 +35,8 @@ def crear_payment_intent(monto_cop, email, descripcion="Guitarra personalizada C
     Crear un PaymentIntent en Stripe.
 
     Args:
-        monto_cop: Monto en COP. Para COP (moneda zero-decimal) se envía el valor entero
-                   sin multiplicar por 100. Ej: 1_261_400 COP → amount=1261400.
+        monto_cop: Monto en COP. Stripe espera el monto en la menor unidad (centavos),
+                   así que multiplicamos por 100. Ej: 1_261_400 COP → amount=126140000.
         email: Email del cliente para receipt
         descripcion: Descripción del pago
 
@@ -49,8 +49,8 @@ def crear_payment_intent(monto_cop, email, descripcion="Guitarra personalizada C
 
     try:
         # Stripe espera el monto en la MENOR UNIDAD de la moneda.
-        # Para COP (moneda de 2 decimales): 1,261,400 COP → 1261400 (sin multiplicar por 100).
-        monto_units = int(float(monto_cop))
+        # Para COP (moneda de 2 decimales): 1,261,400 COP → 126140000.
+        monto_units = int(float(monto_cop) * 100)
         logger.info(f"Creando PaymentIntent: amount={monto_units}, currency=cop, email={email}, descripcion={descripcion}")
         payment_intent = stripe.PaymentIntent.create(
             amount=monto_units,

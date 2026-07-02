@@ -2,8 +2,8 @@
 // Panel Administrativo - Ctrl+Rock
 // ============================================================
 
-// Usar ruta relativa para funcionar tanto en localhost como en producción
-const API_BASE = "";
+// Usar ruta absoluta hacia el backend para evitar problemas de puerto/CORS
+const API_BASE = "http://localhost:5000";
 // Token de acceso al panel admin (cambiar en producción)
 const ADMIN_TOKEN = "admin123";
 
@@ -12,8 +12,15 @@ async function cargarPedidos() {
     listaDiv.innerHTML = '<div class="loading">Cargando pedidos...</div>';
 
     try {
-        const response = await fetchWithTimeout(`/api/admin/pedidos?token=${ADMIN_TOKEN}`, 10000);
+        const response = await fetchWithTimeout(`${API_BASE}/api/admin/pedidos?token=${ADMIN_TOKEN}`, 10000);
         
+        const contentType = response.headers.get("content-type") || "";
+        if (!contentType.includes("application/json")) {
+            const text = await response.text();
+            console.error("Respuesta no JSON:", text);
+            throw new Error(`El backend devolvió HTML en vez de JSON (HTTP ${response.status}). Verifica que el backend esté corriendo en http://localhost:5000 y que la ruta /api/admin/pedidos exista.`);
+        }
+
         if (response.status === 401 || response.status === 403) {
             const errorData = await response.json();
             throw new Error(`⚠️ Acceso denegado: ${errorData.error || 'Token inválido'}`);
@@ -222,7 +229,7 @@ async function sincronizarPedido(paymentIntentId, btnElement) {
     btnElement.disabled = true;
     btnElement.textContent = "Sincronizando...";
     try {
-        const response = await fetchWithTimeout(`/api/admin/sincronizar-pedido/${encodeURIComponent(paymentIntentId)}?token=${ADMIN_TOKEN}`, 10000);
+        const response = await fetchWithTimeout(`${API_BASE}/api/admin/sincronizar-pedido/${encodeURIComponent(paymentIntentId)}?token=${ADMIN_TOKEN}`, 10000);
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || data.mensaje || "Error en sincronización");
         alert(`Sincronización exitosa: ${data.mensaje}`);
@@ -241,8 +248,15 @@ async function cargarWebhookLogs() {
     if (!logsDiv) return;
     logsDiv.innerHTML = '<div class="loading">Cargando logs de webhooks...</div>';
     try {
-        const response = await fetchWithTimeout(`/api/admin/webhook-logs?token=${ADMIN_TOKEN}&limit=50`, 10000);
+        const response = await fetchWithTimeout(`${API_BASE}/api/admin/webhook-logs?token=${ADMIN_TOKEN}&limit=50`, 10000);
         
+        const contentType = response.headers.get("content-type") || "";
+        if (!contentType.includes("application/json")) {
+            const text = await response.text();
+            console.error("Respuesta no JSON:", text);
+            throw new Error(`El backend devolvió HTML en vez de JSON (HTTP ${response.status}). Verifica que el backend esté corriendo en http://localhost:5000 y que la ruta /api/admin/webhook-logs exista.`);
+        }
+
         if (response.status === 401 || response.status === 403) {
             const errorData = await response.json();
             throw new Error(`⚠️ Acceso denegado: ${errorData.error || 'Token inválido'}`);

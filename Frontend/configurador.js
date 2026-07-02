@@ -1,69 +1,120 @@
-// === CONFIGURADOR 3D INTERACTIVO Y PARAMÉTRICO DE GUITARRAS ===
+// Configurador 3D y flujo de compra Ctrl+Rock.
 
 document.addEventListener("DOMContentLoaded", () => {
-
-    // ── 1. PARÁMETROS URL Y ELEMENTOS DOM ─────────────────────────────────────
+    const API_BASE_URL = "http://localhost:5000";
     const urlParams = new URLSearchParams(window.location.search);
-    const modeloId  = urlParams.get('modelo') || 'Strat';
-    const modoId    = urlParams.get('modo') || 'experto'; // 'asistido' o 'experto'
+    const modeloId = (urlParams.get("modelo") || "Stingray").toLowerCase();
 
-    const container = document.getElementById('guitar-preview-container');
-    const canvas    = document.getElementById('guitar-preview-canvas');
+    const container = document.getElementById("guitar-preview-container");
+    const canvas = document.getElementById("guitar-preview-canvas");
+    const title = document.getElementById("modelo-titulo");
 
-    // Sliders CAD
-    const sliderLength    = document.getElementById('bodyLength');
-    const sliderWidth     = document.getElementById('bodyWidth');
-    const sliderThickness = document.getElementById('bodyThickness');
-    const sliderScale     = document.getElementById('scaleLength');
+    const btnReset = document.getElementById("btn-reset-cam");
+    const btnWireframe = document.getElementById("btn-toggle-wireframe");
+    const btnGrid = document.getElementById("btn-toggle-grid");
+    const btnAxes = document.getElementById("btn-toggle-axes");
+    const btnCotizar = document.getElementById("btn-enviar");
+    const btnComprar = document.getElementById("btn-comprar");
+    const btnCancelar = document.getElementById("btn-cancelar");
+    const btnCancelarCompra = document.getElementById("btn-cancelar-compra");
+    const formCompra = document.getElementById("form-compra");
 
-    // Spans de valor
-    const valLength    = document.getElementById('val-bodyLength');
-    const valWidth     = document.getElementById('val-bodyWidth');
-    const valThickness = document.getElementById('val-bodyThickness');
-    const valScale     = document.getElementById('val-scaleLength');
+    const modalCotizacion = document.getElementById("modal-cotizacion");
+    const modalCompra = document.getElementById("modal-compra");
+    const precioFinalEl = document.getElementById("precio-final");
+    const paymentStatus = document.getElementById("payment-status");
+    const cardErrors = document.getElementById("card-errors");
+    const cardContainer = document.getElementById("card-element-container");
 
-    // Spans de resumen
-    const sumMadera  = document.getElementById('sum-madera');
-    const sumColor   = document.getElementById('sum-color');
-    const sumHardware= document.getElementById('sum-hardware');
-    const sumPickups = document.getElementById('sum-pickups');
-    const sumCad     = document.getElementById('sum-cad');
+    const sumMadera = document.getElementById("sum-madera");
+    const sumColor = document.getElementById("sum-color");
+    const sumHardware = document.getElementById("sum-hardware");
+    const sumPickups = document.getElementById("sum-pickups");
+    const sumCad = document.getElementById("sum-cad");
 
-    // Botones Toolbar
-    const btnReset     = document.getElementById('btn-reset-cam');
-    const btnWireframe = document.getElementById('btn-toggle-wireframe');
-    const btnGrid      = document.getElementById('btn-toggle-grid');
-    const btnAxes      = document.getElementById('btn-toggle-axes');
-    const btnExport    = document.getElementById('btn-export-cad');
+    if (!container || !canvas || !window.THREE || !THREE.OrbitControls) {
+        console.error("No se pudo iniciar el visor 3D: faltan canvas, contenedor o Three.js.");
+        return;
+    }
 
-    // Inicializar labels de sliders con sus valores por defecto
-    if (valLength    && sliderLength)    valLength.innerText    = sliderLength.value;
-    if (valWidth     && sliderWidth)     valWidth.innerText     = sliderWidth.value;
-    if (valThickness && sliderThickness) valThickness.innerText = sliderThickness.value;
-    if (valScale     && sliderScale)     valScale.innerText     = sliderScale.value;
+    if (title) title.textContent = `Personalizando tu modelo ${modeloId}`;
 
-    // ── 2. ESCENA THREE.JS ─────────────────────────────────────────────────────
+    const state = {
+        wood: "caoba",
+        color: "cherry",
+        hardware: "chrome",
+        pickups: "humbucker",
+        size: "4_4",
+        wireframe: false,
+        autoRotate: true,
+        length: 440,
+        width: 325,
+        thickness: 45,
+        scale: 648
+    };
+
+    let cotizacionData = null;
+    let stripe = null;
+    let elements = null;
+    let cardElement = null;
+    let clientSecret = null;
+    let paymentIntentId = null;
+
+    const woodMaterials = {
+        caoba: { color: 0x5c3a21, roughness: 0.35, metalness: 0.08 },
+        fresno: { color: 0xe6d4c3, roughness: 0.45, metalness: 0.04 },
+        nogal: { color: 0x3e2723, roughness: 0.42, metalness: 0.05 },
+        arce: { color: 0xfbf4eb, roughness: 0.3, metalness: 0.04 }
+    };
+
+    const finishMaterials = {
+        cherry: { color: 0xb73225, roughness: 0.1, metalness: 0.1, clearcoat: 1.0, clearcoatRoughness: 0.05 },
+        natural: { color: null, roughness: 0.28, metalness: 0.04, clearcoat: 0.55, clearcoatRoughness: 0.12 },
+        sunburst: { color: 0xe07a1b, roughness: 0.08, metalness: 0.1, clearcoat: 1.0, clearcoatRoughness: 0.05 },
+        carbon: { color: 0x242424, roughness: 0.72, metalness: 0.18, clearcoat: 0.15, clearcoatRoughness: 0.18 },
+        negro: { color: 0x1f1a18, roughness: 0.8, metalness: 0.2, clearcoat: 0.0, clearcoatRoughness: 0.2 },
+        goldtop: { color: 0xd4af37, roughness: 0.15, metalness: 0.85, clearcoat: 0.9, clearcoatRoughness: 0.05 }
+    };
+
+    const metalMaterials = {
+        chrome: { color: 0xcccccc, metalness: 0.95, roughness: 0.05 },
+        gold: { color: 0xdaa520, metalness: 0.9, roughness: 0.08 },
+        black: { color: 0x222222, metalness: 0.8, roughness: 0.2 }
+    };
+
+    const sizePresets = {
+        "1_4": { length: 330, width: 244, thickness: 34, scale: 560 },
+        "1_2": { length: 370, width: 275, thickness: 38, scale: 590 },
+        "3_4": { length: 405, width: 302, thickness: 42, scale: 620 },
+        "4_4": { length: 440, width: 325, thickness: 45, scale: 648 }
+    };
+
     const scene = new THREE.Scene();
-    scene.background = null;
+    scene.background = new THREE.Color(0xf7efe7);
 
-    const camera = new THREE.PerspectiveCamera(40, container.clientWidth / container.clientHeight, 0.1, 100);
+    const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 100);
     camera.position.set(0, 0.5, 7.5);
 
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-    renderer.setSize(container.clientWidth, container.clientHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.outputEncoding = THREE.sRGBEncoding;
 
     const controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
-    controls.dampingFactor = 0.05;
-    controls.minDistance   = 3;
-    controls.maxDistance   = 12;
+    controls.dampingFactor = 0.06;
+    controls.minDistance = 3;
+    controls.maxDistance = 12;
     controls.target.set(0, 0.8, 0);
     controls.update();
+    controls.addEventListener("start", () => {
+        state.autoRotate = false;
+    });
 
-    // ── 3. HELPERS ─────────────────────────────────────────────────────────────
+    const guitarGroup = new THREE.Group();
+    scene.add(guitarGroup);
+
     const gridHelper = new THREE.GridHelper(10, 20, 0x5c3a21, 0xd1c4b9);
     gridHelper.position.y = -1.8;
     gridHelper.visible = false;
@@ -74,613 +125,510 @@ document.addEventListener("DOMContentLoaded", () => {
     axesHelper.visible = false;
     scene.add(axesHelper);
 
-    // ── 4. LUCES ───────────────────────────────────────────────────────────────
-    scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+    scene.add(new THREE.HemisphereLight(0xffffff, 0xd7c4b5, 0.75));
 
-    const dirLight1 = new THREE.DirectionalLight(0xffffff, 0.85);
-    dirLight1.position.set(5, 10, 7);
-    dirLight1.castShadow = true;
-    dirLight1.shadow.mapSize.set(1024, 1024);
-    dirLight1.shadow.bias = -0.001;
-    scene.add(dirLight1);
+    const keyLight = new THREE.DirectionalLight(0xffffff, 0.95);
+    keyLight.position.set(5, 8, 7);
+    keyLight.castShadow = true;
+    keyLight.shadow.mapSize.set(1024, 1024);
+    scene.add(keyLight);
 
-    const dirLight2 = new THREE.DirectionalLight(0xffeedd, 0.4);
-    dirLight2.position.set(-5, 5, -5);
-    scene.add(dirLight2);
+    const rimLight = new THREE.DirectionalLight(0xffead7, 0.45);
+    rimLight.position.set(-5, 4, -4);
+    scene.add(rimLight);
 
-    const spotLight = new THREE.SpotLight(0xffffff, 0.6);
-    spotLight.position.set(0, 4, 6);
-    spotLight.angle    = Math.PI / 4;
-    spotLight.penumbra = 0.5;
-    scene.add(spotLight);
+    const bodyMaterial = new THREE.MeshPhysicalMaterial({ color: 0xb73225, roughness: 0.1, metalness: 0.1, clearcoat: 1 });
+    const neckMaterial = new THREE.MeshStandardMaterial({ color: 0x5c3a21, roughness: 0.35, metalness: 0.08 });
+    const fretboardMaterial = new THREE.MeshStandardMaterial({ color: 0x351c15, roughness: 0.8 });
+    const hardwareMaterial = new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: 0.95, roughness: 0.05 });
+    const plasticMaterial = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.5 });
+    const stringMaterial = new THREE.LineBasicMaterial({ color: 0xdddddd, transparent: true, opacity: 0.68 });
 
-    // ── 5. GRUPO DE LA GUITARRA ────────────────────────────────────────────────
-    const guitarGroup = new THREE.Group();
-    scene.add(guitarGroup);
+    function disposeObject(object) {
+        object.traverse((child) => {
+            if (child.geometry) child.geometry.dispose();
+        });
+    }
 
-    // ── 6. ESTADO INICIAL ──────────────────────────────────────────────────────
-    let currentWood     = 'caoba';
-    let currentColor    = 'cherry';
-    let currentHardware = 'chrome';
-    let currentPickups  = 'humbucker';
-    let isWireframe     = false;
-    let autoRotate      = true; 
+    function clearGuitar() {
+        while (guitarGroup.children.length) {
+            const child = guitarGroup.children.pop();
+            disposeObject(child);
+        }
+    }
 
-    // Valores por defecto manipulables geométricamente
-    let targetLength    = 440;
-    let targetWidth     = 325;
-    let targetThickness = 45;
-    let targetScale     = 648;
+    function bodyShapeForModel(length, width) {
+        const L = length;
+        const W = width;
+        const shape = new THREE.Shape();
 
-    // ── 7. TABLAS DE MATERIALES ────────────────────────────────────────────────
-    const woodMaterials = {
-        caoba: { color: 0x5c3a21, roughness: 0.35, metalness: 0.1  },
-        fresno:{ color: 0xe6d4c3, roughness: 0.45, metalness: 0.05 },
-        arce:   { color: 0xfbf4eb, roughness: 0.3,  metalness: 0.05 }
-    };
-
-    const finishMaterials = {
-        cherry:  { color: 0xb73225, roughness: 0.10, metalness: 0.10, clearcoat: 1.0, clearcoatRoughness: 0.05 },
-        natural: { color: null,     roughness: 0.30, metalness: 0.05, clearcoat: 0.4, clearcoatRoughness: 0.10 },
-        sunburst:{ color: 0xe07a1b, roughness: 0.08, metalness: 0.10, clearcoat: 1.0, clearcoatRoughness: 0.05 },
-        negro:   { color: 0x1f1a18, roughness: 0.80, metalness: 0.20, clearcoat: 0.0, clearcoatRoughness: 0.20 },
-        goldtop: { color: 0xd4af37, roughness: 0.15, metalness: 0.85, clearcoat: 0.9, clearcoatRoughness: 0.05 }
-    };
-
-    const metalMaterials = {
-        chrome:{ color: 0xcccccc, metalness: 0.95, roughness: 0.05 },
-        gold:  { color: 0xdaa520, metalness: 0.90, roughness: 0.08 },
-        black: { color: 0x222222, metalness: 0.80, roughness: 0.20 }
-    };
-
-    // ── 8. OBJETOS DE MATERIAL ────────────────────────────────────────────────
-    const bodyMaterialObj = new THREE.MeshPhysicalMaterial({
-        color: 0xb73225, roughness: 0.1, metalness: 0.1, clearcoat: 1.0, clearcoatRoughness: 0.05
-    });
-    const neckMaterialObj = new THREE.MeshStandardMaterial({ color: 0x5c3a21, roughness: 0.35, metalness: 0.1 });
-    const fretboardMaterialObj = new THREE.MeshStandardMaterial({ color: 0x351c15, roughness: 0.8 });
-    const hardwareMaterialObj = new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: 0.95, roughness: 0.05 });
-    const plasticMaterialObj = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.5 });
-    const stringMaterialObj = new THREE.LineBasicMaterial({ color: 0xdddddd, transparent: true, opacity: 0.6 });
-
-    let bodyMesh, neckMesh, fretboardMesh, headstockMesh, bridgeMesh;
-    let pickupMeshes = [], tunerMeshes = [], stringLines = [];
-
-    // ── 10. RECONSTRUCCIÓN PARAMÉTRICA ─────────────────────────────────────────
-    function rebuildGuitar() {
-        [bodyMesh, neckMesh, fretboardMesh, headstockMesh, bridgeMesh].forEach(m => { if (m) guitarGroup.remove(m); });
-        [...pickupMeshes, ...tunerMeshes, ...stringLines].forEach(m => guitarGroup.remove(m));
-        pickupMeshes = []; tunerMeshes = []; stringLines = [];
-
-        // Leer valores de los targets asignados por sliders o asistente
-        const L = targetLength / 100;
-        const W = targetWidth / 100;
-        const T = targetThickness / 100;
-        const S = targetScale / 100;
-
-        const bodyShape = new THREE.Shape();
-
-        if (modeloId.toLowerCase() === 'strat') {
-            bodyShape.moveTo(0, -L/2);
-            bodyShape.quadraticCurveTo( W/2,    -L/2,    W*0.50, -L*0.20);
-            bodyShape.quadraticCurveTo( W*0.55,  L*0.10, W*0.35,  L*0.25);
-            bodyShape.quadraticCurveTo( W*0.40,  L*0.35, W*0.23,  L*0.48);
-            bodyShape.quadraticCurveTo( W*0.10,  L*0.40, W*0.05,  L*0.25);
-            bodyShape.quadraticCurveTo( 0,       L*0.30,-W*0.05,  L*0.25);
-            bodyShape.quadraticCurveTo(-W*0.10,  L*0.40,-W*0.23,  L*0.48);
-            bodyShape.quadraticCurveTo(-W*0.40,  L*0.35,-W*0.35,  L*0.25);
-            bodyShape.quadraticCurveTo(-W*0.55,  L*0.10,-W*0.50, -L*0.20);
-            bodyShape.quadraticCurveTo(-W/2,    -L/2,    0,       -L/2);
-        } else if (modeloId.toLowerCase() === 'lespaul') {
-            bodyShape.moveTo(0, -L/2);
-            bodyShape.quadraticCurveTo( W*0.46, -L/2,    W*0.48, -L*0.25);
-            bodyShape.quadraticCurveTo( W*0.48,  L*0.05, W*0.25,  L*0.13);
-            bodyShape.quadraticCurveTo( W*0.33,  L*0.30, W*0.15,  L*0.45);
-            bodyShape.quadraticCurveTo( 0,       L*0.44,-W*0.15,  L*0.45);
-            bodyShape.quadraticCurveTo(-W*0.32,  L*0.32,-W*0.32,  L*0.18);
-            bodyShape.quadraticCurveTo(-W*0.20,  L*0.08,-W*0.32, -0.05);
-            bodyShape.quadraticCurveTo(-W*0.48, -L*0.25,-W*0.46, -L*0.25);
-            bodyShape.quadraticCurveTo(-W*0.46, -L/2,    0,       -L/2);
-        } else {
-            // Flying V / Modelos angulares por defecto
-            bodyShape.moveTo( 0,       L*0.42);
-            bodyShape.lineTo(  W*0.46, -L*0.45);
-            bodyShape.lineTo(  W*0.25, -L*0.48);
-            bodyShape.lineTo(  0,      -L*0.12);
-            bodyShape.lineTo( -W*0.25, -L*0.48);
-            bodyShape.lineTo( -W*0.46, -L*0.45);
-            bodyShape.lineTo(  0,       L*0.42);
+        if (modeloId.includes("lespaul")) {
+            shape.moveTo(0, -L / 2);
+            shape.quadraticCurveTo(W * 0.46, -L / 2, W * 0.48, -L * 0.25);
+            shape.quadraticCurveTo(W * 0.48, L * 0.05, W * 0.25, L * 0.13);
+            shape.quadraticCurveTo(W * 0.33, L * 0.3, W * 0.15, L * 0.45);
+            shape.quadraticCurveTo(0, L * 0.44, -W * 0.15, L * 0.45);
+            shape.quadraticCurveTo(-W * 0.32, L * 0.32, -W * 0.32, L * 0.18);
+            shape.quadraticCurveTo(-W * 0.2, L * 0.08, -W * 0.32, -0.05);
+            shape.quadraticCurveTo(-W * 0.48, -L * 0.25, -W * 0.46, -L * 0.25);
+            shape.quadraticCurveTo(-W * 0.46, -L / 2, 0, -L / 2);
+            return shape;
         }
 
-        const extrudeSettings = { depth: T, bevelEnabled: true, bevelSegments: 5, steps: 1, bevelSize: 0.04, bevelThickness: 0.04 };
-        const bodyGeom = new THREE.ExtrudeGeometry(bodyShape, extrudeSettings);
-        bodyGeom.center();
-        bodyMesh = new THREE.Mesh(bodyGeom, bodyMaterialObj);
-        bodyMesh.castShadow = bodyMesh.receiveShadow = true;
-        guitarGroup.add(bodyMesh);
+        if (modeloId.includes("v") || modeloId.includes("espex") || modeloId.includes("ibanez")) {
+            shape.moveTo(0, L * 0.42);
+            shape.lineTo(W * 0.46, -L * 0.45);
+            shape.lineTo(W * 0.25, -L * 0.48);
+            shape.lineTo(0, -L * 0.12);
+            shape.lineTo(-W * 0.25, -L * 0.48);
+            shape.lineTo(-W * 0.46, -L * 0.45);
+            shape.lineTo(0, L * 0.42);
+            return shape;
+        }
 
-        // Mástil
-        const neckLength = S * 0.45; const neckW = 0.16; const neckDepth = 0.08; const neckYPos = L / 2 + neckLength / 2 - 0.2;
-        neckMesh = new THREE.Mesh(new THREE.BoxGeometry(neckW, neckLength, neckDepth), neckMaterialObj);
-        neckMesh.position.set(0, neckYPos, T / 2);
-        guitarGroup.add(neckMesh);
+        shape.moveTo(0, -L / 2);
+        shape.quadraticCurveTo(W / 2, -L / 2, W * 0.5, -L * 0.2);
+        shape.quadraticCurveTo(W * 0.55, L * 0.1, W * 0.35, L * 0.25);
+        shape.quadraticCurveTo(W * 0.4, L * 0.35, W * 0.23, L * 0.48);
+        shape.quadraticCurveTo(W * 0.1, L * 0.4, W * 0.05, L * 0.25);
+        shape.quadraticCurveTo(0, L * 0.3, -W * 0.05, L * 0.25);
+        shape.quadraticCurveTo(-W * 0.1, L * 0.4, -W * 0.23, L * 0.48);
+        shape.quadraticCurveTo(-W * 0.4, L * 0.35, -W * 0.35, L * 0.25);
+        shape.quadraticCurveTo(-W * 0.55, L * 0.1, -W * 0.5, -L * 0.2);
+        shape.quadraticCurveTo(-W / 2, -L / 2, 0, -L / 2);
+        return shape;
+    }
 
-        // Diapasón
-        fretboardMesh = new THREE.Mesh(new THREE.BoxGeometry(neckW - 0.01, neckLength - 0.05, 0.02), fretboardMaterialObj);
-        fretboardMesh.position.set(0, neckYPos + 0.025, T / 2 + neckDepth / 2 + 0.01);
-        guitarGroup.add(fretboardMesh);
+    function updateMaterials() {
+        const wood = woodMaterials[state.wood] || woodMaterials.caoba;
+        const finish = finishMaterials[state.color] || finishMaterials.cherry;
+        const metal = metalMaterials[state.hardware] || metalMaterials.chrome;
 
-        // Cabeza
-        const headYPos = neckYPos + neckLength / 2 + 0.24;
-        headstockMesh  = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.52, 0.06), bodyMaterialObj);
-        headstockMesh.position.set(0, headYPos, T / 2);
-        guitarGroup.add(headstockMesh);
+        neckMaterial.color.setHex(wood.color);
+        neckMaterial.roughness = wood.roughness;
+        neckMaterial.metalness = wood.metalness;
 
-        // Clavijas (6 en línea para Strat, 3+3 para el resto)
-        const pegGeom  = new THREE.CylinderGeometry(0.012, 0.012, 0.08, 8);
-        const knobGeom = new THREE.BoxGeometry(0.04, 0.02, 0.03);
-        const isSixInLine = (modeloId.toLowerCase() === 'strat');
+        if (state.color === "natural") {
+            bodyMaterial.color.setHex(wood.color);
+            bodyMaterial.roughness = finish.roughness;
+            bodyMaterial.metalness = finish.metalness;
+            bodyMaterial.clearcoat = finish.clearcoat;
+            bodyMaterial.clearcoatRoughness = finish.clearcoatRoughness;
+        } else {
+            bodyMaterial.color.setHex(finish.color);
+            bodyMaterial.roughness = finish.roughness;
+            bodyMaterial.metalness = finish.metalness;
+            bodyMaterial.clearcoat = finish.clearcoat;
+            bodyMaterial.clearcoatRoughness = finish.clearcoatRoughness;
+        }
+
+        hardwareMaterial.color.setHex(metal.color);
+        hardwareMaterial.metalness = metal.metalness;
+        hardwareMaterial.roughness = metal.roughness;
+        plasticMaterial.color.setHex(state.hardware === "black" ? 0x0a0a0a : 0x1a1a1a);
+
+        [bodyMaterial, neckMaterial, fretboardMaterial, hardwareMaterial, plasticMaterial].forEach((material) => {
+            material.wireframe = state.wireframe;
+            material.needsUpdate = true;
+        });
+
+        if (sumMadera) sumMadera.textContent = state.wood.toUpperCase();
+        if (sumColor) sumColor.textContent = state.color.toUpperCase();
+        if (sumHardware) sumHardware.textContent = state.hardware.toUpperCase();
+        if (sumPickups) sumPickups.textContent = state.pickups.toUpperCase();
+        if (sumCad) sumCad.textContent = `${state.length} x ${state.width} x ${state.thickness} mm (Escala: ${state.scale} mm)`;
+    }
+
+    function rebuildGuitar() {
+        clearGuitar();
+        updateMaterials();
+
+        const L = state.length / 100;
+        const W = state.width / 100;
+        const T = state.thickness / 100;
+        const S = state.scale / 100;
+
+        const bodyGeometry = new THREE.ExtrudeGeometry(bodyShapeForModel(L, W), {
+            depth: T,
+            bevelEnabled: true,
+            bevelSegments: 5,
+            steps: 1,
+            bevelSize: 0.04,
+            bevelThickness: 0.04
+        });
+        bodyGeometry.center();
+
+        const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+        body.castShadow = true;
+        body.receiveShadow = true;
+        guitarGroup.add(body);
+
+        const neckLength = S * 0.45;
+        const neckWidth = 0.16;
+        const neckDepth = 0.08;
+        const neckY = L / 2 + neckLength / 2 - 0.2;
+
+        const neck = new THREE.Mesh(new THREE.BoxGeometry(neckWidth, neckLength, neckDepth), neckMaterial);
+        neck.position.set(0, neckY, T / 2);
+        neck.castShadow = true;
+        guitarGroup.add(neck);
+
+        const fretboard = new THREE.Mesh(new THREE.BoxGeometry(neckWidth - 0.01, neckLength - 0.05, 0.02), fretboardMaterial);
+        fretboard.position.set(0, neckY + 0.025, T / 2 + neckDepth / 2 + 0.01);
+        guitarGroup.add(fretboard);
+
+        const headY = neckY + neckLength / 2 + 0.24;
+        const headstock = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.52, 0.06), bodyMaterial);
+        headstock.position.set(0, headY, T / 2);
+        guitarGroup.add(headstock);
+
+        const isSixInLine = modeloId.includes("strat") || modeloId.includes("tele") || modeloId.includes("stingray");
+        const pegGeometry = new THREE.CylinderGeometry(0.012, 0.012, 0.08, 12);
+        const knobGeometry = new THREE.BoxGeometry(0.04, 0.02, 0.03);
 
         if (isSixInLine) {
-            for (let i = 0; i < 6; i++) {
-                const tg = new THREE.Group(); const peg = new THREE.Mesh(pegGeom, hardwareMaterialObj); peg.rotation.x = Math.PI / 2; tg.add(peg);
-                const knob = new THREE.Mesh(knobGeom, hardwareMaterialObj); knob.position.set(-0.06, 0, 0); tg.add(knob);
-                tg.position.set(-0.14, headYPos - 0.2 + i * 0.07, T / 2); guitarGroup.add(tg); tunerMeshes.push(tg);
+            for (let i = 0; i < 6; i += 1) {
+                const tuner = new THREE.Group();
+                const peg = new THREE.Mesh(pegGeometry, hardwareMaterial);
+                peg.rotation.x = Math.PI / 2;
+                tuner.add(peg);
+                const knob = new THREE.Mesh(knobGeometry, hardwareMaterial);
+                knob.position.set(-0.06, 0, 0);
+                tuner.add(knob);
+                tuner.position.set(-0.14, headY - 0.2 + i * 0.07, T / 2);
+                guitarGroup.add(tuner);
             }
         } else {
-            for (const side of [-1, 1]) {
-                for (let i = 0; i < 3; i++) {
-                    const tg = new THREE.Group(); const peg = new THREE.Mesh(pegGeom, hardwareMaterialObj); peg.rotation.x = Math.PI / 2; tg.add(peg);
-                    const knob = new THREE.Mesh(knobGeom, hardwareMaterialObj); knob.position.set(0.06 * side, 0, 0); tg.add(knob);
-                    tg.position.set(0.14 * side, headYPos - 0.12 + i * 0.1, T / 2); guitarGroup.add(tg); tunerMeshes.push(tg);
-                }
-            }
-        }
-
-        // Puente y Pastillas
-        const bridgeYPos = -L / 4 - 0.1;
-        bridgeMesh = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.14, 0.06), hardwareMaterialObj);
-        bridgeMesh.position.set(0, bridgeYPos, T / 2 + 0.03);
-        guitarGroup.add(bridgeMesh);
-
-        const isTriple = (modeloId.toLowerCase() === 'strat' && currentPickups === 'singlecoil');
-        const pickupH = isTriple ? 0.08 : 0.14;
-        const pickupGeom = new THREE.BoxGeometry(0.24, pickupH, 0.05);
-        const pickupOffsets = isTriple ? [bridgeYPos + 0.35, bridgeYPos + 0.70, bridgeYPos + 1.05] : [bridgeYPos + 0.45, bridgeYPos + 0.95];
-
-        pickupOffsets.forEach(yOff => {
-            const ringMesh = new THREE.Mesh(new THREE.BoxGeometry(0.26, pickupH + 0.03, 0.06), plasticMaterialObj);
-            ringMesh.position.set(0, yOff, T / 2 + 0.02); guitarGroup.add(ringMesh); pickupMeshes.push(ringMesh);
-
-            const coreMaterial = (currentPickups === 'humbucker') ? plasticMaterialObj : hardwareMaterialObj;
-            const coreMesh = new THREE.Mesh(pickupGeom, coreMaterial);
-            coreMesh.position.set(0, yOff, T / 2 + 0.03); guitarGroup.add(coreMesh); pickupMeshes.push(coreMesh);
-        });
-
-        // Cuerdas
-        const startZ = T / 2 + 0.05; const stringStartXs = [-0.08, -0.05, -0.02, 0.01, 0.04, 0.07];
-        stringStartXs.forEach((sx, idx) => {
-            const points = []; points.push(new THREE.Vector3(sx, bridgeYPos, startZ));
-            let endX = isSixInLine ? sx * 0.7 : (idx < 3 ? -0.08 : 0.08);
-            let endY = isSixInLine ? headYPos - 0.1 + idx * 0.05 : (idx < 3 ? headYPos - 0.1 + idx * 0.08 : headYPos - 0.1 + (idx - 3) * 0.08);
-            points.push(new THREE.Vector3(endX, endY, T / 2 + 0.04));
-            const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints(points), stringMaterialObj);
-            guitarGroup.add(line); stringLines.push(line);
-        });
-
-        if (sumCad) sumCad.innerText = `${targetLength} × ${targetWidth} × ${targetThickness} mm (Escala: ${targetScale} mm)`;
-    }
-
-    // ── 11. ACTUALIZAR MATERIALES ──────────────────────────────────────────────
-    function updateMaterials() {
-        const woodConf   = woodMaterials[currentWood]   || woodMaterials.caoba;
-        const finishConf = finishMaterials[currentColor] || finishMaterials.cherry;
-        const metalConf  = metalMaterials[currentHardware] || metalMaterials.chrome;
-
-        neckMaterialObj.color.setHex(woodConf.color);
-        if (currentColor === 'natural') {
-            bodyMaterialObj.color.setHex(woodConf.color);
-            bodyMaterialObj.clearcoat = 0.5;
-        } else {
-            bodyMaterialObj.color.setHex(finishConf.color);
-            bodyMaterialObj.clearcoat = finishConf.clearcoat;
-        }
-
-        hardwareMaterialObj.color.setHex(metalConf.color);
-        hardwareMaterialObj.metalness = metalConf.metalness;
-        plasticMaterialObj.color.setHex(currentHardware === 'black' ? 0x0a0a0a : 0x1a1a1a);
-
-        [bodyMaterialObj, neckMaterialObj, fretboardMaterialObj, hardwareMaterialObj, plasticMaterialObj].forEach(m => {
-            m.wireframe = isWireframe; m.needsUpdate = true;
-        });
-
-        // Sincronizar etiquetas de resumen informativas
-        if (sumMadera) sumMadera.innerText = currentWood.toUpperCase();
-        if (sumColor) sumColor.innerText = currentColor.toUpperCase();
-        if (sumHardware) sumHardware.innerText = currentHardware.toUpperCase();
-        if (sumPickups) sumPickups.innerText = currentPickups.toUpperCase();
-    }
-
-// ── 12. CONTROL DE VISTAS ESTRICTO (ASISTENTE VS EXPERTO) ──────────────────
-    const panelAsistido = document.getElementById('panel-asistido');
-    const panelExperto  = document.getElementById('panel-experto');
-
-    // Ocultar por completo la barra selectora superior para cumplir el aislamiento estricto
-    const selectorModos = document.querySelector('.user-mode-selector');
-    if (selectorModos) {
-        selectorModos.style.display = 'none';
-    }
-
-    if (modoId === 'asistido') {
-        if (panelAsistido) panelAsistido.style.display = 'block';
-        if (panelExperto)  panelExperto.style.display = 'none';
-        inicializarLogicaWizardReal();
-    } else {
-        if (panelExperto)  panelExperto.style.display = 'block';
-        if (panelAsistido) panelAsistido.style.display = 'none';
-        inicializarLogicaExperto();
-    }
-
-    // Inicialización geométrica por defecto
-    if (modoId !== 'asistido') {
-        actualizarValoresDesdeSliders();
-        updateMaterials();
-        rebuildGuitar();
-    }
-
-    function actualizarValoresDesdeSliders() {
-        if (!sliderLength) return;
-        targetLength    = parseFloat(sliderLength.value);
-        targetWidth     = parseFloat(sliderWidth.value);
-        targetThickness = parseFloat(sliderThickness.value);
-        targetScale     = parseFloat(sliderScale.value);
-    }
-
-    // ── 13. LÓGICA DE INTERACCIÓN MODO EXPERTO (DISEÑO LIBRE) ──────────────────
-    function inicializarLogicaExperto() {
-        // Escuchar inputs en sliders manuales
-        if (sliderLength) {
-            [sliderLength, sliderWidth, sliderThickness, sliderScale].forEach(sl => {
-                if (sl) sl.addEventListener('input', () => {
-                    actualizarValoresDesdeSliders();
-                    rebuildGuitar();
-                });
-            });
-        }
-
-        // Escuchar clics en las opciones estéticas (Maderas, Colores, Metales, Pastillas)
-        document.querySelectorAll('.option-swatch').forEach(swatch => {
-            swatch.addEventListener('click', function() {
-                // Desmarcar hermanos del mismo contenedor y activar este
-                this.parentElement.querySelectorAll('.option-swatch').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-
-                // Leer qué propiedad se ha clickeado
-                if (this.hasAttribute('data-wood'))     currentWood     = this.getAttribute('data-wood');
-                if (this.hasAttribute('data-color'))    currentColor    = this.getAttribute('data-color');
-                if (this.hasAttribute('data-hardware')) currentHardware = this.getAttribute('data-hardware');
-                if (this.hasAttribute('data-pickups'))  currentPickups  = this.getAttribute('data-pickups');
-
-                updateMaterials();
-                rebuildGuitar();
-            });
-        });
-    }
-
-    // ── 14. LÓGICA DE INTERACCIÓN MODO ASISTENTE (WIZARD REAL) ─────────────────
-
-    // ── 14. LÓGICA DE INTERACCIÓN MODO ASISTENTE (WIZARD REAL CON NAVEGACIÓN) ─
-    function inicializarLogicaWizardReal() {
-        let pasoActual = 1;
-        const totalPasos = 4;
-
-        // Forzar sincronización inicial con los valores por defecto
-        const settingsIniciales = elWizardSugeriráValores();
-        aplicarAjustesAsistidosAlModelo(settingsIniciales);
-
-        // A. Capturar elementos de navegación del HTML (CORREGIDO ID DE PROGRESSBAR)
-        const btnNextWiz = document.getElementById('wiz-next-btn');
-        const btnPrevWiz = document.getElementById('wiz-prev-btn');
-        const progressBar = document.getElementById('wiz-progress'); // <--- ID corregido aquí
-
-        // B. Escuchar clics nativos en las tarjetas de selección
-        document.querySelectorAll('.wizard-card').forEach(card => {
-            card.addEventListener('click', () => {
-                // Cambiar clase activa visualmente en el HTML dentro del mismo paso
-                const stepElement = card.closest('.wizard-step');
-                if (stepElement) {
-                    stepElement.querySelectorAll('.wizard-card').forEach(c => c.classList.remove('selected'));
-                }
-                card.classList.add('selected');
-
-                // Leer qué opciones están seleccionadas en todo el formulario actualmente
-                const activeSound = document.querySelector('[data-wiz-sound].selected')?.getAttribute('data-wiz-sound') || 'heavy';
-                const activeFeel  = document.querySelector('[data-wiz-feel].selected')?.getAttribute('data-wiz-feel') || 'light';
-                const activeLook  = document.querySelector('[data-wiz-look].selected')?.getAttribute('data-wiz-look') || 'classic';
-
-                // Modificar el lienzo tridimensional en tiempo real
-                const nuevasPropiedades = elWizardSugeriráValores(activeSound, activeFeel, activeLook);
-                aplicarAjustesAsistidosAlModelo(nuevasPropiedades);
-            });
-        });
-
-        // C. Lógica del Botón "Siguiente / Continuar" (Navegación de Pantallas)
-        if (btnNextWiz) {
-            btnNextWiz.addEventListener('click', () => {
-                if (pasoActual < totalPasos) {
-                    // Ocultar paso actual
-                    const pasoActualEl = document.querySelector(`.wizard-step[data-step="${pasoActual}"]`);
-                    if (pasoActualEl) pasoActualEl.style.display = 'none';
-
-                    // Avanzar e indexar el siguiente paso
-                    pasoActual++;
-
-                    // Mostrar nuevo paso
-                    const siguientePasoEl = document.querySelector(`.wizard-step[data-step="${pasoActual}"]`);
-                    if (siguientePasoEl) siguientePasoEl.style.display = 'block';
-
-                    // Mostrar botón "Atrás" si ya salimos del primer paso
-                    if (btnPrevWiz) btnPrevWiz.style.display = 'inline-block';
-
-                    // Actualizar barra de progreso visual (CORREGIDO: Ahora sí avanzará)
-                    if (progressBar) {
-                        progressBar.style.width = `${(pasoActual / totalPasos) * 100}%`;
-                    }
-
-                    // Si llegamos al último paso (Formulario de cotización), ocultamos el botón de avanzar
-                    if (pasoActual === totalPasos) {
-                        btnNextWiz.style.display = 'none';
-                    }
-
-                    // Recalcular y pintar el estado actual por seguridad y actualizar el resumen textual del paso 4
-                    const activeSound = document.querySelector('[data-wiz-sound].selected')?.getAttribute('data-wiz-sound') || 'heavy';
-                    const activeFeel  = document.querySelector('[data-wiz-feel].selected')?.getAttribute('data-wiz-feel') || 'light';
-                    const activeLook  = document.querySelector('[data-wiz-look].selected')?.getAttribute('data-wiz-look') || 'classic';
-                    
-                    const propiedadesActuales = elWizardSugeriráValores(activeSound, activeFeel, activeLook);
-                    aplicarAjustesAsistidosAlModelo(propiedadesActuales);
-                    
-                    // Actualizar dinámicamente las etiquetas de texto del paso 4 (Resumen)
-                    const maderasNombres = { heavy: 'Caoba', bright: 'Fresno', balanced: 'Arce' };
-                    const pkNombres = { heavy: 'Humbucker', bright: 'Single Coil', balanced: 'Humbucker' };
-                    const coloresNombres = {
-                        classic: (activeSound === 'bright' ? 'Sunburst' : 'Rojo Cereza'),
-                        modern: (activeSound === 'heavy' ? 'Negro Mate' : 'Oro Vintage')
-                    };
-                    const hwNombres = {
-                        classic: 'Cromo',
-                        modern: (activeSound === 'heavy' ? 'Negro Obsidian' : 'Oro')
-                    };
-
-                    if(document.getElementById('wiz-sum-madera'))   document.getElementById('wiz-sum-madera').innerText = maderasNombres[activeSound];
-                    if(document.getElementById('wiz-sum-color'))    document.getElementById('wiz-sum-color').innerText = coloresNombres[activeLook];
-                    if(document.getElementById('wiz-sum-hardware')) document.getElementById('wiz-sum-hardware').innerText = hwNombres[activeLook];
-                    if(document.getElementById('wiz-sum-pickups'))  document.getElementById('wiz-sum-pickups').innerText = pkNombres[activeSound];
-                    if(document.getElementById('wiz-sum-cad'))      document.getElementById('wiz-sum-cad').innerText = `${propiedadesActuales.length}x${propiedadesActuales.width}x${propiedadesActuales.thickness}mm`;
-                    
-                    if(document.getElementById('wiz-colloquial-summary')) {
-                        document.getElementById('wiz-colloquial-summary').innerText = `Configuración sugerida basada en tu perfil: Una guitarra con cuerpo de ${maderasNombres[activeSound]} para una respuesta acústica ideal, dimensiones optimizadas para un tacto ${activeFeel === 'light' ? 'ligero y rápido' : activeFeel === 'heavy' ? 'robusto con sustain' : 'equilibrado'}, y una estética de acabado ${coloresNombres[activeLook]}.`;
-                    }
+            [-1, 1].forEach((side) => {
+                for (let i = 0; i < 3; i += 1) {
+                    const tuner = new THREE.Group();
+                    const peg = new THREE.Mesh(pegGeometry, hardwareMaterial);
+                    peg.rotation.x = Math.PI / 2;
+                    tuner.add(peg);
+                    const knob = new THREE.Mesh(knobGeometry, hardwareMaterial);
+                    knob.position.set(0.06 * side, 0, 0);
+                    tuner.add(knob);
+                    tuner.position.set(0.14 * side, headY - 0.12 + i * 0.1, T / 2);
+                    guitarGroup.add(tuner);
                 }
             });
         }
 
-        // D. Lógica del Botón "Atrás"
-        if (btnPrevWiz) {
-            btnPrevWiz.addEventListener('click', () => {
-                if (pasoActual > 1) {
-                    // Ocultar paso actual
-                    const pasoActualEl = document.querySelector(`.wizard-step[data-step="${pasoActual}"]`);
-                    if (pasoActualEl) pasoActualEl.style.display = 'none';
+        const bridgeY = -L / 4 - 0.1;
+        const bridge = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.14, 0.06), hardwareMaterial);
+        bridge.position.set(0, bridgeY, T / 2 + 0.03);
+        bridge.castShadow = true;
+        guitarGroup.add(bridge);
 
-                    // Retroceder un índice
-                    pasoActual--;
+        const isTriple = state.pickups === "singlecoil";
+        const pickupHeight = isTriple ? 0.08 : 0.14;
+        const pickupOffsets = isTriple ? [bridgeY + 0.35, bridgeY + 0.7, bridgeY + 1.05] : [bridgeY + 0.45, bridgeY + 0.95];
 
-                    // Mostrar paso anterior
-                    const anteriorPasoEl = document.querySelector(`.wizard-step[data-step="${pasoActual}"]`);
-                    if (anteriorPasoEl) anteriorPasoEl.style.display = 'block';
+        pickupOffsets.forEach((y) => {
+            const ring = new THREE.Mesh(new THREE.BoxGeometry(0.27, pickupHeight + 0.035, 0.055), plasticMaterial);
+            ring.position.set(0, y, T / 2 + 0.02);
+            guitarGroup.add(ring);
 
-                    // Volver a asegurar que el botón Siguiente sea visible si volvimos atrás
-                    if (btnNextWiz) btnNextWiz.style.display = 'inline-block';
+            const coreMaterial = state.pickups === "humbucker" ? plasticMaterial : hardwareMaterial;
+            const core = new THREE.Mesh(new THREE.BoxGeometry(0.22, pickupHeight, 0.058), coreMaterial);
+            core.position.set(0, y, T / 2 + 0.035);
+            guitarGroup.add(core);
+        });
 
-                    // Ocultar "Atrás" si regresamos a la primera pantalla
-                    if (pasoActual === 1) {
-                        btnPrevWiz.style.display = 'none';
-                    }
-
-                    // Actualizar barra de progreso al retroceder
-                    if (progressBar) {
-                        progressBar.style.width = `${(pasoActual / totalPasos) * 100}%`;
-                    }
-                }
-            });
-        }
-    }
-    // Mapeo lógico idéntico al HTML para traducir las elecciones asistidas a física CAD y 3D
-    function elWizardSugeriráValores(sonido = 'heavy', ergonomia = 'light', look = 'classic') {
-        const resultado = {
-            wood: 'caoba', pickups: 'humbucker', length: 360, width: 280, thickness: 40, scale: 648, color: 'cherry', hardware: 'chrome'
-        };
-
-        if (sonido === 'heavy')       { resultado.wood = 'caoba';  resultado.pickups = 'humbucker'; } 
-        else if (sonido === 'bright')  { resultado.wood = 'fresno'; resultado.pickups = 'singlecoil'; } 
-        else if (sonido === 'balanced'){ resultado.wood = 'arce';   resultado.pickups = 'humbucker'; }
-
-        if (ergonomia === 'light')     { resultado.length = 330; resultado.width = 240; resultado.thickness = 32; resultado.scale = 610; } 
-        else if (ergonomia === 'heavy') { resultado.length = 400; resultado.width = 300; resultado.thickness = 48; resultado.scale = 650; } 
-        else if (ergonomia === 'standard') { resultado.length = 360; resultado.width = 280; resultado.thickness = 40; resultado.scale = 648; }
-
-        if (look === 'classic') {
-            resultado.color = (sonido === 'bright') ? 'sunburst' : 'cherry';
-            resultado.hardware = 'chrome';
-        } else if (look === 'modern') {
-            resultado.color = (sonido === 'heavy') ? 'negro' : 'goldtop';
-            resultado.hardware = (sonido === 'heavy') ? 'black' : 'gold';
-        }
-
-        return resultado;
+        const stringStartZ = T / 2 + 0.075;
+        [-0.08, -0.05, -0.02, 0.01, 0.04, 0.07].forEach((x, index) => {
+            const endX = isSixInLine ? x * 0.7 : (index < 3 ? -0.08 : 0.08);
+            const endY = isSixInLine ? headY - 0.1 + index * 0.05 : headY - 0.1 + (index % 3) * 0.08;
+            const points = [
+                new THREE.Vector3(x, bridgeY, stringStartZ),
+                new THREE.Vector3(endX, endY, T / 2 + 0.055)
+            ];
+            guitarGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(points), stringMaterial));
+        });
     }
 
-    function aplicarAjustesAsistidosAlModelo(props) {
-        // Asignar a variables globales de control tridimensional
-        currentWood     = props.wood;
-        currentColor    = props.color;
-        currentHardware = props.hardware;
-        currentPickups  = props.pickups;
-        targetLength    = props.length;
-        targetWidth     = props.width;
-        targetThickness = props.thickness;
-        targetScale     = props.scale;
-
-        // Forzar actualización inmediata en el Canvas 3D
-        updateMaterials();
-        rebuildGuitar();
-    }
-
-    // ── 15. LOOP DE ANIMACIÓN & RESIZE ─────────────────────────────────────────
-    controls.addEventListener('start', () => { autoRotate = false; });
-
-    function animate() {
-        requestAnimationFrame(animate);
-        if (autoRotate) guitarGroup.rotation.y += 0.003;
+    function resetView() {
+        camera.position.set(0, 0.5, 7.5);
+        controls.target.set(0, 0.8, 0);
         controls.update();
-        renderer.render(scene, camera);
+        guitarGroup.rotation.set(0, 0, 0);
+        state.autoRotate = true;
+        rebuildGuitar();
+        resizeRenderer();
     }
-    animate();
 
-    window.addEventListener('resize', () => {
-        camera.aspect = container.clientWidth / container.clientHeight;
+    function resizeRenderer() {
+        const width = Math.max(container.clientWidth, 320);
+        const height = Math.max(container.clientHeight, 320);
+        camera.aspect = width / height;
         camera.updateProjectionMatrix();
-        renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.setSize(width, height, false);
+    }
+
+    function applySizePreset(size) {
+        const preset = sizePresets[size] || sizePresets["4_4"];
+        state.size = size;
+        state.length = preset.length;
+        state.width = preset.width;
+        state.thickness = preset.thickness;
+        state.scale = preset.scale;
+    }
+
+    function getConfigurationPayload() {
+        return {
+            modelo: modeloId,
+            madera: state.wood,
+            color: state.color,
+            hardware: state.hardware,
+            pickups: state.pickups,
+            tamano: state.size,
+            dimensiones_cad: `${state.length}x${state.width}x${state.thickness}mm escala ${state.scale}mm`
+        };
+    }
+
+    function updateActiveButton(button) {
+        const group = button.closest(".swatch-group");
+        if (!group) return;
+        group.querySelectorAll(".option-swatch").forEach((item) => item.classList.remove("active"));
+        button.classList.add("active");
+    }
+
+    document.querySelectorAll(".option-swatch").forEach((swatch) => {
+        swatch.addEventListener("click", () => {
+            updateActiveButton(swatch);
+            if (swatch.dataset.wood) state.wood = swatch.dataset.wood;
+            if (swatch.dataset.color) state.color = swatch.dataset.color;
+            if (swatch.dataset.hardware) state.hardware = swatch.dataset.hardware;
+            if (swatch.dataset.pickups) state.pickups = swatch.dataset.pickups;
+            if (swatch.dataset.size) applySizePreset(swatch.dataset.size);
+            rebuildGuitar();
+        });
     });
-    window.addEventListener('resize', () => {
-    camera.aspect = container.clientWidth / container.clientHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(container.clientWidth, container.clientHeight);
-});
 
-// =====================================
-// BOTÓN COTIZAR
-// =====================================
+    btnReset?.addEventListener("click", resetView);
 
-const btnCotizar = document.getElementById("btn-enviar");
+    btnWireframe?.addEventListener("click", () => {
+        state.wireframe = !state.wireframe;
+        btnWireframe.classList.toggle("active", state.wireframe);
+        rebuildGuitar();
+    });
 
-if (btnCotizar) {
+    btnGrid?.addEventListener("click", () => {
+        gridHelper.visible = !gridHelper.visible;
+        btnGrid.classList.toggle("active", gridHelper.visible);
+    });
 
-    btnCotizar.addEventListener("click", async () => {
+    btnAxes?.addEventListener("click", () => {
+        axesHelper.visible = !axesHelper.visible;
+        btnAxes.classList.toggle("active", axesHelper.visible);
+    });
 
+    btnCotizar?.addEventListener("click", async () => {
         try {
-
             btnCotizar.disabled = true;
             btnCotizar.textContent = "Calculando...";
 
-            const response = await fetch("http://localhost:5000/cotizar");
+            // Map frontend selections to backend expected keys
+            const configuracion = {
+                modelo: modeloId,
+                madera: state.wood,
+                color: state.color,
+                hardware: state.hardware,
+                pickups: state.pickups,
+                trastes: "estandar",       // Default since not in UI
+                clavijeros: "grover",      // Default since not in UI
+                knobs: "top_hat",          // Default since not in UI
+                puente: "tremolo"          // Default since not in UI
+            };
+
+            const response = await fetch(`${API_BASE_URL}/api/cotizar`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(configuracion)
+            });
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || `Error ${response.status}: No fue posible obtener la cotizacion.`);
+            }
 
             const data = await response.json();
+            cotizacionData = {
+                ...data,
+                configuracion: getConfigurationPayload()
+            };
 
-            document.getElementById("precio-final").textContent =
-                `$${data.precio_final_cop.toLocaleString("es-CO")} COP`;
-
-            document
-                .getElementById("modal-cotizacion")
-                .classList.add("active");
-
+            precioFinalEl.textContent = `$${Number(cotizacionData.precio_final_cop).toLocaleString("es-CO")} COP`;
+            modalCotizacion.classList.add("active");
         } catch (error) {
-
-            console.error(error);
-
-            alert("No fue posible generar la cotización.");
-
+            console.error("Error en cotizacion:", error);
+            alert(`No fue posible generar la cotizacion: ${error.message}`);
         } finally {
-
             btnCotizar.disabled = false;
             btnCotizar.textContent = "Cotizar mi guitarra";
+        }
+    });
 
+    async function ensureStripe() {
+        if (stripe && cardElement) return;
+
+        const response = await fetch(`${API_BASE_URL}/api/stripe-config`);
+        if (!response.ok) throw new Error("No fue posible cargar la configuracion de Stripe.");
+        const { publishable_key: publishableKey } = await response.json();
+        if (!publishableKey) throw new Error("Falta STRIPE_PUBLISHABLE_KEY en el backend.");
+
+        stripe = Stripe(publishableKey);
+        elements = stripe.elements({ locale: "es" });
+        cardElement = elements.create("card", {
+            hidePostalCode: true,
+            style: {
+                base: {
+                    color: "#2a1610",
+                    fontFamily: "'Plus Jakarta Sans', sans-serif",
+                    fontSize: "16px",
+                    "::placeholder": { color: "#8c766b" }
+                },
+                invalid: { color: "#c93628" }
+            }
+        });
+
+        cardElement.mount(cardContainer);
+        cardElement.on("change", (event) => {
+            cardErrors.textContent = event.error ? event.error.message : "";
+        });
+    }
+
+    async function createPaymentIntent() {
+        const email = document.getElementById("correo").value || "cliente@ctrlrock.test";
+        const response = await fetch(`${API_BASE_URL}/api/payment-intent`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                precio_cop: cotizacionData.precio_final_cop,
+                email,
+                configuracion: cotizacionData.configuracion
+            })
+        });
+
+        const data = await response.json();
+        if (!response.ok || data.error) throw new Error(data.error || "Stripe no pudo crear el pago.");
+
+        clientSecret = data.client_secret;
+        paymentIntentId = data.payment_intent_id;
+    }
+
+    btnComprar?.addEventListener("click", async () => {
+        if (!cotizacionData?.precio_final_cop) {
+            alert("Primero genera una cotizacion.");
+            return;
         }
 
+        modalCotizacion.classList.remove("active");
+        modalCompra.classList.add("active");
+        paymentStatus.textContent = "Cargando formulario de pago...";
+
+        try {
+            await ensureStripe();
+            paymentStatus.textContent = "Formulario de pago listo.";
+        } catch (error) {
+            console.error(error);
+            paymentStatus.textContent = error.message;
+        }
     });
 
-}
+    formCompra?.addEventListener("submit", async (event) => {
+        event.preventDefault();
 
-// =====================================
-// MODALES
-// =====================================
+        if (!stripe || !cardElement) {
+            paymentStatus.textContent = "Stripe Elements aun no esta listo.";
+            return;
+        }
 
-const btnComprar = document.getElementById("btn-comprar");
-const btnCancelar = document.getElementById("btn-cancelar");
-const btnCancelarCompra = document.getElementById("btn-cancelar-compra");
+        const submitButton = document.getElementById("btn-confirmar-compra");
+        submitButton.disabled = true;
+        paymentStatus.textContent = "Creando pago seguro...";
+        cardErrors.textContent = "";
 
-if (btnComprar) {
+        try {
+            await createPaymentIntent();
+            paymentStatus.textContent = "Confirmando pago...";
 
-    btnComprar.addEventListener("click", () => {
+            const nombre = `${document.getElementById("nombre").value} ${document.getElementById("apellidos").value}`.trim();
+            const email = document.getElementById("correo").value;
 
-        document
-            .getElementById("modal-cotizacion")
-            .classList.remove("active");
+            const result = await stripe.confirmCardPayment(clientSecret, {
+                payment_method: {
+                    card: cardElement,
+                    billing_details: {
+                        name: nombre,
+                        email,
+                        phone: document.getElementById("telefono").value,
+                        address: {
+                            line1: document.getElementById("direccion").value,
+                            city: document.getElementById("ciudad").value,
+                            state: document.getElementById("departamento").value,
+                            country: "CO"
+                        }
+                    }
+                }
+            });
 
-        document
-            .getElementById("modal-compra")
-            .classList.add("active");
+            if (result.error) throw new Error(result.error.message);
+            if (result.paymentIntent.status !== "succeeded") {
+                throw new Error(`El pago quedo en estado ${result.paymentIntent.status}.`);
+            }
 
+            paymentStatus.textContent = "Guardando pedido...";
+            const confirmResponse = await fetch(`${API_BASE_URL}/api/confirm-payment`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    payment_intent_id: paymentIntentId,
+                    precio_cop: cotizacionData.precio_final_cop,
+                    cliente: {
+                        nombre,
+                        email,
+                        telefono: document.getElementById("telefono").value,
+                        direccion: document.getElementById("direccion").value,
+                        ciudad: document.getElementById("ciudad").value,
+                        departamento: document.getElementById("departamento").value,
+                        tipo_identificacion: document.getElementById("tipo-identificacion").value,
+                        identificacion: document.getElementById("identificacion").value
+                    },
+                    cotizacion: cotizacionData,
+                    configuracion: cotizacionData.configuracion
+                })
+            });
+
+            const confirmData = await confirmResponse.json();
+            if (!confirmResponse.ok || confirmData.error) {
+                throw new Error(confirmData.error || "El pago fue aprobado, pero no se pudo guardar el pedido.");
+            }
+
+            paymentStatus.textContent = `Pago exitoso. Pedido #${confirmData.pedido_id} guardado.`;
+            formCompra.reset();
+            cardElement.clear();
+        } catch (error) {
+            console.error(error);
+            paymentStatus.textContent = error.message;
+        } finally {
+            submitButton.disabled = false;
+        }
     });
 
-}
+    btnCancelar?.addEventListener("click", () => modalCotizacion.classList.remove("active"));
+    btnCancelarCompra?.addEventListener("click", () => modalCompra.classList.remove("active"));
 
-if (btnCancelar) {
+    function animate() {
+        requestAnimationFrame(animate);
+        if (state.autoRotate) guitarGroup.rotation.y += 0.003;
+        controls.update();
+        renderer.render(scene, camera);
+    }
 
-    btnCancelar.addEventListener("click", () => {
+    window.addEventListener("resize", resizeRenderer);
 
-        document
-            .getElementById("modal-cotizacion")
-            .classList.remove("active");
-
-    });
-
-}
-
-if (btnCancelarCompra) {
-
-    btnCancelarCompra.addEventListener("click", () => {
-
-        document
-            .getElementById("modal-compra")
-            .classList.remove("active");
-
-    });
-
-}
-document.addEventListener('DOMContentLoaded', () => {
-    const btnVer3D = document.getElementById('btnVer3D');
-    const contenedor3D = document.getElementById('contenedor3D');
-    const visorBajo = document.getElementById('visorBajo');
-    const btnCotizar = document.getElementById('btnCotizarFase2');
-
-    btnVer3D.addEventListener('click', function() {
-        // 1. Deshabilitar el botón temporalmente para evitar múltiples clics
-        this.disabled = true;
-        this.textContent = 'Cargando modelo interactivo...';
-
-        // 2. Obtener la ruta del .glb según lo que configuró el usuario
-        // Aquí llamarías a tu función que determina qué archivo cargar
-        const rutaArchivoGLB = obtenerRutaDelGLBGenerado(); 
-
-        // 3. Asignar el archivo al visor
-        visorBajo.src = rutaArchivoGLB;
-
-        // 4. Mostrar el contenedor del visor
-        contenedor3D.style.display = 'block';
-
-        // Opcional: Escuchar el evento de carga completa de Khronos/model-viewer
-        visorBajo.addEventListener('load', () => {
-             btnVer3D.style.display = 'none'; // Ocultamos el botón de ver 3D
-             btnCotizar.style.display = 'block'; // Mostramos el botón de cotizar real
-        });
-    });
-});
-
-// Función simulada: Aquí debes poner tu lógica para saber qué modelo cargar
-function obtenerRutaDelGLBGenerado() {
-    // Ejemplo: Si el usuario eligió Nogal Rojo Tamaño 1/4
-    return 'assets/modelos_3d/stingray_nogal_rojo_1_4.glb'; 
-}
+    applySizePreset(state.size);
+    rebuildGuitar();
+    resizeRenderer();
+    animate();
 });
