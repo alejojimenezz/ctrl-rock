@@ -233,6 +233,19 @@ def admin_pedidos():
 
     pedidos = []
     for pedido in obtener_pedidos():
+        intent_id = pedido.get("stripe_payment_intent_id")
+        estado = pedido.get("estado", "pagado")
+        reembolsado = False
+        monto_reembolsado = 0
+        
+        if intent_id and estado == "pagado":
+            pago = verificar_pago(intent_id)
+            if pago and not pago.get("error"):
+                refunds = pago.get("refunds") or []
+                if refunds:
+                    reembolsado = True
+                    monto_reembolsado = sum(r.get("amount", 0) for r in refunds) / 100
+        
         pedidos.append({
             "id": pedido["id"],
             "nombre": pedido["nombre"],
@@ -241,9 +254,11 @@ def admin_pedidos():
             "direccion": pedido["direccion"],
             "ciudad": pedido["ciudad"],
             "fecha": pedido["fecha_creacion"],
-            "estado": pedido["estado"],
+            "estado": estado,
+            "reembolsado": reembolsado,
+            "monto_reembolsado": monto_reembolsado,
             "total_cop": pedido["precio_cop"],
-            "stripe_payment_intent_id": pedido["stripe_payment_intent_id"],
+            "stripe_payment_intent_id": intent_id,
             "detalles": obtener_detalles_pedido(pedido["id"]),
         })
     return jsonify({"pedidos": pedidos})

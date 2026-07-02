@@ -73,18 +73,42 @@ def crear_payment_intent(monto_cop, email, descripcion="Guitarra personalizada C
 
 
 def verificar_pago(payment_intent_id):
-    """Verificar el estado de un PaymentIntent."""
+    """Verificar el estado de un PaymentIntent y sus reembolsos."""
     if not stripe:
         return None
 
     try:
         intent = stripe.PaymentIntent.retrieve(payment_intent_id)
+        
+        # Verificar si hay reembolsos en el cargo más reciente
+        latest_charge = getattr(intent, "latest_charge", None)
+        refunds = []
+        if latest_charge:
+            try:
+                charge = stripe.Charge.retrieve(latest_charge, expand=["refunds"])
+                refunds_data = getattr(charge, "refunds", None)
+                if refunds_data and getattr(refunds_data, "data", None):
+                    refunds = [
+                        {
+                            "id": r.id,
+                            "amount": r.amount,
+                            "currency": r.currency,
+                            "status": r.status,
+                            "created": r.created,
+                        }
+                        for r in refunds_data.data
+                    ]
+            except Exception:
+                pass
+
         return {
             "id": intent.id,
-            "status": intent.status,  # 'succeeded', 'requires_payment_method', etc.
+            "status": intent.status,
             "amount": intent.amount,
             "currency": intent.currency,
-            "created": intent.created
+            "created": intent.created,
+            "charges": getattr(intent, "charges", {}).get("data", []),
+            "refunds": refunds,
         }
     except stripe.error.StripeError as e:
         logger.error(f"Error al verificar pago: {e}")

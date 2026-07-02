@@ -155,6 +155,7 @@ function generarHTMLPedido(pedido) {
 
             <div class="pedido-total">
                 Total: $${(pedido.total_cop || 0).toLocaleString('es-CO')} COP
+                ${pedido.reembolsado ? `<div class="reembolso-info">Reembolsado: $${(pedido.monto_reembolsado || 0).toLocaleString('es-CO')} COP</div>` : ''}
             </div>
 
             ${detalles.length > 0 ? `
