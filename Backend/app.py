@@ -268,26 +268,6 @@ def admin_pedidos():
     for pedido in obtener_pedidos():
         intent_id = pedido.get("stripe_payment_intent_id")
         estado = pedido.get("estado", "pagado")
-        reembolsado = False
-        monto_reembolsado = 0
-        
-        if intent_id and estado == "pagado":
-            pago = verificar_pago(intent_id)
-            if pago and not pago.get("error"):
-                refunds = pago.get("refunds") or []
-                if refunds:
-                    reembolsado = True
-                    monto_reembolsado = sum(r.get("amount", 0) for r in refunds) / 100
-        
-        estado_stripe = estado
-        if intent_id and estado in ("pagado", "succeeded"):
-            pago = verificar_pago(intent_id)
-            if pago and not pago.get("error"):
-                refunds = pago.get("refunds") or []
-                if refunds:
-                    estado_stripe = "reembolsado"
-                else:
-                    estado_stripe = pago.get("status", estado)
 
         pedidos.append({
             "id": pedido["id"],
@@ -297,9 +277,9 @@ def admin_pedidos():
             "direccion": pedido["direccion"],
             "ciudad": pedido["ciudad"],
             "fecha": pedido["fecha_creacion"],
-            "estado": estado_stripe,
-            "reembolsado": reembolsado,
-            "monto_reembolsado": monto_reembolsado,
+            "estado": estado,
+            "reembolsado": False,
+            "monto_reembolsado": 0,
             "total_cop": pedido["precio_cop"],
             "stripe_payment_intent_id": intent_id,
             "detalles": obtener_detalles_pedido(pedido["id"]),
@@ -319,19 +299,88 @@ def admin_webhook_logs():
 @app.route("/api/admin/sincronizar-pedido/<payment_intent_id>")
 def admin_sincronizar_pedido(payment_intent_id):
     if not validar_admin():
-        return jsonify({"error": "Token invalido"}), 403
+        return jsonify({"error": "Token inválido"}), 403
 
     pago = verificar_pago(payment_intent_id)
     if not pago or pago.get("error"):
         return jsonify({"error": pago.get("error", "No se pudo consultar Stripe")}), 400
 
-    estado = "pagado" if pago.get("status") == "succeeded" else pago.get("status")
-    actualizado = actualizar_estado_pedido(payment_intent_id, estado)
+    stripe_status = pago.get("status") or "desconocido"
+    estado = "pagado" if stripe_status == "succeeded" else stripe_status
+
+    refunds = pago.get("refunds") or []
+    reembolsado = bool(refunds)
+    monto_reembolsado = (sum(r.get("amount", 0) for r in refunds) / 100) if reembolsado else 0
+
+    actualizado_estado = actualizar_estado_pedido(payment_intent_id, estado)
+
+    conn = get_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            UPDATE pedidos
+            SET reembolsado = ?, monto_reembolsado = ?
+            WHERE stripe_payment_intent_id = ?
+            """,
+            (1 if reembolsado else 0, monto_reembolsado, payment_intent_id),
+        )
+        conn.commit()
+        actualizado = True
+    except Exception:
+        conn.rollback()
+        actualizado = False
+    finally:
+        conn.close()
+
     return jsonify({
         "ok": actualizado,
         "mensaje": f"Estado sincronizado: {estado}" if actualizado else "No existe un pedido local para ese PaymentIntent",
-        "stripe_status": pago.get("status"),
+        "stripe_status": stripe_status,
+        "reembolsado": reembolsado,
+        "monto_reembolsado": monto_reembolsado,
     })
+
+
+@app.route("/api/admin/sincronizar-todos", methods=["POST"])
+def admin_sincronizar_todos():
+    if not validar_admin():
+        return jsonify({"error": "Token inválido"}), 403
+
+    resumen = {"total": 0, "actualizados": 0, "fallidos": 0}
+    for pedido in obtener_pedidos():
+        intent_id = pedido.get("stripe_payment_intent_id")
+        resumen["total"] += 1
+        if not intent_id:
+            continue
+        pago = verificar_pago(intent_id)
+        if not pago or pago.get("error"):
+            resumen["fallidos"] += 1
+            continue
+        resumen["actualizados"] += 1
+        stripe_status = pago.get("status") or "desconocido"
+        actualizar_estado_pedido(intent_id, "pagado" if stripe_status == "succeeded" else stripe_status)
+        guardar_sincronizacion_remota(intent_id, pago)
+
+    return jsonify({"ok": True, "resumen": resumen})
+
+
+def guardar_sincronizacion_remota(payment_intent_id, pago):
+    refunds = pago.get("refunds") or []
+    monto_reembolsado = (sum(r.get("amount", 0) for r in refunds) / 100) if refunds else 0
+    reembolsado = 1 if refunds else 0
+    conn = get_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute(
+            "UPDATE pedidos SET reembolsado = ?, monto_reembolsado = ? WHERE stripe_payment_intent_id = ?",
+            (reembolsado, monto_reembolsado, payment_intent_id),
+        )
+        conn.commit()
+    except Exception:
+        conn.rollback()
+    finally:
+        conn.close()
 
 
 FRONTEND_DIR = BASE_DIR.parent / "Frontend"

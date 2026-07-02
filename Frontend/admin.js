@@ -3,8 +3,8 @@
 // Panel Administrativo - Ctrl+Rock
 // ============================================================
 
-// Usar ruta absoluta hacia el backend para evitar problemas de puerto/CORS
-const API_BASE = "http://localhost:5000";
+// Evitar CORS/timeouts usando IP loopback explícita
+const API_BASE = "http://127.0.0.1:5000";
 // Token de acceso al panel admin (cambiar en producción)
 const ADMIN_TOKEN = "admin123";
 
@@ -13,7 +13,7 @@ async function cargarPedidos() {
     listaDiv.innerHTML = '<div class="loading">Cargando pedidos...</div>';
 
     try {
-        const response = await fetchWithTimeout(`${API_BASE}/api/admin/pedidos?token=${ADMIN_TOKEN}`, 10000);
+        const response = await fetchWithTimeout(`${API_BASE}/api/admin/pedidos?token=${ADMIN_TOKEN}`, 15000);
         
         const contentType = response.headers.get("content-type") || "";
         if (!contentType.includes("application/json")) {
@@ -294,6 +294,19 @@ async function cargarWebhookLogs() {
     } catch (error) {
         console.error("Error cargando logs de webhook:", error);
         logsDiv.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+    }
+}
+
+async function sincronizarTodos() {
+    try {
+        const response = await fetchWithTimeout(`${API_BASE}/api/admin/sincronizar-todos?token=${ADMIN_TOKEN}`, 30000);
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Error en sincronización");
+        alert(`Sincronización completada: ${data.resumen.actualizados}/${data.resumen.total} pedidos actualizados`);
+        cargarPedidos();
+    } catch (error) {
+        console.error("Error sincronizando todos los pedidos:", error);
+        alert(`Error: ${error.message}`);
     }
 }
 
