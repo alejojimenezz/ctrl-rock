@@ -1,4 +1,5 @@
 // ============================================================
+// ============================================================
 // Panel Administrativo - Ctrl+Rock
 // ============================================================
 
@@ -123,7 +124,14 @@ function generarHTMLPedido(pedido) {
         <div class="pedido-card">
             <div class="pedido-header">
                 <div class="pedido-id">Pedido #${pedido.id}</div>
-                <span class="pedido-estado">${pedido.estado || 'pagado'}</span>
+                ${(() => {
+                    const estado = (pedido.estado || 'pagado').toLowerCase();
+                    const clase = estado === 'reembolsado' ? 'reembolsado' :
+                                  estado === 'disputed' || estado === 'disputa' ? 'disputado' :
+                                  estado === 'fallido' || estado === 'error' ? 'error' :
+                                  'pagado';
+                    return `<span class="pedido-estado ${clase}">${pedido.estado || 'pagado'}</span>`;
+                })()}
             </div>
             
             <div class="pedido-info">

@@ -246,6 +246,16 @@ def admin_pedidos():
                     reembolsado = True
                     monto_reembolsado = sum(r.get("amount", 0) for r in refunds) / 100
         
+        estado_stripe = estado
+        if intent_id and estado in ("pagado", "succeeded"):
+            pago = verificar_pago(intent_id)
+            if pago and not pago.get("error"):
+                refunds = pago.get("refunds") or []
+                if refunds:
+                    estado_stripe = "reembolsado"
+                else:
+                    estado_stripe = pago.get("status", estado)
+
         pedidos.append({
             "id": pedido["id"],
             "nombre": pedido["nombre"],
@@ -254,7 +264,7 @@ def admin_pedidos():
             "direccion": pedido["direccion"],
             "ciudad": pedido["ciudad"],
             "fecha": pedido["fecha_creacion"],
-            "estado": estado,
+            "estado": estado_stripe,
             "reembolsado": reembolsado,
             "monto_reembolsado": monto_reembolsado,
             "total_cop": pedido["precio_cop"],
