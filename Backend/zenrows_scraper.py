@@ -19,6 +19,7 @@ import requests
 load_dotenv(Path(__file__).parent / ".env")
 
 logger = logging.getLogger(__name__)
+session = requests.Session()
 
 # ==========================================
 # CONFIGURACIÓN
@@ -26,37 +27,29 @@ logger = logging.getLogger(__name__)
 
 API_KEY = os.getenv("ZENROWS_API_KEY", "")
 CACHE_FILE = Path(__file__).parent / "cache" / "amazon_precios.json"
-CACHE_DURATION_HOURS = 6
-MAX_INTENTOS = 5
-ESPERA_SEGUNDOS = 2
+CACHE_DURATION_HOURS = 24
+MAX_INTENTOS = 2
+ESPERA_SEGUNDOS = 1
 
 ASIN_MAP = {
     # Trastes - Fret packages
     "trastes": "B003B0D4OU",
-    "trastes_dunlop": "B003B0D4OU",
-    "trastes_jescar": "B07XKQY8VH",
+   
     
     # Clavijeros - Tuners
     "clavijeros": "B08MQWZ2MD",
-    "clavijeros_grover": "B082ZNPSGZ",
-    "clavijeros_grover_1by4": "B07FHSQ3VH",
-    "clavijeros_shafer": "B09TQ5K3YL",
+
     
     # Knobs - Pot knobs
     "knobs": "B0BLMWPDQ9",
-    "knobs_clase": "B0BLMWPDQ9",
-    "knobs_top": "B07MKJ8ZQS",
+
     
     # Puentes - Bridges
     "puente": "B0FY5M9G97",
-    "puente_gotoh": "B0FY5M9G97",
-    "puente_tremolo": "B0064RU7MO",
-    "puente_fixo": "B09PRQSBDC",
-    
+ 
     # Pastillas - Pickups
     "pastillas_alnico": "B0FZKM55QD",
-    "pastillas_ceramicas": "B0CNKCPGN5",
-    "pastillas_luminance": "B0CN9522K7",
+
 }
 
 CATEGORIAS = ["trastes", "clavijeros", "knobs", "puente", "pastillas"]
@@ -66,13 +59,6 @@ CATEGORIAS = ["trastes", "clavijeros", "knobs", "puente", "pastillas"]
 # (ASIN_MAP / default_prices). Si una opción no está aquí, se usa tal cual
 # como clave (fallback) y, si tampoco existe en `precios`, se cobra $0 y se
 # loggea un warning en vez de reventar.
-OPCION_A_CLAVE = {
-    "trastes": {"estandar": "trastes_dunlop", "jumbo": "trastes_jescar", "narrow_tall": "trastes_dunlop"},
-    "clavijeros": {"grover": "clavijeros_grover", "schaller": "clavijeros_shafer", "grover_rotomatic": "clavijeros_grover_1by4"},
-    "knobs": {"top_hat": "knobs_clase", "domed": "knobs_clase", "speed": "knobs_top"},
-    "puente": {"tremolo": "puente_tremolo", "fixed_stopbar": "puente_fixo"},
-    "pastillas": {"humbucker": "pastillas_alnico", "singlecoil": "pastillas_ceramicas", "single_coil": "pastillas_ceramicas", "p90": "pastillas_luminance"},
-}
 
 
 def _ensure_cache_dir():
@@ -133,10 +119,10 @@ def _consultar_precio(asin):
         logger.error("ZENROWS_API_KEY no configurada")
         return None
     try:
-        response = requests.get(
+        response = session.get(
             "https://api.zenrows.com/v1/",
             params={"url": f"https://www.amazon.com/dp/{asin}", "apikey": API_KEY, "javascript": "true"},
-            timeout=60
+            timeout=12
         )
         if response.status_code != 200:
             logger.warning(f"ZenRows HTTP {response.status_code} para ASIN {asin}")
@@ -197,22 +183,10 @@ def obtener_precios_componentes(refresh=False):
 
     default_prices = {
         "trastes": {"precio": 15.0, "enlace": "https://www.amazon.com/dp/B003B0D4OU"},
-        "trastes_dunlop": {"precio": 15.0, "enlace": "https://www.amazon.com/dp/B003B0D4OU"},
-        "trastes_jescar": {"precio": 25.0, "enlace": "https://www.amazon.com/dp/B07XKQY8VH"},
         "clavijeros": {"precio": 45.0, "enlace": "https://www.amazon.com/dp/B08MQWZ2MD"},
-        "clavijeros_grover": {"precio": 45.0, "enlace": "https://www.amazon.com/dp/B082ZNPSGZ"},
-        "clavijeros_grover_1by4": {"precio": 80.0, "enlace": "https://www.amazon.com/dp/B07FHSQ3VH"},
-        "clavijeros_shafer": {"precio": 120.0, "enlace": "https://www.amazon.com/dp/B09TQ5K3YL"},
         "knobs": {"precio": 12.0, "enlace": "https://www.amazon.com/dp/B0BLMWPDQ9"},
-        "knobs_clase": {"precio": 12.0, "enlace": "https://www.amazon.com/dp/B0BLMWPDQ9"},
-        "knobs_top": {"precio": 25.0, "enlace": "https://www.amazon.com/dp/B07MKJ8ZQS"},
         "puente": {"precio": 65.0, "enlace": "https://www.amazon.com/dp/B0FY5M9G97"},
-        "puente_gotoh": {"precio": 65.0, "enlace": "https://www.amazon.com/dp/B0FY5M9G97"},
-        "puente_tremolo": {"precio": 90.0, "enlace": "https://www.amazon.com/dp/B0064RU7MO"},
-        "puente_fixo": {"precio": 45.0, "enlace": "https://www.amazon.com/dp/B09PRQSBDC"},
         "pastillas_alnico": {"precio": 85.0, "enlace": "https://www.amazon.com/dp/B0FZKM55QD"},
-        "pastillas_ceramicas": {"precio": 55.0, "enlace": "https://www.amazon.com/dp/B0CNKCPGN5"},
-        "pastillas_luminance": {"precio": 150.0, "enlace": "https://www.amazon.com/dp/B0CN9522K7"},
     }
     for nombre in pendientes:
         resultados[nombre] = default_prices.get(nombre, {"precio": 30.0, "enlace": ""})
@@ -230,50 +204,18 @@ def obtener_precios_componentes(refresh=False):
     _save_cache(resultados_formateados)
     return resultados_formateados
 
-
-def calcular_precio_hardware(configuracion):
-    """Calcular el costo total de hardware basado en la configuración del usuario.
-
-    Devuelve SIEMPRE un dict: {"total_usd": float, "desglose": {categoria: {...}}}
-    """
+def calcular_precio_hardware():
     precios = obtener_precios_componentes()
-    if not isinstance(precios, dict):
-        raise ValueError(
-            f"obtener_precios_componentes() devolvió un {type(precios).__name__} "
-            "en vez de un dict; revisa cache/amazon_precios.json"
-        )
 
-    total_usd = 0.0
-    desglose = {}
-    for categoria in CATEGORIAS:
-        seleccion = configuracion.get(categoria, "")
-        if not seleccion:
-            continue
-        clave_precio = OPCION_A_CLAVE.get(categoria, {}).get(seleccion, seleccion)
-        entry = precios.get(clave_precio)
-        if entry is None:
-            logger.warning(
-                f"Sin precio para {categoria}='{seleccion}' (clave '{clave_precio}'); usando $0.0"
-            )
-            precio = 0.0
-            enlace = ""
-        elif isinstance(entry, dict):
-            precio = entry.get("precio", 0.0)
-            enlace = entry.get("enlace", "")
-        else:
-            precio = float(entry)
-            enlace = f"https://www.amazon.com/dp/{ASIN_MAP.get(clave_precio, '')}"
-        desglose[categoria] = {
-            "opcion": seleccion,
-            "clave_precio": clave_precio,
-            "precio_usd": precio,
-            "enlace": enlace
-        }
-        total_usd += precio
-        logger.debug(f"{categoria} → {seleccion}: ${precio:.2f}")
+    total = sum(
+        item["precio"]
+        for item in precios.values()
+    )
 
-    return {"total_usd": round(total_usd, 2), "desglose": desglose}
-
+    return {
+        "total_usd": total,
+        "desglose": precios
+    }
 
 def refrescar_precios():
     """Forzar actualización de todos los precios desde Amazon.

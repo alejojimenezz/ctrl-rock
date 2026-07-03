@@ -15,6 +15,19 @@ document.addEventListener('DOMContentLoaded', () => {
     // ── 1. PARÁMETROS DE URL Y TÍTULO ───────────────────────────────────
     const urlParams = new URLSearchParams(window.location.search);
     const modeloId  = (urlParams.get('modelo') || 'lespaul').toLowerCase();
+    const MODELOS = {
+    lespaul: "Gibson Les Paul",
+    telecaster: "Fender Telecaster",
+    ibanezxp: "Ibanez XP",
+    stingray: "Music Man StingRay Bass",
+    espex: "ESP EX",
+    danelectro: "Danelectro"
+};
+const MADERAS = {
+    fresno: "Fresno Americano",
+    caoba: "Caoba de Honduras",
+    nogal: "Nogal Negro Exótico"
+};
 
     const tituloEl = document.getElementById('modelo-titulo');
     if (tituloEl) tituloEl.textContent = 'Personalizando tu modelo';
@@ -65,7 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const { madera, acabado, tamano, picks } = getSeleccion();
         return {
             modelo: modeloId,
-            madera,
+            madera: madera,
             acabado,
             tamano,
             picks,

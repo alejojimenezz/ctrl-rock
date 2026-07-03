@@ -31,7 +31,20 @@ from email_sender import (
 
 BASE_DIR = Path(__file__).resolve().parent
 ADMIN_TOKEN = os.getenv("ADMIN_TOKEN", "admin123")
+PRECIOS_MODELOS = {
+    "lespaul": 1200000,
+    "telecaster": 1000000,
+    "ibanezxp": 1350000,
+    "stingray": 1250000,
+    "espex": 1400000,
+    "danelectro": 950000,
+}
 
+PRECIOS_MADERAS = {
+    "fresno": 0,
+    "caoba": 350000,
+    "nogal": 600000,
+}
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -43,6 +56,9 @@ app = Flask(
 
 CORS(app)
 inicializar_db()
+from zenrows_scraper import obtener_precios_componentes
+
+obtener_precios_componentes()
 
 
 def validar_admin():
@@ -91,49 +107,58 @@ def cotizar():
         from exchange_rates import convertir_a_cop, obtener_tasa_usd_cop
 
         data = request.get_json(silent=True) or {}
-        
-        # Map frontend config to backend keys
-        configuracion = {
-            "trastes": data.get("trastes", "estandar"),
-            "clavijeros": data.get("clavijeros", "grover"),
-            "knobs": data.get("knobs", "top_hat"),
-            "puente": data.get("puente", "tremolo"),
-            "pastillas": data.get("pastillas", data.get("pickups", "humbucker")),
-        }
-        
-        logger.info(f"Calculando cotizacion para configuracion: {configuracion}")
-        
-        # Calculate hardware prices in USD
-        resultado_hardware = calcular_precio_hardware(configuracion)
+
+        modelo = data.get("modelo")
+        madera = data.get("madera")
+
+        resultado_hardware = calcular_precio_hardware()
+
         total_usd = resultado_hardware["total_usd"]
         desglose = resultado_hardware["desglose"]
-        
-        # Convert to COP
+
         tasa_cambio = obtener_tasa_usd_cop()
-        total_hardware_cop = convertir_a_cop(total_usd)
-        
-        # Add manufacturing cost
+        hardware_cop = convertir_a_cop(total_usd)
+
+        precio_modelo = PRECIOS_MODELOS.get(modelo, 0)
+        precio_madera = PRECIOS_MADERAS.get(madera, 0)
+
         COSTO_FABRICACION_COP = 350000
-        precio_final_cop = total_hardware_cop + COSTO_FABRICACION_COP
-        
+
+        precio_final_cop = (
+            precio_modelo
+            + precio_madera
+            + hardware_cop
+            + COSTO_FABRICACION_COP
+        )
+
         resultado = {
             "precio_final_cop": precio_final_cop,
-            "total_hardware_usd": total_usd,
-            "precio_componentes_cop": total_hardware_cop,
+            "precio_modelo_cop": precio_modelo,
+            "precio_madera_cop": precio_madera,
+            "precio_hardware_cop": hardware_cop,
             "costo_fabricacion_cop": COSTO_FABRICACION_COP,
+            "total_hardware_usd": total_usd,
             "tasa_cambio_usd_cop": tasa_cambio,
             "desglose": desglose,
-            "detalles": desglose,  # For direct use in guardar_detalles_pedido
-            "configuracion": configuracion
+            "configuracion": {
+                "modelo": modelo,
+                "madera": madera
+            }
         }
-        
-        logger.info(f"Cotizacion generada: ${total_usd:.2f} USD = ${precio_final_cop:,.0f} COP")
-        return jsonify(resultado)
-        
-    except Exception as exc:
-        logger.exception("Error generando cotizacion")
-        return jsonify({"error": str(exc)}), 500
+        logger.info(f"Modelo recibido: {modelo}")
+        logger.info(f"Madera recibida: '{madera}'")
+        logger.info(f"Claves disponibles: {list(PRECIOS_MADERAS.keys())}")
 
+        logger.info(
+            f"Cotización generada: ${total_usd:.2f} USD = ${precio_final_cop:,.0f} COP"
+        )
+        
+
+        return jsonify(resultado)
+
+    except Exception as exc:
+        logger.exception("Error generando cotización")
+        return jsonify({"error": str(exc)}), 500
 
 @app.route("/api/stripe-config")
 def stripe_config():
