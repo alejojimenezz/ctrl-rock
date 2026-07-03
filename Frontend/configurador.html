@@ -10,6 +10,7 @@
     <script src="https://js.stripe.com/v3/"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.min.js"></script>
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
 </head>
 <body class="cad-grid-bg">
     <header class="header">
@@ -25,108 +26,130 @@
         <h2 id="modelo-titulo">Configurando tu Guitarra</h2>
 
         <div class="config-grid">
-            <section class="visualizadores-container">
-                <div id="guitar-preview-container">
-                    <canvas id="guitar-preview-canvas" aria-label="Vista previa 3D de la guitarra"></canvas>
-                    <div class="viewport-toolbar" aria-label="Herramientas del visor 3D">
-                        <button id="btn-reset-cam" class="toolbar-btn" type="button" title="Recargar modelo y restablecer camara">Recargar modelo</button>
-                        <button id="btn-toggle-wireframe" class="toolbar-btn" type="button" title="Alternar wireframe">Wire</button>
-                        <button id="btn-toggle-grid" class="toolbar-btn" type="button" title="Mostrar u ocultar grilla">Grid</button>
-                        <button id="btn-toggle-axes" class="toolbar-btn" type="button" title="Mostrar u ocultar ejes">Ejes</button>
-                    </div>
+            
+            <div class="visualizadores-container" style="width: 100%;">
+                
+                <div class="preview-box" id="contenedor2D" style="position: relative; background: #eadfd4; padding: 20px; border-radius: 8px; max-width: 100%; min-height: 630px; display: flex; align-items: flex-end; justify-content: center; overflow: hidden; flex-direction: row;">
+                    
+                <div id="elemento-referencia" style="position: absolute; left: 100px; bottom: 10px; width: 280px; height: 760px; display: flex; align-items: flex-end; justify-content: center; opacity: 0.75; z-index: 5;">
+                    <img src="../assets/images/referencia-estatura.png" alt="Referencia de Estatura" style="max-height: 100%; width: auto; object-fit: contain;">
                 </div>
-            </section>
 
-            <aside class="control-panel">
+                <div id="guitar-scaler" style="position: relative; margin-left: 250px; display: flex; align-items: flex-end; justify-content: center; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform-origin: bottom center;">
+
+                    <img id="guitar-image" src="" alt="Guitarra" style="position: absolute; bottom:0; height:100%; width:auto; max-width:none; filter: drop-shadow(0px 10px 20px rgba(0,0,0,0.3)); z-index: 1;">
+
+                </div>
+
+                </div>
+
+
+                <div id="contenedor3D" style="display: none; width: 100%; height: 630px; background-color: #a09891; border-radius: 8px; padding: 20px;">
+                    <model-viewer
+                        id="visorBajo"
+                        src="" 
+                        alt="Modelo 3D interactivo de tu instrumento"
+                        camera-controls
+                        auto-rotate
+                        shadow-intensity="2"
+                        environment-image="neutral" 
+                        exposure="0.8"
+                        style="width: 100%; height: 100%;">
+                    </model-viewer>
+                </div>
+
+            </div>
+
+            <div class="control-panel">
                 <div id="panel-experto">
                     <div class="tabs-content">
+                                              
                         <div class="config-section">
                             <h4>Madera del Cuerpo</h4>
                             <div class="swatch-group">
-                                <button class="option-swatch active" type="button" data-wood="caoba">
-                                    <span class="color-circle" style="background-color: #5c3a21;"></span> Caoba de Honduras
-                                </button>
-                                <button class="option-swatch" type="button" data-wood="fresno">
+                                <div class="option-swatch active" data-wood="fresno">
                                     <span class="color-circle" style="background-color: #e4d5c7;"></span> Fresno Americano
-                                </button>
-                                <button class="option-swatch" type="button" data-wood="nogal">
-                                    <span class="color-circle" style="background-color: #3e2723;"></span> Nogal Negro
-                                </button>
+                                </div>
+                                <div class="option-swatch" data-wood="caoba">
+                                    <span class="color-circle" style="background-color: #5c3a21;"></span> Caoba de Honduras
+                                </div>
+                                <div class="option-swatch" data-wood="nogal">
+                                    <span class="color-circle" style="background-color: #3e2723;"></span> Nogal Negro Exótico
+                                </div>
                             </div>
                         </div>
 
                         <div class="config-section">
                             <h4>Color de Acabado</h4>
                             <div class="swatch-group">
-                                <button class="option-swatch active" type="button" data-color="cherry">
-                                    <span class="color-circle" style="background-color: #b73225;"></span> Rojo Cereza
-                                </button>
-                                <button class="option-swatch" type="button" data-color="natural">
+                                <div class="option-swatch active" data-finish="cherry">
+                                    <span class="color-circle" style="background-color: #B73225;"></span> Rojo Cereza
+                                </div>
+                                <div class="option-swatch" data-finish="natural">
                                     <span class="color-circle" style="background-color: #8d5b38;"></span> Natural
-                                </button>
-                                <button class="option-swatch" type="button" data-color="carbon">
-                                    <span class="color-circle" style="background-color: #2c2c2c;"></span> Negro Carbon
-                                </button>
-                                <button class="option-swatch" type="button" data-color="sunburst">
-                                    <span class="color-circle" style="background-color: #e07a1b;"></span> Sunburst
-                                </button>
+                                </div>
+                                <div class="option-swatch" data-finish="carbon">
+                                    <span class="color-circle" style="background-color: #2C2C2C;"></span> Negro Carbón
+                                </div>
                             </div>
                         </div>
 
                         <div class="config-section">
-                            <h4>Hardware</h4>
-                            <div class="swatch-group">
-                                <button class="option-swatch active" type="button" data-hardware="chrome">
-                                    <span class="color-circle" style="background-color: #cccccc;"></span> Cromo
-                                </button>
-                                <button class="option-swatch" type="button" data-hardware="gold">
-                                    <span class="color-circle" style="background-color: #daa520;"></span> Oro
-                                </button>
-                                <button class="option-swatch" type="button" data-hardware="black">
-                                    <span class="color-circle" style="background-color: #222222;"></span> Negro
-                                </button>
+                            <h4>Tamaño del Instrumento (De acuerdo a la estatura)</h4>
+                            <div class="swatch-group" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px;">
+                                <div class="option-swatch" data-size="1_4" style="padding: 4px 2px; font-size: 0.8rem; flex-direction: column; text-align: center; cursor: pointer; gap: 2px;">
+                                    <span style="font-weight: bold; font-size: 0.85rem;">1/4</span>
+                                    <span style="font-size: 0.65rem; color: #888; display: block;">1.00m - 1.15m</span>
+                                </div>
+                                <div class="option-swatch" data-size="1_2" style="padding: 4px 2px; font-size: 0.8rem; flex-direction: column; text-align: center; cursor: pointer; gap: 2px;">
+                                    <span style="font-weight: bold; font-size: 0.85rem;">1/2</span>
+                                    <span style="font-size: 0.65rem; color: #888; display: block;">1.15m - 1.35m</span>
+                                </div>
+                                <div class="option-swatch" data-size="3_4" style="padding: 4px 2px; font-size: 0.8rem; flex-direction: column; text-align: center; cursor: pointer; gap: 2px;">
+                                    <span style="font-weight: bold; font-size: 0.85rem;">3/4</span>
+                                    <span style="font-size: 0.65rem; color: #888; display: block;">1.35m - 1.50m</span>
+                                </div>
+                                <div class="option-swatch active" data-size="4_4" style="padding: 4px 2px; font-size: 0.8rem; flex-direction: column; text-align: center; cursor: pointer; gap: 2px;">
+                                    <span style="font-weight: bold; font-size: 0.85rem;">4/4</span>
+                                    <span style="font-size: 0.65rem; color: #888; display: block;">> 1.50m</span>
+                                </div>
                             </div>
                         </div>
 
                         <div class="config-section">
-                            <h4>Pastillas</h4>
-                            <div class="swatch-group">
-                                <button class="option-swatch active" type="button" data-pickups="humbucker">Humbucker</button>
-                                <button class="option-swatch" type="button" data-pickups="singlecoil">Single Coil</button>
+                            <h4>Picks (Púas) de Cortesía</h4>
+                            <div class="swatch-group" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;">
+                                <div class="option-swatch active" data-picks="rojo">
+                                    <span class="color-circle" style="background-color: #cd0707;"></span> Rojo
+                                </div>
+                                <div class="option-swatch" data-picks="amarillo">
+                                    <span class="color-circle" style="background-color: #f7d307; border: 1px solid #ccc;"></span> Amarillo
+                                </div>
+                                 <div class="option-swatch" data-picks="azul">
+                                    <span class="color-circle" style="background-color: #4064f6; border: 1px solid #ccc;"></span> Azul
+                                </div>
+                                <div class="option-swatch" data-picks="rosado">
+                                    <span class="color-circle" style="background-color: #e578bc; border: 1px solid #ccc;"></span> Rosado
+                                </div>
+                                <div class="option-swatch" data-picks="morado">
+                                    <span class="color-circle" style="background-color: #b926ac; border: 1px solid #ccc;"></span> Morado
+                                </div>
                             </div>
                         </div>
-
-                        <div class="config-section">
-                            <h4>Tamano del Instrumento</h4>
-                            <div class="swatch-group size-options">
-                                <button class="option-swatch" type="button" data-size="1_4">1/4</button>
-                                <button class="option-swatch" type="button" data-size="1_2">1/2</button>
-                                <button class="option-swatch" type="button" data-size="3_4">3/4</button>
-                                <button class="option-swatch active" type="button" data-size="4_4">4/4</button>
-                            </div>
-                        </div>
-
-                        <div class="quote-summary-box">
-                            <h5>Resumen</h5>
-                            <ul class="summary-list">
-                                <li>Madera: <span id="sum-madera">CAOBA</span></li>
-                                <li>Color: <span id="sum-color">CHERRY</span></li>
-                                <li>Hardware: <span id="sum-hardware">CHROME</span></li>
-                                <li>Pastillas: <span id="sum-pickups">HUMBUCKER</span></li>
-                                <li>CAD: <span id="sum-cad">440 x 325 x 45 mm (Escala: 648 mm)</span></li>
-                            </ul>
-                        </div>
-
-                        <button id="btn-enviar" type="button">Cotizar mi guitarra</button>
+                        
+                        <button id="btnVer3D" style="width: 100%; margin-top: 20px;">Ver modelo 3D</button>
+                        <button id="btnCotizarFase2" style="display: none; width: 100%; margin-top: 20px;">Proceder a Cotización</button>
+                        
                     </div>
                 </div>
-            </aside>
+            </div>
+                      
         </div>
 
         <div id="modal-cotizacion" class="modal-overlay">
             <div class="modal-content">
-                <h2>Tu guitarra esta lista</h2>
-                <p class="modal-subtitle">Este es el precio final estimado incluyendo componentes y fabricacion.</p>
+                <h2> 🎸 Tu guitarra esta lista</h2>
+                <p class="modal-subtitle">Este es el precio final estimado incluyendo envío e impuestos.</p>
                 <div id="precio-final" class="precio-final">$0 COP</div>
                 <div class="modal-actions">
                     <button id="btn-comprar" class="btn-comprar" type="button">Comprar</button>
@@ -172,5 +195,6 @@
     </main>
 
     <script src="configurador.js"></script>
+    
 </body>
 </html>

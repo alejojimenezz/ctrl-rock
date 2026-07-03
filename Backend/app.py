@@ -35,7 +35,12 @@ ADMIN_TOKEN = os.getenv("ADMIN_TOKEN", "admin123")
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-app = Flask(__name__)
+app = Flask(
+    __name__,
+    static_folder=os.path.join(BASE_DIR, "..", "assets"),
+    static_url_path="/assets"
+)
+
 CORS(app)
 inicializar_db()
 
