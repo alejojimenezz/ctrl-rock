@@ -1,11 +1,12 @@
+import email
 import json
 import logging
 import os
 import subprocess
 from pathlib import Path
-
 from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
+
 
 from db import (
     actualizar_estado_pedido,
@@ -28,6 +29,8 @@ from email_sender import (
     enviar_correo,
     generar_html_confirmacion_pago,
 )
+
+from factura_pdf import MODELOS, generar_factura_pdf
 
 BASE_DIR = Path(__file__).resolve().parent
 ADMIN_TOKEN = os.getenv("ADMIN_TOKEN", "admin123")
@@ -219,6 +222,7 @@ def confirm_payment():
         "metodo_pago": "tarjeta",
         "stripe_payment_intent_id": payment_intent_id,
     })
+    
 
     if not pedido_id:
         return jsonify({"error": "No se pudo guardar el pedido"}), 500
@@ -239,13 +243,37 @@ def confirm_payment():
         guardar_detalles_pedido(pedido_id, detalles, tasa_cop)
     guardar_detalles_configuracion(pedido_id, configuracion)
 
-    # Enviar correo de confirmación de pago
+    ruta_pdf = generar_factura_pdf(
+        pedido_id=pedido_id,
+        cliente=cliente,
+        cotizacion=cotizacion,
+        configuracion=configuracion
+    )
+
+    # ==========================================
+    # Enviar correo
+    # ==========================================
+
     try:
-        modelo = configuracion.get("modelo", "Guitarra personalizada")
+
+        MODELOS = {
+            "lespaul": "Gibson Les Paul",
+            "telecaster": "Fender Telecaster",
+            "ibanezxp": "Ibanez XP",
+            "stingray": "Music Man StingRay Bass",
+            "espex": "ESP EX",
+            "danelectro": "Danelectro",
+        }
+
+        modelo = MODELOS.get(
+            configuracion.get("modelo"),
+            "Guitarra personalizada"
+        )
+
         telefono = cliente.get("telefono", "")
         direccion = cliente.get("direccion", "")
         ciudad = cliente.get("ciudad", "")
-        
+
         html = generar_html_confirmacion_pago(
             nombre=nombre,
             email=email,
@@ -256,19 +284,21 @@ def confirm_payment():
             direccion=direccion,
             ciudad=ciudad,
         )
-        
+
         enviado = enviar_correo(
             destinatario=email,
             asunto="Confirmación de Pago - Ctrl+Rock",
             cuerpo_html=html,
+            adjuntos=[ruta_pdf]
         )
-        
+
         if enviado:
-            logger.info("✅ Correo de confirmación enviado a %s", email)
+            logger.info("Correo enviado correctamente")
         else:
-            logger.warning("⚠️ No se pudo enviar el correo de confirmación a %s", email)
+            logger.warning("No se pudo enviar el correo")
+
     except Exception as exc:
-        logger.exception("Error enviando correo de confirmación: %s", exc)
+        logger.exception(exc)
 
     return jsonify({
         "ok": True,
@@ -276,7 +306,6 @@ def confirm_payment():
         "estado": "pagado",
         "email_enviado": enviado if 'enviado' in locals() else False,
     })
-
 
 @app.route("/api/webhook/stripe", methods=["POST"])
 def stripe_webhook():
