@@ -47,7 +47,8 @@ def generar_html_confirmacion_pago(
     modelo="",
     telefono="",
     direccion="",
-    ciudad=""
+    ciudad="",
+    mensaje_ia=""
 ):
 
     fecha = datetime.now().strftime("%d/%m/%Y %H:%M")
@@ -176,6 +177,8 @@ td{{
 
 <div class="price">
 
+<div class="price">
+
 Total pagado:<br>
 
 {precio}
@@ -183,6 +186,37 @@ Total pagado:<br>
 </div>
 
 <br>
+
+<div style="
+background:#fafafa;
+border-left:5px solid #B8860B;
+padding:20px;
+border-radius:8px;
+margin-top:20px;
+margin-bottom:20px;
+">
+
+<h2 style="
+margin-top:0;
+color:#B8860B;
+">
+
+💬 Un mensaje para ti
+
+</h2>
+
+<p style="
+font-size:15px;
+line-height:1.8;
+color:#333;
+white-space:pre-line;
+">
+
+{mensaje_ia}
+
+</p>
+
+</div>
 
 <p>
 
@@ -192,9 +226,15 @@ Adjunto encontrarás la factura correspondiente a tu compra.
 
 <p>
 
-Tiempo estimado de fabricación y envío:
+Nuestro equipo comenzará la fabricación de tu instrumento en las próximas horas.
 
-<b>15 días calendario.</b>
+</p>
+
+<p>
+
+<b>Tiempo estimado de fabricación y envío:</b>
+
+15 días calendario.
 
 </p>
 

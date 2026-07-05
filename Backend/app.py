@@ -6,6 +6,7 @@ import subprocess
 from pathlib import Path
 from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
+from ai_message import generar_mensaje_personalizado
 
 
 from db import (
@@ -269,10 +270,17 @@ def confirm_payment():
             configuracion.get("modelo"),
             "Guitarra personalizada"
         )
+       
 
         telefono = cliente.get("telefono", "")
         direccion = cliente.get("direccion", "")
         ciudad = cliente.get("ciudad", "")
+        mensaje_ia = generar_mensaje_personalizado(
+    nombre=nombre,
+    modelo=modelo,
+    madera=configuracion.get("madera", ""),
+    acabado=configuracion.get("acabado", "")
+)
 
         html = generar_html_confirmacion_pago(
             nombre=nombre,
@@ -283,6 +291,7 @@ def confirm_payment():
             telefono=telefono,
             direccion=direccion,
             ciudad=ciudad,
+            mensaje_ia=mensaje_ia
         )
 
         enviado = enviar_correo(
