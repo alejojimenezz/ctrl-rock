@@ -1,5 +1,6 @@
 """
-STINGRAY Scale Tool v3
+Scale Tool v3
+Daniel Felipe Vargas Pulido
 ======================
 Menú secuencial de selección de escala:
   Paso 1: Selección de criterio
