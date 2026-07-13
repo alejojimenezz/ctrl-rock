@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ctrl + Rock | Selecciona tu Modelo Base</title>
+    <meta name="description" content="Elige entre Strat, Les Paul o Flying V como tu modelo base de guitarra CAD en 3D.">
+    <link rel="icon" type="image/x-icon" href="../assets/favicon.ico"/>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="cad-grid-bg">
+
+    <header class="header">
+        <a href="index.html" class="logo" style="text-decoration: none;">
+        <img src="../assets/LogoCTRL+ROCK.png" alt="Logo CTRL+ROCK">
+        </a>
+        <nav>
+            <a href="index.html" class="nav-link">Inicio</a>
+        </nav>
+        <nav>
+            <a href="#footer" class="nav-link">Contáctanos</a>
+        </nav>
+    </header>
+
+<main class="models-section">
+        <h2>Selecciona tu Modelo Base</h2>
+        <p class="section-subtitle">Diseño y precisión en tus manos. Explora libremente los modelos interactivos y elige la base para tu configuración.</p>
+        
+        <div class="models-grid">
+            
+            <div class="model-card">
+                <div class="model-3d-card-viewport" 
+                    id="viewport-LesPaul" 
+                    data-model="lespaul"
+                    data-gif="../assets/gifs/LesPaul.gif"
+                    data-audio="../assets/sounds/Les-Paul-HH.mp3"
+                    style="background-image: url('../assets/images/LesPaul.png'); background-size: cover; background-position: center; background-color: #f0e0d1; background-repeat: no-repeat;"> 
+                    </div>
+                
+                <h3>Gibson Les Paul</h3>
+                <p>Introducida en 1952, destaca por su icónico cuerpo de caoba maciza con tapa de membrillo y pastillas humbucker. Ofrece un sonido cálido, denso y con un sustain legendario que definió la historia del rock clásico y el blues pesado.</p>
+                
+                <div class="audio-preview-container">
+                    <button class="btn-audio-play" data-sound="../assets/sounds/Les-Paul-HH.mp3">
+                        <span class="icon-play">▶</span> Escuchar Tono 
+                    </button>
+                </div>
+
+                <a href="configurador.html?modelo=lespaul&modo=experto" class="btn-secondary-link"> Elegir y Personalizar</a>
+            </div>
+
+            <div class="model-card">
+                <div class="model-3d-card-viewport" 
+                    id="viewport-Stratocaster" 
+                    data-model="stratocaster"
+                    data-gif="../assets/gifs/Stratocaster.gif"
+                    data-audio="../assets/sounds/Stratocaster-HH.mp3"
+                    style="background-image: url('../assets/images/Stratocaster.png'); background-size: cover; background-position: center; background-color: #f0e0d1; background-repeat: no-repeat;"></div>
+                <h3>Fender Stratocaster</h3>
+                <p>Considerada la primera guitarra eléctrica de cuerpo sólido producida en masa en la historia. Su diseño simple de un solo corte, combinado con dos pastillas de bobina simple (single-coil), produce un sonido brillante, cristalino y con el característico "twang" del country y el rock primitivo.</p>
+                
+                <div class="audio-preview-container">
+                    <button class="btn-audio-play" data-sound="../assets/sounds/Stratocaster-HH.mp3">
+                        <span class="icon-play">▶</span> Escuchar Tono 
+                    </button>
+                </div>
+
+                <a href="configurador.html?modelo=stratocaster&modo=experto" class="btn-secondary-link"> Elegir y Personalizar</a>
+            </div>
+
+            <div class="model-card">
+                <div class="model-3d-card-viewport" 
+                id="viewport-IbanezXp" 
+                data-model="ibanezxp"
+                data-gif="../assets/gifs/IbanezXP.gif"
+                data-audio="../assets/sounds/Xiphos-HH.mp3"
+                style="background-image: url('../assets/images/IbanezXP.png'); background-size: cover; background-position: center; background-color: #f0e0d1; background-repeat: no-repeat;"></div>
+                <h3>Ibanez XP</h3>
+                <p>Perteneciente a la serie Xiphos, presenta un diseño de cuerpo extremo con cortes angulares agresivos en forma de estrella de cuatro puntas. Diseñada específicamente para el metal extremo, destaca por su construcción neck-through que optimiza el acceso a los trastes más altos y su alta estabilidad tonal.</p>
+                
+            <div class="audio-preview-container">
+                <button class="btn-audio-play" data-sound="../assets/sounds/Xiphos-HH.mp3">
+                    <span class="icon-play">▶</span> Escuchar Tono 
+                </button>
+            </div>
+
+                <a href="configurador.html?modelo=ibanezxp&modo=experto" class="btn-secondary-link">Elegir y Personalizar</a>
+            </div>
+
+            <div class="model-card">
+                <div class="model-3d-card-viewport" 
+                id="viewport-Stingray"
+                data-model="stingray"
+                data-gif="../assets/gifs/Stingray.gif"
+                data-audio="../assets/sounds/Stingray-HH.mp3"
+                style="background-image: url('../assets/images/Stingray.png'); background-size: cover; background-position: center; background-color: #f0e0d1; background-repeat: no-repeat;"></div>
+                <h3>Music Man StingRay Bass</h3>
+                <p>Introducido en 1976 y diseñado en parte por Leo Fender, hizo historia al ser el primer bajo de producción con ecualización activa. Su masiva pastilla humbucker proporciona un tono corpulento, con un ataque agresivo y un característico "gruñido" que redefinió el sonido del funk, rock y slap.</p>
+                
+                <div class="audio-preview-container">
+                      <button class="btn-audio-play" data-sound="../assets/sounds/Stingray-HH.mp3">
+                        <span class="icon-play">▶</span> Escuchar Tono 
+                    </button>
+                </div>
+
+                <a href="configurador.html?modelo=stingray&modo=experto" class="btn-secondary-link">Elegir y Personalizar</a>
+            </div>
+            
+            <div class="model-card">
+                <div class="model-3d-card-viewport" 
+                id="viewport-IbanezRG" 
+                data-model="ibanezrg"
+                data-gif="../assets/gifs/IbanezRG.gif"
+                data-audio="../assets/sounds/IbanezRG-HH.mp3"
+                style="background-image: url('../assets/images/IbanezRG.png'); background-size: cover; background-position: center; background-color: #f0e0d1; background-repeat: no-repeat;"></div>
+                <h3>Ibanez RG</h3>
+                <p>Diseñada para la velocidad y la potencia. Una evolución agresiva y estilizada de la silueta Superstrat, equipada con líneas angulares, bordes afilados y un mástil extra plano de alta velocidad. Optimizada por completo para géneros extremos, riffs veloces y distorsiones pesadas.</p>
+                
+                <div class="audio-preview-container">
+                    <button class="btn-audio-play" data-sound="../assets/sounds/IbanezRG-HH.mp3">
+                        <span class="icon-play">▶</span> Escuchar Tono 
+                    </button>
+                </div>
+
+                <a href="configurador.html?modelo=ibanezrg&modo=experto" class="btn-secondary-link">Elegir y Personalizar</a>
+            </div>
+
+            <div class="model-card">
+                <div class="model-3d-card-viewport" 
+                id="viewport-Danelectro" 
+                data-model="danelectro"
+                data-gif="../assets/gifs/Danelectro.gif"
+                data-audio="../assets/sounds/Danelectro-HH.mp3"
+                style="background-image: url('../assets/images/Danelectro.png'); background-size: cover; background-position: center; background-color: #f0e0d1; background-repeat: no-repeat;"></div>
+                <h3>Danelectro</h3>
+                <p>Famosa por su construcción histórica alternativa usando tableros de alta densidad (Masonite) y marcos de madera. Sus emblemáticas pastillas "Lipstick" alojadas en tubos de metal genuinos entregan un timbre vintage, hueco y sumamente distintivo, muy apreciado en el rock alternativo e indie.</p>
+                
+                <div class="audio-preview-container">
+                    <button class="btn-audio-play" data-sound="../assets/sounds/Danelectro-HH.mp3">
+                        <span class="icon-play">▶</span> Escuchar Tono 
+                    </button>
+                </div>
+
+                <a href="configurador.html?modelo=danelectro&modo=experto" class="btn-secondary-link">Elegir y Personalizar</a>
+            </div>
+
+        </div>
+    </main>
+<footer class="site-footer" id="footer">
+        <div class="footer-grid">
+
+            <div class="footer-col">
+                <h4>Ctrl + Rock</h4>
+                <p>Diseña tu guitarra eléctrica ideal de acuerdo a tus necesidades.</p>
+            </div>
+
+            <div class="footer-col">
+                <h4>Contacto</h4>
+                <div class="contact-item">+57 315 2200001</div>
+                <div class="contact-item"><a href="mailto:contacto@ctrlrock.com">contacto@ctrlrock.com</a></div>
+                <div class="contact-item"><a href="mailto:soporte@ctrlrock.com">soporte@ctrlrock.com</a></div>
+            </div>
+
+            <div class="footer-col">
+                <h4>Atención</h4>
+                <p>Lun – Vie: 9:00 am – 6:00 pm</p>
+                <p>Sáb: 10:00 am – 2:00 pm</p>
+            </div>
+
+        </div>
+        <div class="footer-bottom">
+            <p>2026 <span>Ctrl + Rock</span>. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+    <script src="modelos.js"></script>
+
+</body>
+</html>
