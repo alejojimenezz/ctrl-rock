@@ -28,6 +28,18 @@ const MADERAS = {
     caoba: "Caoba de Honduras",
     nogal: "Nogal Negro Exótico"
 };
+const ACABADOS = {
+    cherry: "Rojo Cereza",
+    natural: "Natural",
+    carbon: "Negro Carbon"
+};
+const PICKS = {
+    rojo: "Rojo",
+    amarillo: "Amarillo",
+    azul: "Azul",
+    rosado: "Rosado",
+    morado: "Morado"
+};
 
     const tituloEl = document.getElementById('modelo-titulo');
     if (tituloEl) tituloEl.textContent = 'Personalizando tu modelo';
@@ -40,8 +52,8 @@ const MADERAS = {
     const contenedor3D = document.getElementById('contenedor3D');
     const visorBajo     = document.getElementById('visorBajo');
 
-    const btnVer3D        = document.getElementById('btnVer3D');
-    const btnCotizarFase2 = document.getElementById('btnCotizarFase2');
+    const btnVer3D          = document.getElementById('btnVer3D');
+    const btnCotizarDirecto = document.getElementById('btnCotizarDirecto');
 
     const modalCotizacion = document.getElementById('modal-cotizacion');
     const modalCompra     = document.getElementById('modal-compra');
@@ -137,13 +149,15 @@ const MADERAS = {
             contenedor2D.classList.add('view-3d-active');
 
             visorBajo.addEventListener('load', () => {
-                btnVer3D.style.display = 'none';
-                btnCotizarFase2.style.display = 'block';
+                this.textContent = 'Modelo 3D cargado';
+                this.disabled = false;
+                setTimeout(() => {
+                    this.textContent = 'Ver modelo 3D';
+                }, 2000);
             }, { once: true });
 
             visorBajo.addEventListener('error', () => {
                 console.error('No se encontró el archivo GLB:', rutaGLB);
-                alert(`Error al cargar el 3D.\nEl archivo no se encontró en:\n${rutaGLB}\n\nAsegúrate de que el archivo exista con ese nombre exacto y que estés usando Live Server.`);
 
                 this.disabled = false;
                 this.textContent = 'Ver modelo 3D';
@@ -154,12 +168,12 @@ const MADERAS = {
         });
     }
 
-    // ── 7. COTIZAR GUITARRA ──────────────────────────────────────────────
-    if (btnCotizarFase2) {
-        btnCotizarFase2.addEventListener('click', async () => {
+    // ── 7. COTIZAR GUITARRA (botón directo, independiente del 3D) ──────
+    if (btnCotizarDirecto) {
+        btnCotizarDirecto.addEventListener('click', async () => {
             try {
-                btnCotizarFase2.disabled = true;
-                btnCotizarFase2.textContent = 'Calculando...';
+                btnCotizarDirecto.disabled = true;
+                btnCotizarDirecto.textContent = 'Calculando...';
 
                 const configuracion = getConfigurationPayload();
 
@@ -180,15 +194,32 @@ const MADERAS = {
                     configuracion
                 };
 
+                // Mostrar precio final
                 precioFinalEl.textContent = `$${Number(cotizacionData.precio_final_cop).toLocaleString('es-CO')} COP`;
+
+                // Desglose oculto para el cliente (solo visible en panel admin)
+                // const dp = cotizacionData.desglose_precios;
+                // if (dp) {
+                //     const fmt = (val) => `$${Number(val).toLocaleString('es-CO')} COP`;
+                //     document.getElementById('desglose-partes').textContent = fmt(dp.costo_partes_totales || 0);
+                //     document.getElementById('desglose-produccion').textContent = fmt(dp.costo_produccion || 0);
+                //     document.getElementById('desglose-transporte').textContent = fmt(dp.transporte || 0);
+                //     document.getElementById('desglose-imprevistos').textContent = fmt(dp.imprevistos || 0);
+                //     document.getElementById('desglose-ganancia').textContent = fmt(dp.ganancia_neta || 0);
+                //     document.getElementById('desglose-stripe').textContent = fmt(dp.comision_stripe_cop || 0);
+                //     document.getElementById('desglose-iva').textContent = fmt(dp.iva || 0);
+                //     document.getElementById('desglose-total').textContent = fmt(dp.precio_final_cop || 0);
+                //     document.getElementById('desglose-precios').style.display = 'block';
+                // }
+
                 modalCotizacion.classList.add('active');
 
             } catch (error) {
                 console.error('Error en cotización:', error);
                 alert(`No fue posible generar la cotización: ${error.message}`);
             } finally {
-                btnCotizarFase2.disabled = false;
-                btnCotizarFase2.textContent = 'Proceder a Cotización';
+                btnCotizarDirecto.disabled = false;
+                btnCotizarDirecto.textContent = 'Ir a Cotización';
             }
         });
     }

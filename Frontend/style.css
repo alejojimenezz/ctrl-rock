@@ -1519,7 +1519,50 @@ body {
 
     color: #c93628;
 
-    margin-bottom: 30px;
+    margin-bottom: 20px;
+}
+
+/* Desglose de precios en el modal de cotizacion */
+.desglose-precios {
+    text-align: left;
+    margin-bottom: 25px;
+    border-top: 1px solid #e0d6cf;
+    padding-top: 15px;
+}
+
+.desglose-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    font-size: 0.9rem;
+    color: #5c3a21;
+}
+
+.desglose-item span:first-child {
+    color: #6e584f;
+}
+
+.desglose-item span:last-child {
+    font-weight: 600;
+    color: #2a1610;
+}
+
+.desglose-total {
+    border-top: 2px solid #c93628;
+    margin-top: 8px;
+    padding-top: 10px;
+    font-size: 1.1rem;
+}
+
+.desglose-total span:first-child {
+    font-weight: 800;
+    color: #2a1610;
+}
+
+.desglose-total span:last-child {
+    font-size: 1.3rem;
+    color: #c93628;
 }
 
 .modal-actions {
@@ -1710,9 +1753,35 @@ body {
     transform: translateY(0);
 }
 
+/* Estilo secundario para el botón "Ir a Cotización" */
+#btnCotizarDirecto {
+    background: transparent;
+    color: #c93628;
+    border: 2px solid #c93628;
+    border-radius: 8px;
+    padding: 18px 24px;
+    font-size: 1.25rem;
+    font-weight: 800;
+    cursor: pointer;
+    text-align: center;
+    letter-spacing: 1px;
+    transition: background 0.3s ease, transform 0.1s ease, color 0.3s ease;
+}
+
+#btnCotizarDirecto:hover {
+    background: #c93628;
+    color: white;
+    transform: translateY(-3px);
+}
+
+#btnCotizarDirecto:active {
+    transform: translateY(0);
+}
+
 /* Si el botón de cotizar está calculando (disabled) */
 #btnCotizarFase2:disabled,
-#btnVer3D:disabled {
+#btnVer3D:disabled,
+#btnCotizarDirecto:disabled {
     background: #ccc;
     color: #666;
     cursor: not-allowed;

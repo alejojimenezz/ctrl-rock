@@ -12,9 +12,11 @@ from ai_message import generar_mensaje_personalizado
 from db import (
     actualizar_estado_pedido,
     get_connection,
+    guardar_desglose_pedido,
     guardar_detalles_pedido,
     guardar_pedido,
     inicializar_db,
+    obtener_desglose_pedido,
     obtener_detalles_pedido,
     obtener_pedidos,
     obtener_webhook_logs,
@@ -33,22 +35,25 @@ from email_sender import (
 
 from factura_pdf import MODELOS, generar_factura_pdf
 
+from precios import (
+    COSTO_PRODUCCION_COP,
+    MAPEO_ACABADO,
+    MAPEO_MADERA,
+    MAPEO_MODELO,
+    PRECIOS_ACABADO,
+    PRECIOS_MADERA,
+    PRECIOS_MODELO,
+    PRECIOS_PICKS,
+    TASA_GANANCIA,
+    TASA_IMPREVISTOS,
+    TASA_IVA,
+    TASA_STRIPE_FIJO_USD,
+    TASA_STRIPE_PORCENTAJE,
+    TASA_TRANSPORTE,
+)
+
 BASE_DIR = Path(__file__).resolve().parent
 ADMIN_TOKEN = os.getenv("ADMIN_TOKEN", "admin123")
-PRECIOS_MODELOS = {
-    "lespaul": 1200000,
-    "telecaster": 1000000,
-    "ibanezxp": 1350000,
-    "stingray": 1250000,
-    "espex": 1400000,
-    "danelectro": 950000,
-}
-
-PRECIOS_MADERAS = {
-    "fresno": 0,
-    "caoba": 350000,
-    "nogal": 600000,
-}
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -112,51 +117,113 @@ def cotizar():
 
         data = request.get_json(silent=True) or {}
 
-        modelo = data.get("modelo")
-        madera = data.get("madera")
+        modelo = data.get("modelo", "lespaul")
+        madera = data.get("madera", "fresno")
+        acabado = data.get("acabado", "cherry")
+        tamano = data.get("tamano", "4_4")
+        picks = data.get("picks", "rojo")
 
+        # ==========================================
+        # 1. COSTO DE PARTES ARBITRARIAS (COP)
+        # ==========================================
+        clave_modelo = MAPEO_MODELO.get(modelo, "lespaul")
+        clave_madera = MAPEO_MADERA.get(madera, "fresno")
+        clave_acabado = MAPEO_ACABADO.get(acabado, "cherry")
+
+        costo_modelo = PRECIOS_MODELO.get(clave_modelo, 0)
+        costo_madera = PRECIOS_MADERA.get(clave_madera, 0)
+        costo_acabado = PRECIOS_ACABADO.get(clave_acabado, 0)
+        costo_picks = PRECIOS_PICKS.get(picks, 0)
+
+        # ==========================================
+        # 2. COSTO DE HARDWARE (Amazon USD -> COP)
+        # ==========================================
         resultado_hardware = calcular_precio_hardware()
-
-        total_usd = resultado_hardware["total_usd"]
-        desglose = resultado_hardware["desglose"]
+        total_hardware_usd = resultado_hardware["total_usd"]
+        desglose_hardware = resultado_hardware["desglose"]
 
         tasa_cambio = obtener_tasa_usd_cop()
-        hardware_cop = convertir_a_cop(total_usd)
+        costo_hardware_cop = convertir_a_cop(total_hardware_usd)
 
-        precio_modelo = PRECIOS_MODELOS.get(modelo, 0)
-        precio_madera = PRECIOS_MADERAS.get(madera, 0)
-
-        COSTO_FABRICACION_COP = 350000
-
-        precio_final_cop = (
-            precio_modelo
-            + precio_madera
-            + hardware_cop
-            + COSTO_FABRICACION_COP
+        # ==========================================
+        # 3. COSTO TOTAL DE PARTES
+        # ==========================================
+        costo_partes_totales = (
+            costo_modelo + costo_madera + costo_acabado + costo_picks + costo_hardware_cop
         )
 
+        # ==========================================
+        # 4. COSTO DE FABRICACION BASE
+        # ==========================================
+        costo_fabricacion_base_cop = costo_partes_totales + COSTO_PRODUCCION_COP
+
+        # ==========================================
+        # 5. CALCULO DE PRECIO CON MARKUP EN ORDEN CORRECTO
+        # ==========================================
+        # Orden:
+        #   1. Margenes (transporte, imprevistos, ganancia) sobre subtotal costos
+        #   2. IVA sobre subtotal con margenes
+        #   3. Comision Stripe sobre total con IVA (Stripe cobra sobre lo cobrado)
+        subtotal_costos = costo_fabricacion_base_cop
+
+        transporte = round(subtotal_costos * TASA_TRANSPORTE)
+        imprevistos = round(subtotal_costos * TASA_IMPREVISTOS)
+        ganancia_neta = round(subtotal_costos * TASA_GANANCIA)
+
+        subtotal_con_margenes = subtotal_costos + transporte + imprevistos + ganancia_neta
+
+        iva = round(subtotal_con_margenes * TASA_IVA)
+
+        total_con_iva = subtotal_con_margenes + iva
+
+        comision_stripe_porcentaje = round(total_con_iva * TASA_STRIPE_PORCENTAJE)
+        comision_stripe_fijo_cop = round(TASA_STRIPE_FIJO_USD * tasa_cambio)
+        comision_stripe_cop = comision_stripe_porcentaje + comision_stripe_fijo_cop
+
+        precio_final_cop = total_con_iva + comision_stripe_cop
+
+        # ==========================================
+        # 6. RESPUESTA
+        # ==========================================
         resultado = {
             "precio_final_cop": precio_final_cop,
-            "precio_modelo_cop": precio_modelo,
-            "precio_madera_cop": precio_madera,
-            "precio_hardware_cop": hardware_cop,
-            "costo_fabricacion_cop": COSTO_FABRICACION_COP,
-            "total_hardware_usd": total_usd,
+            "desglose_componentes": {
+                "modelo": {"clave": clave_modelo, "precio_cop": costo_modelo},
+                "madera": {"clave": clave_madera, "precio_cop": costo_madera},
+                "acabado": {"clave": clave_acabado, "precio_cop": costo_acabado},
+                "picks": {"clave": picks, "precio_cop": costo_picks},
+            },
+            "costo_hardware_usd": round(total_hardware_usd, 2),
+            "costo_hardware_cop": costo_hardware_cop,
+            "costo_partes_totales_cop": costo_partes_totales,
+            "costo_produccion_cop": COSTO_PRODUCCION_COP,
             "tasa_cambio_usd_cop": tasa_cambio,
-            "desglose": desglose,
+            "desglose_hardware": desglose_hardware,
+            "desglose_precios": {
+                "costo_partes_totales": costo_partes_totales,
+                "costo_produccion": COSTO_PRODUCCION_COP,
+                "subtotal_costos": subtotal_costos,
+                "transporte": transporte,
+                "imprevistos": imprevistos,
+                "ganancia_neta": ganancia_neta,
+                "subtotal_con_margenes": subtotal_con_margenes,
+                "iva": iva,
+                "total_con_iva": total_con_iva,
+                "comision_stripe_cop": comision_stripe_cop,
+                "precio_final_cop": precio_final_cop,
+            },
             "configuracion": {
                 "modelo": modelo,
-                "madera": madera
+                "madera": madera,
+                "acabado": acabado,
+                "tamano": tamano,
+                "picks": picks,
             }
         }
-        logger.info(f"Modelo recibido: {modelo}")
-        logger.info(f"Madera recibida: '{madera}'")
-        logger.info(f"Claves disponibles: {list(PRECIOS_MADERAS.keys())}")
 
-        logger.info(
-            f"Cotización generada: ${total_usd:.2f} USD = ${precio_final_cop:,.0f} COP"
-        )
-        
+        logger.info(f"Cotizacion generada: modelo={clave_modelo}, madera={clave_madera}, "
+                     f"hardware=${total_hardware_usd:.2f} USD, "
+                     f"precio_final=${precio_final_cop:,.0f} COP")
 
         return jsonify(resultado)
 
@@ -243,6 +310,19 @@ def confirm_payment():
     if isinstance(detalles, dict):
         guardar_detalles_pedido(pedido_id, detalles, tasa_cop)
     guardar_detalles_configuracion(pedido_id, configuracion)
+
+    # Guardar desglose completo de precios (JSON) para mostrarlo en admin
+    desglose_completo = {
+        "desglose_precios": cotizacion.get("desglose_precios", {}),
+        "desglose_hardware": cotizacion.get("desglose_hardware", {}),
+        "desglose_componentes": cotizacion.get("desglose_componentes", {}),
+        "costo_hardware_usd": cotizacion.get("costo_hardware_usd", 0),
+        "costo_hardware_cop": cotizacion.get("costo_hardware_cop", 0),
+        "costo_produccion_cop": cotizacion.get("costo_produccion_cop", 0),
+        "tasa_cambio_usd_cop": cotizacion.get("tasa_cambio_usd_cop", tasa_cop),
+        "configuracion": configuracion,
+    }
+    guardar_desglose_pedido(pedido_id, desglose_completo)
 
     ruta_pdf = generar_factura_pdf(
         pedido_id=pedido_id,
@@ -349,6 +429,7 @@ def admin_pedidos():
         estado = pedido.get("estado", "pagado")
         reembolsado = bool(pedido.get("reembolsado", 0))
         monto_reembolsado = pedido.get("monto_reembolsado", 0) or 0
+        desglose = obtener_desglose_pedido(pedido["id"])
 
         pedidos.append({
             "id": pedido["id"],
@@ -364,6 +445,7 @@ def admin_pedidos():
             "total_cop": pedido["precio_cop"],
             "stripe_payment_intent_id": intent_id,
             "detalles": obtener_detalles_pedido(pedido["id"]),
+            "desglose": desglose,
         })
     return jsonify({"pedidos": pedidos})
 

@@ -308,7 +308,140 @@
             background: #218838;
         }
 
+        /* ==========================================
+           DESGLOSE COMPLETO - SPLIT PANEL
+           ========================================== */
+        .desglose-panel {
+            display: none;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #e0e0e0;
+        }
+
+        .desglose-panel.active {
+            display: block;
+        }
+
+        .desglose-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .desglose-columna {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        }
+
+        .desglose-columna h3 {
+            color: #333;
+            font-size: 16px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .desglose-columna h4 {
+            color: #555;
+            font-size: 14px;
+            margin: 15px 0 10px 0;
+        }
+
+        .desglose-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 13px;
+        }
+
+        .desglose-item:last-child {
+            border-bottom: none;
+        }
+
+        .desglose-item .label {
+            color: #666;
+        }
+
+        .desglose-item .valor {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .desglose-item .valor.usd {
+            color: #666;
+            font-size: 12px;
+        }
+
+        .desglose-item .valor.cop {
+            color: #28a745;
+        }
+
+        .desglose-item .valor.total {
+            color: #667eea;
+            font-size: 16px;
+        }
+
+        .desglose-item .valor.stripe {
+            color: #dc3545;
+        }
+
+        .desglose-item .valor.iva {
+            color: #fd7e14;
+        }
+
+        .desglose-item .valor.ganancia {
+            color: #17a2b8;
+        }
+
+        .desglose-subtotal {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            margin-top: 10px;
+            border-top: 2px solid #667eea;
+            font-weight: bold;
+            font-size: 15px;
+        }
+
+        .desglose-subtotal .label {
+            color: #333;
+        }
+
+        .desglose-subtotal .valor {
+            color: #667eea;
+        }
+
+        .desglose-enlace-amazon {
+            display: inline-block;
+            background: #ff9900;
+            color: white;
+            text-decoration: none;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-left: 8px;
+        }
+
+        .desglose-enlace-amazon:hover {
+            background: #e88a00;
+        }
+
+        .desglose-no-disponible {
+            text-align: center;
+            color: #999;
+            font-style: italic;
+            padding: 20px;
+        }
+
         @media (max-width: 768px) {
+            .desglose-grid {
+                grid-template-columns: 1fr;
+            }
             .pedido-header {
                 flex-direction: column;
                 align-items: flex-start;

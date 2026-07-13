@@ -147,7 +147,7 @@
                         </div>
                         
                         <button id="btnVer3D" style="width: 100%; margin-top: 20px;">Ver modelo 3D</button>
-                        <button id="btnCotizarFase2" style="display: none; width: 100%; margin-top: 20px;">Proceder a Cotización</button>
+                        <button id="btnCotizarDirecto" style="width: 100%; margin-top: 10px;">Ir a Cotización</button>
                         
                     </div>
                 </div>
@@ -157,9 +157,43 @@
 
         <div id="modal-cotizacion" class="modal-overlay">
             <div class="modal-content">
-                <h2> 🎸 Tu guitarra esta lista</h2>
-                <p class="modal-subtitle">Este es el precio final estimado incluyendo envío e impuestos.</p>
+                <h2>Tu guitarra esta lista</h2>
+                <p class="modal-subtitle">Este es el precio final estimado incluyendo envio e impuestos.</p>
                 <div id="precio-final" class="precio-final">$0 COP</div>
+                <div id="desglose-precios" class="desglose-precios" style="display: none;">
+                    <div class="desglose-item">
+                        <span>Partes y materiales</span>
+                        <span id="desglose-partes">$0 COP</span>
+                    </div>
+                    <div class="desglose-item">
+                        <span>Produccion (mano de obra)</span>
+                        <span id="desglose-produccion">$0 COP</span>
+                    </div>
+                    <div class="desglose-item">
+                        <span>Transporte (5%)</span>
+                        <span id="desglose-transporte">$0 COP</span>
+                    </div>
+                    <div class="desglose-item">
+                        <span>Imprevistos (4%)</span>
+                        <span id="desglose-imprevistos">$0 COP</span>
+                    </div>
+                    <div class="desglose-item">
+                        <span>Ganancia (18%)</span>
+                        <span id="desglose-ganancia">$0 COP</span>
+                    </div>
+                    <div class="desglose-item">
+                        <span>Comision Stripe</span>
+                        <span id="desglose-stripe">$0 COP</span>
+                    </div>
+                    <div class="desglose-item">
+                        <span>IVA (19%)</span>
+                        <span id="desglose-iva">$0 COP</span>
+                    </div>
+                    <div class="desglose-item desglose-total">
+                        <span>Total</span>
+                        <span id="desglose-total">$0 COP</span>
+                    </div>
+                </div>
                 <div class="modal-actions">
                     <button id="btn-comprar" class="btn-comprar" type="button">Comprar</button>
                     <button id="btn-cancelar" class="btn-cancelar" type="button">Cancelar</button>

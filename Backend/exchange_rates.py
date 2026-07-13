@@ -58,19 +58,16 @@ def _save_cache(rate):
 
 
 def _obtener_tasa_exchange_api():
-    """Obtener tasa desde ExchangeRate-API."""
+    """Obtener tasa desde ExchangeRate-API v6."""
     if not EXCHANGE_API_KEY:
         return None
     try:
-        response = requests.get(
-            "https://v6.exchangerate-api.com/v6",
-            params={"key": EXCHANGE_API_KEY, "base": "USD", "target": "COP"},
-            timeout=30
-        )
+        url = f"https://v6.exchangerate-api.com/v6/{EXCHANGE_API_KEY}/latest/USD"
+        response = requests.get(url, timeout=30)
         if response.status_code == 200:
             data = response.json()
             if data.get("result") == "success":
-                return data["conversion_rate"]
+                return data.get("conversion_rates", {}).get("COP")
     except Exception as e:
         logger.warning(f"ExchangeRate-API falló: {e}")
     return None

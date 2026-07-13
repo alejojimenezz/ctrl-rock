@@ -182,11 +182,11 @@ def obtener_precios_componentes(refresh=False):
             time.sleep(ESPERA_SEGUNDOS)
 
     default_prices = {
-        "trastes": {"precio": 15.0, "enlace": "https://www.amazon.com/dp/B003B0D4OU"},
-        "clavijeros": {"precio": 45.0, "enlace": "https://www.amazon.com/dp/B08MQWZ2MD"},
-        "knobs": {"precio": 12.0, "enlace": "https://www.amazon.com/dp/B0BLMWPDQ9"},
-        "puente": {"precio": 65.0, "enlace": "https://www.amazon.com/dp/B0FY5M9G97"},
-        "pastillas_alnico": {"precio": 85.0, "enlace": "https://www.amazon.com/dp/B0FZKM55QD"},
+        "trastes": {"precio": 18.81, "enlace": "https://www.amazon.com/dp/B003B0D4OU"},
+        "clavijeros": {"precio": 31.99, "enlace": "https://www.amazon.com/dp/B08MQWZ2MD"},
+        "knobs": {"precio": 11.99, "enlace": "https://www.amazon.com/dp/B0BLMWPDQ9"},
+        "puente": {"precio": 34.99, "enlace": "https://www.amazon.com/dp/B0FY5M9G97"},
+        "pastillas_alnico": {"precio": 40.37, "enlace": "https://www.amazon.com/dp/B0FZKM55QD"},
     }
     for nombre in pendientes:
         resultados[nombre] = default_prices.get(nombre, {"precio": 30.0, "enlace": ""})

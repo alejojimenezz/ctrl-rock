@@ -7,6 +7,7 @@ Tablas:
 """
 
 import os
+import json
 import sqlite3
 import logging
 from pathlib import Path
@@ -40,10 +41,52 @@ def migrar_esquema_pedidos():
         if "monto_reembolsado" not in columnas:
             cursor.execute("ALTER TABLE pedidos ADD COLUMN monto_reembolsado REAL DEFAULT 0")
             logger.info("Migracion: columna 'monto_reembolsado' agregada a 'pedidos'")
+        if "desglose_precios" not in columnas:
+            cursor.execute("ALTER TABLE pedidos ADD COLUMN desglose_precios TEXT DEFAULT NULL")
+            logger.info("Migracion: columna 'desglose_precios' agregada a 'pedidos'")
         conn.commit()
     except sqlite3.Error as e:
         logger.error(f"Error en migracion de esquema: {e}")
         conn.rollback()
+    finally:
+        conn.close()
+
+
+def guardar_desglose_pedido(pedido_id, desglose_dict):
+    """Guardar el desglose completo de precios (JSON serializado) para un pedido."""
+    if not pedido_id or not desglose_dict:
+        return False
+    conn = get_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute(
+            "UPDATE pedidos SET desglose_precios = ? WHERE id = ?",
+            (json.dumps(desglose_dict, ensure_ascii=False, default=str), pedido_id)
+        )
+        conn.commit()
+        logger.info(f"Desglose de precios guardado para pedido #{pedido_id}")
+        return cursor.rowcount > 0
+    except sqlite3.Error as e:
+        logger.error(f"Error guardando desglose de precios: {e}")
+        conn.rollback()
+        return False
+    finally:
+        conn.close()
+
+
+def obtener_desglose_pedido(pedido_id):
+    """Obtener el desglose de precios de un pedido como dict."""
+    conn = get_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT desglose_precios FROM pedidos WHERE id = ?", (pedido_id,))
+        row = cursor.fetchone()
+        if row and row["desglose_precios"]:
+            return json.loads(row["desglose_precios"])
+        return None
+    except (sqlite3.Error, json.JSONDecodeError) as e:
+        logger.error(f"Error leyendo desglose de precios: {e}")
+        return None
     finally:
         conn.close()
 

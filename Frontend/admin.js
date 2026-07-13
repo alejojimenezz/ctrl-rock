@@ -119,6 +119,7 @@ function generarHTMLPedido(pedido) {
     });
 
     const detalles = pedido.detalles || [];
+    const tieneDesglose = pedido.desglose && pedido.desglose.desglose_precios;
 
     const estadoLower = (pedido.estado || 'pagado').toLowerCase();
     const estaReembolsado = Boolean(pedido.reembolsado);
@@ -178,18 +179,143 @@ function generarHTMLPedido(pedido) {
 
             ${detalles.length > 0 ? `
                 <button class="btn-ver-detalles" data-pedido-id="${pedido.id}">
-                    Ver materiales (${detalles.length})
+                    Ver desglose completo
                 </button>
                 <div class="detalles-materiales" id="detalles-${pedido.id}">
                     ${detalles.map(detalle => generarHTMLDetalle(detalle)).join("")}
                 </div>
             ` : '<p style="color:#999;font-style:italic;">Sin detalles de materiales</p>'}
 
+            ${tieneDesglose ? `
+                <div class="desglose-panel" id="desglose-${pedido.id}">
+                    ${generarHTMLDesglose(pedido.desglose)}
+                </div>
+            ` : `
+                <div class="desglose-panel" id="desglose-${pedido.id}">
+                    <div class="desglose-no-disponible">
+                        Desglose de precios no disponible para pedidos anteriores a la implementacion.
+                    </div>
+                </div>
+            `}
+
             ${pedido.stripe_payment_intent_id ? `
                 <button class="btn-sincronizar" data-payment-intent-id="${escapeHTML(pedido.stripe_payment_intent_id)}">
                     Sincronizar con Stripe
                 </button>
             ` : ''}
+        </div>
+    `;
+}
+
+
+function generarHTMLDesglose(desglose) {
+    const dp = desglose.desglose_precios || {};
+    const dh = desglose.desglose_hardware || {};
+    const dc = desglose.desglose_componentes || {};
+    const tasaCambio = desglose.tasa_cambio_usd_cop || 0;
+    const costoProduccion = desglose.costo_produccion_cop || 0;
+
+    const fmt = (val) => `$${Number(val).toLocaleString('es-CO')} COP`;
+    const fmtUSD = (val) => `$${Number(val).toFixed(2)} USD`;
+
+    // Hardware items
+    let hardwareHTML = '';
+    for (const [key, item] of Object.entries(dh)) {
+        if (!item || typeof item !== 'object') continue;
+        const precioUSD = item.precio || 0;
+        const precioCOP = Math.round(precioUSD * tasaCambio);
+        const enlace = item.enlace || '';
+        hardwareHTML += `
+            <div class="desglose-item">
+                <span class="label">${capitalizeFirst(key)}</span>
+                <span>
+                    <span class="valor usd">${fmtUSD(precioUSD)}</span>
+                    <span class="valor cop"> / ${fmt(precioCOP)}</span>
+                    ${enlace ? `<a href="${escapeHTML(enlace)}" target="_blank" rel="noopener noreferrer" class="desglose-enlace-amazon">Amazon</a>` : ''}
+                </span>
+            </div>
+        `;
+    }
+
+    // Componentes arbitrarios
+    let compsHTML = '';
+    const compLabels = {
+        modelo: 'Modelo',
+        madera: 'Madera',
+        acabado: 'Acabado',
+        picks: 'Picks'
+    };
+    for (const [key, info] of Object.entries(dc)) {
+        if (!info || typeof info !== 'object') continue;
+        const precioCOP = info.precio_cop || 0;
+        compsHTML += `
+            <div class="desglose-item">
+                <span class="label">${compLabels[key] || capitalizeFirst(key)}</span>
+                <span class="valor cop">${fmt(precioCOP)}</span>
+            </div>
+        `;
+    }
+
+    // Margen items
+    const margenItems = [
+        { label: 'Transporte (5%)', valor: dp.transporte, cls: '' },
+        { label: 'Imprevistos (4%)', valor: dp.imprevistos, cls: '' },
+        { label: 'Ganancia neta (18%)', valor: dp.ganancia_neta, cls: 'ganancia' },
+        { label: 'IVA (19%)', valor: dp.iva, cls: 'iva' },
+        { label: 'Comision Stripe (2.9% + $0.30)', valor: dp.comision_stripe_cop, cls: 'stripe' },
+    ];
+
+    let margenHTML = '';
+    for (const item of margenItems) {
+        margenHTML += `
+            <div class="desglose-item">
+                <span class="label">${item.label}</span>
+                <span class="valor ${item.cls}">${fmt(item.valor || 0)}</span>
+            </div>
+        `;
+    }
+
+    const subtotalCostos = (dp.subtotal_costos || dp.costo_partes_totales || 0);
+    const totalFinal = (dp.precio_final_cop || 0);
+
+    return `
+        <div class="desglose-grid">
+            <!-- COLUMNA IZQUIERDA: Partes y componentes -->
+            <div class="desglose-columna">
+                <h3>Componentes y Partes</h3>
+
+                <h4>Hardware (Amazon)</h4>
+                ${hardwareHTML || '<p style="color:#999;font-size:13px;">Sin datos de hardware</p>'}
+
+                <h4>Componentes Personalizados</h4>
+                ${compsHTML || '<p style="color:#999;font-size:13px;">Sin datos de componentes</p>'}
+
+                <div class="desglose-item">
+                    <span class="label">Costo de produccion</span>
+                    <span class="valor cop">${fmt(costoProduccion)}</span>
+                </div>
+
+                <div class="desglose-subtotal">
+                    <span class="label">Total partes + produccion</span>
+                    <span class="valor">${fmt(subtotalCostos)}</span>
+                </div>
+            </div>
+
+            <!-- COLUMNA DERECHA: Impuestos y comisiones -->
+            <div class="desglose-columna">
+                <h3>Impuestos y Comisiones</h3>
+
+                ${margenHTML}
+
+                <div class="desglose-subtotal">
+                    <span class="label">PRECIO FINAL AL CLIENTE</span>
+                    <span class="valor total">${fmt(totalFinal)}</span>
+                </div>
+
+                <div style="margin-top:15px;padding-top:10px;border-top:1px solid #e0e0e0;font-size:12px;color:#999;">
+                    Tasa de cambio: ${fmtUSD(tasaCambio)} por 1 USD
+                </div>
+            </div>
         </div>
     `;
 }
@@ -206,12 +332,12 @@ function generarHTMLDetalle(detalle) {
                 <div class="material-componente">${capitalizeFirst(detalle.componente || '')}</div>
                 <div class="material-nombre">${escapeHTML(detalle.nombre || '')}</div>
             </div>
+            ${tienePrecio ? `
             <div class="material-precios">
-                ${tienePrecio ? `
-                    ${precioUSD ? `<div class="material-precio-usd">$${precioUSD.toFixed(2)} USD</div>` : ''}
-                    <div class="material-precio-cop">$${precioCOP.toLocaleString('es-CO')} COP</div>
-                ` : '<div class="material-precio-cop" style="color:#999;">Sin precio de mercado</div>'}
+                ${precioUSD ? `<div class="material-precio-usd">$${precioUSD.toFixed(2)} USD</div>` : ''}
+                <div class="material-precio-cop">$${precioCOP.toLocaleString('es-CO')} COP</div>
             </div>
+            ` : ''}
             ${detalle.enlace ? `
                 <a href="${escapeHTML(detalle.enlace)}" target="_blank" rel="noopener noreferrer" class="btn-amazon">
                     🛒 Amazon
@@ -224,14 +350,18 @@ function generarHTMLDetalle(detalle) {
 
 function toggleDetalles(pedidoId) {
     const detallesDiv = document.getElementById(`detalles-${pedidoId}`);
+    const desgloseDiv = document.getElementById(`desglose-${pedidoId}`);
     const btn = document.querySelector(`[data-pedido-id="${pedidoId}"]`);
     
     if (detallesDiv) {
         const isActive = detallesDiv.classList.contains("active");
         detallesDiv.classList.toggle("active");
+        if (desgloseDiv) {
+            desgloseDiv.classList.toggle("active");
+        }
         btn.textContent = isActive 
-            ? `Ver materiales` 
-            : `Ocultar materiales`;
+            ? `Ver desglose completo` 
+            : `Ocultar desglose`;
     }
 }
 
