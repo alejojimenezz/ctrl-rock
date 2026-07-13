@@ -1,0 +1,1763 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+
+/* ==========================================================
+   CONFIGURACIONES GENERALES Y VARIABLES DE DISEÑO
+   ========================================================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    /* Paleta de Colores Original Conservada y Enriquecida */
+    --caoba-oscuro: #351c15;
+    --caoba-medio: #5c3a21;
+    --caoba-claro: #8d5b38;
+    --rojo-cereza: #b73225;
+    --rojo-brillante: #d13d2f;
+    --crema-madera: #f5efe6;
+    --crema-claro: #fbf9f6;
+    --blanco-puro: #ffffff;
+    --texto-oscuro: #2a1610;
+    --texto-claro: #fbf9f6;
+    --texto-mutado: #6e584f;
+    
+    /* Efectos y Sombras */
+    --sombra-suave: 0 8px 30px rgba(53, 28, 21, 0.06);
+    --sombra-media: 0 12px 40px rgba(53, 28, 21, 0.12);
+    --sombra-fuerte: 0 20px 50px rgba(18, 9, 7, 0.3);
+    --glow-rojo: 0 0 20px rgba(183, 50, 37, 0.25);
+    
+    /* Bordes y Fuentes */
+    --radio-borde: 16px;
+    --radio-borde-sm: 8px;
+    --fuente-titulo: 'Outfit', sans-serif;
+    --fuente-cuerpo: 'Plus Jakarta Sans', sans-serif;
+    --transicion: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+body {
+    background-color: var(--crema-madera);
+    color: var(--texto-oscuro);
+    font-family: var(--fuente-cuerpo);
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+/* Fondo Tecnológico Blueprint / Grid CAD */
+.cad-grid-bg {
+    background-image: 
+        linear-gradient(to right, rgba(92, 58, 33, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(92, 58, 33, 0.04) 1px, transparent 1px);
+    background-size: 30px 30px;
+}
+
+/* ==========================================================
+   ENCABEZADO (HEADER)
+   ========================================================== */
+.header {
+    background: rgba(53, 28, 21, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    color: var(--blanco-puro);
+    padding: 0.3rem 8%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+
+.header div a {
+    text-decoration: none;
+    color: var(--blanco-puro);
+}
+
+.logo {
+    font-family: var(--fuente-titulo);
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    background: linear-gradient(135deg, var(--blanco-puro) 0%, #e8d8c8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    position: relative;
+}
+
+.logo img {
+    width: 110px;
+    height: auto;
+}
+
+.logo::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 30px;
+    height: 3px;
+    background-color: var(--rojo-cereza);
+    border-radius: 2px;
+}
+
+.header nav a {
+    color: #e8d8c8;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: var(--transicion);
+    padding: 6px 16px;
+    border-radius: var(--radio-borde-sm);
+    border: 1px solid transparent;
+}
+
+.header nav a:hover {
+    color: var(--blanco-puro);
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* ==========================================================
+   PANTALLA DE INICIO (INDEX) - PREMIUM DARK MODE HERO
+   ========================================================== */
+.landing-body {
+    background-color: #120907;
+    color: var(--texto-claro);
+    overflow: hidden;
+}
+
+.landing-container {
+    height: 100vh;
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    align-items: center;
+    padding: 0 8%;
+    position: relative;
+    background: radial-gradient(circle at 60% 50%, #2f1711 0%, #120907 100%);
+    background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+    background-size: 40px 40px;
+}
+
+.landing-logo {
+    display: flex;
+    text-align: center;
+    animation: fadeInUp 1s ease;
+}
+
+.landing-logo img {
+    width: 400px;
+    height: auto;
+}
+
+.landing-content {
+    z-index: 10;
+    max-width: 650px;
+}
+
+.main-tag {
+    display: inline-block;
+    background: rgba(183, 50, 37, 0.15);
+    border: 1px solid rgba(183, 50, 37, 0.3);
+    color: #ff8a80;
+    padding: 6px 16px;
+    border-radius: 30px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 25px;
+    animation: fadeInUp 0.8s ease;
+}
+
+.main-title {
+    font-family: var(--fuente-titulo);
+    font-size: clamp(3rem, 1vw, 5.5rem);
+    font-weight: 900;
+    line-height: 1.05;
+    margin-bottom: 20px;
+    letter-spacing: -2px;
+    text-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    animation: fadeInUp 1s ease;
+}
+
+.main-title span {
+    background: linear-gradient(135deg, var(--rojo-brillante) 0%, #ff8a80 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.main-subtitle {
+    font-size: 1.15rem;
+    color: #c9b3a7;
+    margin-bottom: 40px;
+    line-height: 1.7;
+    animation: fadeInUp 1.2s ease;
+}
+
+.landing-3d-viewport {
+    position: relative;
+    width: 100%;
+    height: 80vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 1.5s ease;
+}
+
+#canvas-landing {
+    width: 100%;
+    height: 100%;
+    outline: none;
+    cursor: grab;
+}
+
+#canvas-landing:active {
+    cursor: grabbing;
+}
+
+/* ==========================================================
+   BOTONES
+   ========================================================== */
+.btn-primary {
+    background: linear-gradient(135deg, var(--rojo-cereza) 0%, var(--rojo-brillante) 100%);
+    color: var(--blanco-puro);
+    padding: 16px 36px;
+    text-decoration: none;
+    font-family: var(--fuente-titulo);
+    font-size: 1.1rem;
+    font-weight: 700;
+    border-radius: var(--radio-borde-sm);
+    border: none;
+    cursor: pointer;
+    transition: var(--transicion);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 8px 24px rgba(183, 50, 37, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(183, 50, 37, 0.5);
+    filter: brightness(1.1);
+}
+
+.btn-primary:active {
+    transform: translateY(-1px);
+}
+
+.btn-secondary-link {
+    display: inline-block;
+    background-color: var(--caoba-medio);
+    color: var(--blanco-puro);
+    text-decoration: none;
+    padding: 12px 24px;
+    font-family: var(--fuente-titulo);
+    font-size: 1rem;
+    font-weight: 700;
+    border-radius: var(--radio-borde-sm);
+    text-align: center;
+    transition: var(--transicion);
+    border: 1px solid rgba(255,255,255,0.05);
+    box-shadow: 0 4px 12px rgba(53, 28, 21, 0.15);
+}
+
+.btn-secondary-link:hover {
+    background-color: var(--rojo-cereza);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(183, 50, 37, 0.3);
+}
+
+.btn-outline {
+    background: transparent;
+    color: var(--caoba-medio);
+    border: 2px solid var(--caoba-medio);
+    padding: 12px 24px;
+    border-radius: var(--radio-borde-sm);
+    font-family: var(--fuente-titulo);
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transicion);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-outline:hover {
+    background: var(--caoba-medio);
+    color: var(--blanco-puro);
+}
+
+/* ==========================================================
+   VISTA DE MODELOS (MODELOS.HTML)
+   ========================================================== */
+.models-section {
+    padding: 80px 8% 100px 8%;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.models-section h2 {
+    font-family: var(--fuente-titulo);
+    font-size: 2.8rem;
+    font-weight: 800;
+    margin-bottom: 12px;
+    color: var(--caoba-oscuro);
+    text-align: center;
+}
+
+.models-section .section-subtitle {
+    margin-bottom: 60px;
+    color: var(--texto-mutado);
+    text-align: center;
+    font-size: 1.1rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.models-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 40px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.model-card {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(15px);
+    border-radius: var(--radio-borde);
+    padding: 30px;
+    box-shadow: var(--sombra-suave);
+    transition: var(--transicion);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+}
+
+.model-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(to right, var(--caoba-medio), var(--rojo-cereza));
+    opacity: 0;
+    transition: var(--transicion);
+}
+
+.model-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--sombra-media);
+    border-color: rgba(183, 50, 37, 0.15);
+    background: rgba(255, 255, 255, 0.95);
+}
+
+.model-card:hover::before {
+    opacity: 1;
+}
+
+.model-3d-card-viewport {
+    background: radial-gradient(circle, #fcfaf7 0%, #eedfd0 100%);
+    height: 320px;
+    border-radius: var(--radio-borde-sm);
+    margin-bottom: 25px;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(92, 58, 33, 0.15);
+    cursor: grab;
+}
+
+.model-3d-card-viewport:active {
+    cursor: grabbing;
+}
+
+.model-3d-card-viewport canvas {
+    width: 100% !important;
+    height: 100% !important;
+    outline: none;
+}
+
+.model-card h3 {
+    font-family: var(--fuente-titulo);
+    margin-bottom: 12px;
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--caoba-oscuro);
+}
+
+.model-card p {
+    font-size: 0.95rem;
+    color: var(--texto-mutado);
+    margin-bottom: 30px;
+    line-height: 1.6;
+    flex-grow: 1;
+}
+
+/* ==========================================================
+   CONFIGURADOR (CONFIGURADOR.HTML)
+   ========================================================== */
+.config-container {
+    min-height: calc(100vh - 70px);
+    padding: 15px 4% 50px;
+    max-width: 1500px;
+    margin: 0 auto;
+    overflow: visible;
+}
+
+.config-container h2 {
+    font-family: var(--fuente-titulo);
+    font-size: 2.4rem;
+    font-weight: 800;
+    color: var(--caoba-oscuro);
+    margin-bottom: 20px;
+    display: inline-block;
+    position: relative;
+    margin-top: 10px;
+}
+
+.config-container h2::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 0;
+    width: 60px;
+    height: 4px;
+    background-color: var(--rojo-cereza);
+    border-radius: 2px;
+}
+
+.config-grid {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 30px;
+    min-height: 640px;
+    align-items: start;
+    margin-top: -10px;
+    
+}
+
+
+/* Lado Izquierdo: Visor 3D e Interactividad */
+.preview-box {
+    height: 680px !important;
+    min-height: 680px !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: flex-end !important;    /* Clava ambos elementos al fondo */
+    justify-content: center !important;  /* Los centra horizontalmente */
+    gap: -5px !important;                /* Separa el niño de la guitarra limpiamente */
+    position: relative !important;
+    overflow: hidden !important;
+    padding: 30px !important;
+}
+#elemento-referencia {
+    position: relative !important;
+    left: auto !important;
+    bottom: auto !important;
+    width: auto !important;
+    height: 100% !important;             /* Ocupa la altura del contenedor */
+    display: flex !important;
+    align-items: flex-end !important;    /* Pies al suelo */
+}
+
+#elemento-referencia img {
+    height: 750px !important;    /* Representa los 1.30m del niño en la pantalla */
+    width: auto !important;
+    object-fit: contain !important;
+}
+#guitar-scaler {
+    position: relative !important;
+    margin-left: 0 !important;           /* Eliminamos el margen manual izquierdo */
+    height: 100% !important;             /* Comparte la misma altura del contenedor */
+    display: flex !important;
+    align-items: flex-end !important;    /* Base de la guitarra al suelo */
+    
+    /* PIVOTE: Fijado abajo al centro para que al escalar solo crezca hacia arriba */
+    transform-origin: bottom center !important; 
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+    margin-left: -80px !important;
+    margin-bottom: 30px !important;
+}
+
+/* Imagen de la guitarra */
+#guitar-scaler img {
+    position: relative !important;
+    height: 500px !important;    /* Representa exactamente los 1.05m de la guitarra 4/4 */
+    width: auto !important;
+    max-width: none !important;
+    display: block !important;
+}
+
+#guitar-preview-container {
+    position: relative;
+    width: 100%;
+    height: clamp(440px, 72vh, 720px);
+    background: radial-gradient(circle, #fbf9f6 0%, #e6d3c2 100%);
+    border-radius: var(--radio-borde-sm);
+    overflow: hidden;
+    border: 1px solid rgba(92, 58, 33, 0.15);
+}
+#guitar-preview-canvas {
+    width: 100%;
+    height: 100%;
+    outline: none;
+    cursor: grab;
+}
+
+#guitar-preview-canvas:active {
+    cursor: grabbing;
+}
+
+/* Superposición de controles para el visor 3D */
+.viewport-toolbar {
+    position: absolute;
+    bottom: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(53, 28, 21, 0.85);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 6px 12px;
+    border-radius: 30px;
+    display: flex;
+    gap: 8px;
+    z-index: 5;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+}
+
+.toolbar-btn {
+    background: transparent;
+    border: none;
+    color: #e8d8c8;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 20px;
+    transition: var(--transicion);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.toolbar-btn:hover {
+    color: var(--blanco-puro);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.toolbar-btn.active {
+    background: var(--rojo-cereza);
+    color: var(--blanco-puro);
+}
+
+/* Lado Derecho: Controles y Pestañas */
+.control-panel {
+    background: var(--blanco-puro);
+    border-radius: var(--radio-borde);
+    box-shadow: var(--sombra-media);
+    border: 1px solid rgba(92, 58, 33, 0.08);
+    overflow: hidden;
+    margin-top: -30px;
+}
+
+/* Sistema de Pestañas (Tabs) */
+.tabs-header {
+    display: flex;
+    background-color: rgba(53, 28, 21, 0.03);
+    border-bottom: 1px solid rgba(53, 28, 21, 0.08);
+}
+
+.tab-btn {
+    flex: 1;
+    background: none;
+    border: none;
+    padding: 16px 10px;
+    font-family: var(--fuente-titulo);
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--texto-mutado);
+    cursor: pointer;
+    transition: var(--transicion);
+    text-align: center;
+    position: relative;
+}
+
+.tab-btn:hover {
+    color: var(--caoba-medio);
+    background-color: rgba(53, 28, 21, 0.02);
+}
+
+.tab-btn.active {
+    color: var(--rojo-cereza);
+    background-color: var(--blanco-puro);
+}
+
+.tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background-color: var(--rojo-cereza);
+}
+
+.tabs-content {
+   padding: 15px 20px;
+}
+
+.tab-pane {
+    display: none;
+    animation: fadeIn 0.4s ease;
+}
+
+.tab-pane.active {
+    display: block;
+}
+
+/* Secciones de Configuración Estética */
+.config-section {
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+}
+
+.config-section:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.config-section h4 {
+    font-family: var(--fuente-titulo);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--caoba-oscuro);
+    margin-bottom: 15px;
+}
+
+/* Selectores Visuales (Swatches) */
+.swatch-group {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.option-swatch {
+    cursor: pointer;
+    border: 2px solid #e1d6cd;
+    border-radius: var(--radio-borde-sm);
+    padding: 10px 14px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--texto-mutado);
+    transition: var(--transicion);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: var(--crema-claro);
+    font-family: var(--fuente-cuerpo);
+}
+
+.option-swatch:hover {
+    border-color: var(--caoba-medio);
+    color: var(--caoba-oscuro);
+}
+
+.option-swatch.active {
+    border-color: var(--rojo-cereza);
+    color: var(--rojo-cereza);
+    background-color: rgba(183, 50, 37, 0.03);
+    box-shadow: 0 4px 10px rgba(183, 50, 37, 0.05);
+}
+
+/* Círculos de color */
+.color-circle {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 1px solid rgba(0,0,0,0.15);
+    display: inline-block;
+}
+
+/* Pestaña CAD: Sliders e instrucciones */
+.cad-sliders {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.slider-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.slider-label-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--caoba-oscuro);
+}
+
+.slider-value {
+    color: var(--rojo-cereza);
+}
+
+.cad-input-range {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: #e1d6cd;
+    outline: none;
+}
+
+.cad-input-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--rojo-cereza);
+    cursor: pointer;
+    transition: var(--transicion);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+.cad-input-range::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+    background: var(--rojo-brillante);
+}
+
+/* Caja de Código de iLogic */
+.code-box {
+    margin-top: 25px;
+    background: #1e120f;
+    border-radius: var(--radio-borde-sm);
+    border: 1px solid rgba(255,255,255,0.05);
+    padding: 18px;
+}
+
+.code-box-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.code-box-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #c9b3a7;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.code-copy-btn {
+    background: rgba(255,255,255,0.08);
+    border: none;
+    color: #e8d8c8;
+    font-size: 0.75rem;
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: var(--transicion);
+}
+
+.code-copy-btn:hover {
+    background: rgba(255,255,255,0.15);
+    color: var(--blanco-puro);
+}
+
+.code-pre {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.78rem;
+    color: #f7ede2;
+    overflow-x: auto;
+    max-height: 180px;
+    white-space: pre;
+    line-height: 1.4;
+}
+
+/* Caja resumen de cotización */
+.quote-summary-box {
+    background-color: var(--crema-madera);
+    border-radius: var(--radio-borde-sm);
+    padding: 20px;
+    margin-bottom: 25px;
+    border: 1px dashed rgba(92, 58, 33, 0.25);
+}
+
+.quote-summary-box h5 {
+    font-family: var(--fuente-titulo);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--caoba-oscuro);
+    margin-bottom: 10px;
+}
+
+.summary-list {
+    list-style: none;
+    font-size: 0.85rem;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    color: var(--texto-mutado);
+}
+
+.summary-list li span {
+    font-weight: 700;
+    color: var(--caoba-oscuro);
+}
+
+/* Estilización de Formulario de Cotización */
+.form-group {
+    margin-bottom: 22px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 700;
+    margin-bottom: 8px;
+    font-size: 0.85rem;
+    color: var(--caoba-oscuro);
+}
+
+.form-group input, 
+.form-group select {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1.5px solid #dcd1c6;
+    border-radius: var(--radio-borde-sm);
+    background-color: var(--crema-claro);
+    font-family: var(--fuente-cuerpo);
+    font-size: 0.95rem;
+    color: var(--texto-oscuro);
+    transition: var(--transicion);
+}
+
+.form-group input:focus, 
+.form-group select:focus {
+    outline: none;
+    border-color: var(--rojo-cereza);
+    background-color: var(--blanco-puro);
+    box-shadow: 0 0 0 4px rgba(183, 50, 37, 0.08);
+}
+
+#mensaje-status {
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 12px;
+    border-radius: var(--radio-borde-sm);
+    margin-top: 20px;
+    animation: fadeIn 0.4s ease;
+}
+
+/* ==========================================================
+   SEGMENTACIÓN DE EXPERIENCIA DE USUARIO (WIZARD ASISTIDO)
+   ========================================================== */
+.user-mode-selector {
+    display: flex;
+    background-color: rgba(53, 28, 21, 0.05);
+    border-bottom: 2px solid rgba(53, 28, 21, 0.08);
+    padding: 8px;
+    gap: 8px;
+}
+
+.mode-btn {
+    flex: 1;
+    background: none;
+    border: none;
+    padding: 12px 6px;
+    font-family: var(--fuente-titulo);
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--texto-mutado);
+    border-radius: var(--radio-borde-sm);
+    cursor: pointer;
+    transition: var(--transicion);
+    text-align: center;
+}
+
+.mode-btn:hover {
+    color: var(--caoba-oscuro);
+    background-color: rgba(53, 28, 21, 0.03);
+}
+
+.mode-btn.active {
+    background-color: var(--blanco-puro);
+    color: var(--rojo-cereza);
+    box-shadow: 0 4px 10px rgba(53, 28, 21, 0.06);
+}
+
+/* Contenedores de paneles */
+#panel-asistido, #panel-experto {
+    transition: var(--transicion);
+}
+
+#panel-asistido {
+    display: block;
+}
+
+#panel-experto {
+    display: none;
+}
+
+/* Wizard / Asistente Paso a Paso */
+.wizard-progress-container {
+    background-color: #e1d6cd;
+    height: 6px;
+    width: 100%;
+    border-radius: 3px;
+    margin-bottom: 25px;
+    overflow: hidden;
+}
+
+.wizard-progress-bar {
+    height: 100%;
+    background: linear-gradient(to right, var(--caoba-medio), var(--rojo-cereza));
+    width: 33.33%; /* Ajustado por JS */
+    transition: width 0.4s ease;
+}
+
+.wizard-step {
+    display: none;
+    animation: fadeIn 0.4s ease;
+}
+
+.wizard-step.active {
+    display: block;
+}
+
+.wizard-step h4 {
+    font-family: var(--fuente-titulo);
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--caoba-oscuro);
+    margin-bottom: 8px;
+}
+
+.wizard-step .step-desc {
+    font-size: 0.9rem;
+    color: var(--texto-mutado);
+    margin-bottom: 25px;
+}
+
+/* Grilla de opciones para las preguntas */
+.wizard-options-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.wizard-card {
+    background: var(--crema-claro);
+    border: 2px solid #e1d6cd;
+    border-radius: var(--radio-borde-sm);
+    padding: 20px;
+    cursor: pointer;
+    transition: var(--transicion);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    position: relative;
+}
+
+.wizard-card:hover {
+    border-color: var(--caoba-medio);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(53, 28, 21, 0.05);
+}
+
+.wizard-card.selected {
+    border-color: var(--rojo-cereza);
+    background-color: rgba(183, 50, 37, 0.03);
+}
+
+.wizard-card-title {
+    font-family: var(--fuente-titulo);
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--caoba-oscuro);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.wizard-card-desc {
+    font-size: 0.85rem;
+    color: var(--texto-mutado);
+    line-height: 1.4;
+}
+
+.wizard-card-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid #e1d6cd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transicion);
+}
+
+.wizard-card.selected .wizard-card-badge {
+    border-color: var(--rojo-cereza);
+    background-color: var(--rojo-cereza);
+}
+
+.wizard-card.selected .wizard-card-badge::after {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: var(--blanco-puro);
+}
+
+/* Botones de navegación */
+.wizard-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.wizard-actions .btn-outline,
+.wizard-actions .btn-primary {
+    flex: 1;
+    padding: 14px 20px;
+}
+/* Estilo divertido y rockero para el lema */
+.rock-slogan {
+    font-size: 1.6rem !important; /* Lo hace más grande y vistoso */
+    font-weight: 800;             /* Súper negrita */
+    text-transform: uppercase;    /* Todo en mayúsculas para más impacto */
+    letter-spacing: 1px;          /* Espaciado entre letras */
+    color: #fff;
+    margin: 20px 0;
+    display: inline-block;
+    
+    /* El truco maestro: una inclinación de contracultura rockera */
+    transform: rotate(-1.5deg); 
+}
+
+/* Destacar la acción en el color rojo de tu marca */
+.highlight-rock {
+    color: #d13d2f; /* El rojo brillante de la guitarra */
+    display: inline-block;
+    text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.5); /* Sombra estilo cómic/póster */
+}
+
+/* ==========================================================
+   ANIMACIONES Y RESPONSIVIDAD
+   ========================================================== */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@media (max-width: 1024px) {
+    .landing-container {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
+        padding-top: 100px;
+        text-align: center;
+        height: auto;
+        min-height: 100vh;
+    }
+    .landing-content {
+        max-width: 100%;
+        margin-bottom: 40px;
+    }
+    .landing-logo {
+        display: flex;
+        text-align: center;
+        justify-content: center;
+    }
+
+    .landing-logo img {
+        width: 300px;
+        height: auto;
+    }
+
+    .landing-3d-viewport {
+        height: 50vh;
+    }
+    .config-grid {
+        grid-template-columns: 1fr;
+        display: grid;
+        align-items: flex-start;
+        min-height: auto;
+    }
+    .preview-box {
+        position: static;
+    
+    }
+}
+/* ==========================================================
+   FOOTER
+   ========================================================== */
+.site-footer {
+    background: var(--caoba-oscuro);
+    border-top: 3px solid var(--rojo-cereza);
+    padding: 3rem 8% 1.5rem;
+    color: var(--crema-madera);
+}
+
+.footer-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 2.5rem;
+    max-width: 1400px;
+    margin: 0 auto 2rem;
+}
+
+.footer-col h4 {
+    font-family: var(--fuente-titulo);
+    color: var(--rojo-brillante);
+    font-size: 0.75rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.footer-col p,
+.footer-col .contact-item {
+    font-size: 0.9rem;
+    color: #c9b3a7;
+    line-height: 2.2;
+}
+
+.footer-col a {
+    color: #c9b3a7;
+    text-decoration: none;
+    transition: var(--transicion);
+}
+
+.footer-col a:hover {
+    color: var(--crema-madera);
+}
+
+.footer-bottom {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding-top: 1.2rem;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.78rem;
+    color: var(--texto-mutado);
+}
+
+.footer-bottom span {
+    color: var(--rojo-brillante);
+}
+/* ==========================================================
+   RESPONSIVIDAD PARA PANTALLAS MÓVILES (MÁXIMO 768px)
+   ========================================================== */
+@media (max-width: 768px) {
+    .footer-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    .footer-bottom {
+        flex-direction: column;
+        gap: 0.4rem;
+        text-align: center;
+    }
+    .header {
+        padding: 1.2rem 5%;
+    }
+    .models-section {
+        padding: 50px 5% 80px 5%;
+    }
+    .config-container {
+        padding: 30px 5% 60px 5%;
+    }
+    .config-container h2 {
+        font-size: 1.8rem;
+    }
+    #guitar-preview-container {
+        height: 420px;
+    }
+    .viewport-toolbar {
+        width: calc(100% - 24px);
+        overflow-x: auto;
+        justify-content: flex-start;
+        bottom: 10px;
+    }
+    .modal-content {
+        padding: 24px;
+    }
+    .modal-actions {
+        flex-direction: column;
+    }
+} /* <--- Aquí se cierra correctamente la media query móvil */
+
+/* ==========================================================
+   PREVISUALIZADOR DE AUDIO GLOBAL (Cualquier tamaño de pantalla)
+   ========================================================== */
+.audio-preview-container {
+    margin: 15px 0 25px 0; /* Añadido margen inferior para separarlo simétricamente del botón "Elegir y Personalizar" */
+    min-height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.btn-audio-play {
+    background-color: #2e1a0c; 
+    color: #f5f5f5;
+    border: 1px solid var(--rojo-cereza); /* Cambiado por tu variable nativa para mejor consistencia */
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: var(--transicion); /* Integrado con tus transiciones fluidas de diseño */
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-audio-play:hover {
+    background-color: var(--rojo-cereza);
+    color: var(--blanco-puro);
+    transform: translateY(-2px); /* Un sutil salto hacia arriba que hace match con tus otros botones */
+}
+
+.btn-audio-play.playing {
+    background-color: var(--rojo-cereza);
+    box-shadow: var(--glow-rojo); /* Integrado con tu variable de resplandor para que se vea premium al sonar */
+}
+
+.audio-placeholder {
+    font-size: 0.8rem;
+    color: var(--texto-mutado); /* Usando tu variable mutada para mantener la gama de colores */
+    font-style: italic;
+}
+/* ========================================= */
+/* ESTILOS DEL POP-UP (MODAL DE SELECCIÓN)   */
+/* ========================================= */
+
+/* El fondo oscuro que cubre toda la pantalla */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.85); /* Fondo negro al 85% de opacidad */
+    z-index: 9999; /* Asegura que quede por encima del header y los modelos 3D */
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(5px); /* Efecto de desenfoque en el fondo (opcional, se ve muy bien) */
+    display: none;
+}
+
+/* La caja principal del pop-up */
+.modal-content {
+    background-color: #1e1e1e; /* Gris muy oscuro, casi negro */
+    color: #ffffff;
+    padding: 40px;
+    border-radius: 12px;
+    max-width: 500px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
+    border: 1px solid #333;
+}
+
+.modal-content h3 {
+    margin-top: 0;
+    font-size: 1.6rem;
+    margin-bottom: 10px;
+}
+
+/* Contenedor de los dos botones principales */
+.modal-buttons {
+    display: flex;
+    flex-direction: column; /* Coloca un botón sobre otro */
+    gap: 15px;
+    margin-top: 20px;
+}
+
+/* Efectos hover para que los botones se sientan interactivos */
+.modal-buttons button {
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.modal-buttons button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Ajustes específicos para los botones si no tienes estas clases creadas */
+#btn-modal-asistido.btn-primary {
+    background-color: #e53935; /* Un rojo rockero, cámbialo por tu color principal si tienes otro */
+    color: white;
+    border: none;
+}
+
+#btn-modal-asistido.btn-primary:hover {
+    background-color: #ef5350;
+}
+
+#btn-modal-experto.btn-outline {
+    background-color: transparent;
+    color: #ffffff;
+    border: 2px solid #555;
+}
+
+#btn-modal-experto.btn-outline:hover {
+    border-color: #fff;
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Efecto hover para el botón de cancelar */
+#btn-cerrar-modal:hover {
+    color: #fff !important;
+}
+/* Estilos para el Formulario del Asistente */
+.wizard-header {
+    margin-bottom: 25px;
+}
+.progress-bar {
+    background: #333;
+    height: 6px;
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 10px;
+}
+#wizard-progress {
+    background: #e53935; /* Color rojo principal */
+    height: 100%;
+    transition: width 0.3s ease;
+}
+.step-desc {
+    font-size: 0.9rem;
+    color: #aaa;
+    margin-bottom: 20px;
+}
+.wizard-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.btn-wizard-opt {
+    background: #2a2a2a;
+    border: 1px solid #444;
+    color: #fff;
+    padding: 14px;
+    border-radius: 8px;
+    text-align: left;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+}
+.btn-wizard-opt:hover {
+    background: #333;
+    border-color: #666;
+}
+.btn-wizard-opt.active {
+    background: rgba(229, 57, 53, 0.15);
+    border-color: #e53935;
+    color: #fff;
+    font-weight: bold;
+}
+.control-panel {
+    display: flex;
+    flex-direction: column;
+}
+
+#panel-experto {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.btn-container {
+    margin-top: auto;
+    display: flex;
+    justify-content: flex-end;
+    padding: 20px;
+    border-top: 1px solid rgba(92,58,33,0.08);
+}
+.action-area {
+    margin-top: 10px;
+}
+
+#btn-enviar {
+    width: 100%;
+    height: 70px;
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-size: 1.5rem;
+    font-weight: 700;
+
+    background: #c93628;
+    color: white;
+
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+}
+/* ==========================
+   MODAL COTIZACIÓN
+========================== */
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+
+    background: rgba(0,0,0,.65);
+
+    display: none;
+    justify-content: center;
+    align-items: center;
+
+    z-index: 9999;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal-content {
+
+    width: 90%;
+    max-width: 500px;
+
+    background: white;
+
+    border-radius: 18px;
+
+    padding: 35px;
+
+    text-align: center;
+
+    box-shadow: 0 20px 60px rgba(0,0,0,.25);
+
+    animation: modalEntrada .25s ease;
+}
+
+@keyframes modalEntrada {
+
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-content h2 {
+
+    margin-bottom: 10px;
+
+    color: #5c3a21;
+
+    font-size: 2rem;
+}
+
+.modal-subtitle {
+
+    color: #666;
+
+    margin-bottom: 25px;
+
+    line-height: 1.5;
+}
+
+.precio-final {
+
+    font-size: 2.5rem;
+
+    font-weight: 800;
+
+    color: #c93628;
+
+    margin-bottom: 30px;
+}
+
+.modal-actions {
+
+    display: flex;
+
+    gap: 15px;
+}
+
+.modal-actions button {
+
+    flex: 1;
+
+    border: none;
+
+    border-radius: 10px;
+
+    padding: 16px;
+
+    font-size: 1rem;
+
+    font-weight: 700;
+
+    cursor: pointer;
+}
+
+.btn-comprar {
+
+    background: #c93628;
+    color: white;
+}
+
+.btn-comprar:hover {
+
+    transform: translateY(-2px);
+}
+
+.btn-cancelar {
+
+    background: #ececec;
+    color: #444;
+}
+/* ==========================
+   FORMULARIO DE COMPRA
+========================== */
+
+.modal-form {
+    max-width: 650px;
+    width: 95%;
+    max-height: 85vh;
+    overflow-y: auto;
+}
+
+.modal-form h2 {
+    color: #5c3a21;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.modal-form .modal-subtitle {
+    text-align: center;
+    color: #666;
+    margin-bottom: 25px;
+}
+
+.campo-form {
+    margin-bottom: 18px;
+}
+
+.campo-form label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: #333;
+    font-size: 0.95rem;
+}
+
+.campo-form input,
+.campo-form select {
+    width: 100%;
+    padding: 12px 14px;
+
+    border: 1px solid #d8d8d8;
+    border-radius: 8px;
+
+    font-size: 1rem;
+    color: #333;
+    background: white;
+
+    box-sizing: border-box;
+}
+
+.campo-form input:focus,
+.campo-form select:focus {
+    outline: none;
+    border-color: #c93628;
+    box-shadow: 0 0 0 3px rgba(201,54,40,.15);
+}
+
+.modal-form .modal-actions {
+    margin-top: 25px;
+    display: flex;
+    gap: 12px;
+}
+
+.modal-form .btn-comprar {
+    flex: 1;
+    background: #c93628;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 14px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.modal-form .btn-cancelar {
+    flex: 1;
+    background: #efefef;
+    color: #444;
+    border: none;
+    border-radius: 8px;
+    padding: 14px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+#card-element-container {
+    width: 100%;
+    min-height: 46px;
+    padding: 13px 14px;
+    border: 1px solid #d8d8d8;
+    border-radius: 8px;
+    background: white;
+}
+
+#card-element-container.StripeElement--focus {
+    border-color: #c93628;
+    box-shadow: 0 0 0 3px rgba(201,54,40,.15);
+}
+
+#card-errors {
+    min-height: 20px;
+    margin-top: 8px;
+    color: #c93628;
+    font-size: 0.88rem;
+    text-align: left;
+}
+
+.payment-status {
+    min-height: 22px;
+    margin-top: 10px;
+    color: #5c3a21;
+    font-weight: 700;
+    text-align: center;
+}
+/* Estilos unificados para botones principales */
+.btn-comprar,
+#btnVer3D,
+#btnCotizarFase2 {
+    background: #c93628;
+    color: white;
+    border: none;
+    border-radius:8px;
+    padding: 18px 24px;
+    font-size: 1.25rem;
+    font-weight: 800;
+    cursor: pointer;
+    text-align: center;
+    letter-spacing: 1px;
+    transition: background 0.3s ease, transform 0.1s ease;
+}
+
+/* Efecto al pasar el mouse */
+.btn-comprar:hover,
+#btnVer3D:hover,
+#btnCotizarFase2:hover {
+    background: #a82d21;
+    transform: translateY(-3px);
+}
+
+/* Efecto al hacer clic */
+.btn-comprar:active,
+#btnVer3D:active,
+#btnCotizarFase2:active {
+    transform: translateY(0);
+}
+
+/* Si el botón de cotizar está calculando (disabled) */
+#btnCotizarFase2:disabled,
+#btnVer3D:disabled {
+    background: #ccc;
+    color: #666;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+/* ==========================================================
+   ALINEACIÓN COMPARTIDA: VISTA 2D Y MODELO 3D
+   ========================================================== */
+
+/* 1. Configuramos las dimensiones idénticas para el visor 3D */
+/* ==========================================================
+   ALINEACIÓN COMPARTIDA: VISTA 2D Y MODELO 3D
+   ========================================================== */
+
+/* Visor 3D: Estado oculto por defecto (Vista 2D) */
+#visorBajo {
+    width: 350px !important;        /* Dimensiones en modo 2D por si acaso */
+    height: 500px !important;
+    margin-left: -80px !important;
+    margin-bottom: 30px !important;
+    display: none !important;       
+    --poster-color: transparent;    
+    outline: none;
+}
+
+/* ==========================================================
+   INTERCAMBIO: CUANDO SE ACTIVA EL MODO 3D (.view-3d-active)
+   ========================================================== */
+
+/* 1. Ocultamos al niño por completo */
+.preview-box.view-3d-active #elemento-referencia {
+    display: none !important;       
+}
+
+/* 2. Ocultamos la guitarra plana 2D */
+.preview-box.view-3d-active #guitar-scaler {
+    display: none !important;       
+}
+
+/* 3. El visor 3D toma el control absoluto y se expande al 100% */
+.preview-box.view-3d-active #visorBajo {
+    display: block !important;      
+    width: 100% !important;         /* Ocupa todo el ancho del contenedor gris */
+    height: 100% !important;        /* Ocupa todo el alto del contenedor gris */
+    margin: 0 !important;           /* Resetea los márgenes negativos para centrarse perfectamente */
+}
+
