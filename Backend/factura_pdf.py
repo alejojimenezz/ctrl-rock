@@ -37,10 +37,10 @@ FACTURAS_DIR.mkdir(exist_ok=True)
 
 MODELOS = {
     "lespaul": "Gibson Les Paul",
-    "telecaster": "Fender Telecaster",
+    "stratocaster": "Fender Stratocaster",
     "ibanezxp": "Ibanez XP",
     "stingray": "Music Man StingRay",
-    "espex": "ESP EX",
+    "ibanezrg": "Ibanez RG",
     "danelectro": "Danelectro",
 }
 
@@ -51,8 +51,8 @@ MADERAS = {
 }
 
 ACABADOS = {
-    "carbon": "Carbon",
-    "cherry": "Cherry",
+    "carbon": "Negro Carbón",
+    "cherry": "Rojo Cereza",
     "natural": "Natural",
 }
 

@@ -2,10 +2,10 @@ import ollama
 
 MODELOS = {
     "lespaul": "Gibson Les Paul",
-    "telecaster": "Fender Telecaster",
+    "stratocaster": "Fender Stratocaster",
     "ibanezxp": "Ibanez XP",
     "stingray": "Music Man StingRay",
-    "espex": "ESP EX",
+    "ibanezrg": "Ibanez RG",
     "danelectro": "Danelectro",
 }
 
@@ -33,7 +33,7 @@ def generar_mensaje_personalizado(
     acabado = ACABADOS.get(acabado, acabado)
 
     prompt = f"""
-Eres un luthier profesional de CTRL+ROCK.
+Eres un vendedor profesional de CTRL+ROCK.
 
 Acaba de finalizar la compra de una guitarra personalizada.
 

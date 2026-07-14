@@ -17,10 +17,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const modeloId  = (urlParams.get('modelo') || 'lespaul').toLowerCase();
     const MODELOS = {
     lespaul: "Gibson Les Paul",
-    telecaster: "Fender Telecaster",
+    stratocaster: "Fender Stratocaster",
     ibanezxp: "Ibanez XP",
     stingray: "Music Man StingRay Bass",
-    espex: "ESP EX",
+    ibanezrg: "Ibanez RG",
     danelectro: "Danelectro"
 };
 const MADERAS = {

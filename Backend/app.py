@@ -1,3 +1,4 @@
+from datetime import datetime
 import email
 import json
 import logging
@@ -7,6 +8,8 @@ from pathlib import Path
 from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 from ai_message import generar_mensaje_personalizado
+from plano_taller import generar_plano_taller
+from email_sender import enviar_correo
 
 
 from db import (
@@ -330,6 +333,15 @@ def confirm_payment():
         cotizacion=cotizacion,
         configuracion=configuracion
     )
+    # ==========================================================
+# GENERAR PLANO PARA EL TALLER
+# ==========================================================
+
+    ruta_plano = generar_plano_taller(
+        pedido_id=pedido_id,
+        cliente=cliente,
+        configuracion=configuracion
+    )
 
     # ==========================================
     # Enviar correo
@@ -339,10 +351,10 @@ def confirm_payment():
 
         MODELOS = {
             "lespaul": "Gibson Les Paul",
-            "telecaster": "Fender Telecaster",
+            "stratocaster": "Fender Stratocaster",
             "ibanezxp": "Ibanez XP",
             "stingray": "Music Man StingRay Bass",
-            "espex": "ESP EX",
+            "ibanezrg": "Ibanez RG",
             "danelectro": "Danelectro",
         }
 
@@ -376,7 +388,7 @@ def confirm_payment():
 
         enviado = enviar_correo(
             destinatario=email,
-            asunto="Confirmación de Pago - Ctrl+Rock",
+            asunto=f"CTRL+ROCK | Confirmación de compra | Pedido #{pedido_id}",
             cuerpo_html=html,
             adjuntos=[ruta_pdf]
         )
@@ -385,6 +397,39 @@ def confirm_payment():
             logger.info("Correo enviado correctamente")
         else:
             logger.warning("No se pudo enviar el correo")
+        # ==========================================================
+        # CORREO AL TALLER
+        # ==========================================================
+
+       
+
+        html_taller = f"""
+        <h2>Nuevo pedido recibido</h2>
+
+        <p>Se adjunta el plano correspondiente para fabricación.</p>
+
+        <table style="border-collapse:collapse;">
+        <tr><td><b>Pedido:</b></td><td>{pedido_id}</td></tr>
+        <tr><td><b>Cliente:</b></td><td>{cliente.get('nombre','')}</td></tr>
+        <tr><td><b>Correo:</b></td><td>{cliente.get('email','')}</td></tr>
+        <tr><td><b>Teléfono:</b></td><td>{cliente.get('telefono','')}</td></tr>
+        <tr><td><b>Modelo:</b></td><td>{modelo}</td></tr>
+        <tr><td><b>Fecha:</b></td><td>{datetime.now().strftime("%d/%m/%Y %H:%M")}</td></tr>
+        </table>
+
+        <p>
+        El plano PDF adjunto ya contiene automáticamente los datos del cliente y está listo para fabricación.
+        </p>
+        """
+
+        enviar_correo(
+            destinatario= "jbarretoh@unal.edu.co",
+            asunto=f"CTRL+ROCK | Fabricación | Pedido #{pedido_id} | {modelo}",
+            cuerpo_html=html_taller,
+            adjuntos=[str(ruta_plano)]
+        )
+
+        logger.info("Plano enviado al taller correctamente")
 
     except Exception as exc:
         logger.exception(exc)
@@ -544,7 +589,6 @@ def guardar_sincronizacion_remota(payment_intent_id, pago):
         conn.rollback()
     finally:
         conn.close()
-
 
 FRONTEND_DIR = BASE_DIR.parent / "Frontend"
 

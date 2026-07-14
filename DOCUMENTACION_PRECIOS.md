@@ -15,10 +15,10 @@ Todos los precios están centralizados en `Backend/precios.py`.
 | Categoría | Opción | Precio COP | Fuente |
 |-----------|--------|------------|--------|
 | **Modelo** | lespaul | $600,000 | `precios.py` |
-| | telecaster | $500,000 | `precios.py` |
+| | stratocaster | $500,000 | `precios.py` |
 | | ibanezxp | $650,000 | `precios.py` |
 | | stingray | $600,000 | `precios.py` |
-| | espex | $700,000 | `precios.py` |
+| | ibanezrg | $700,000 | `precios.py` |
 | | danelectro | $450,000 | `precios.py` |
 | **Madera** | fresno | $0 (base) | `precios.py` |
 | | caoba | $150,000 | `precios.py` |

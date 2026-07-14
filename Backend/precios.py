@@ -14,10 +14,10 @@ Un solo lugar para auditarlos y modificarlos.
 
 PRECIOS_MODELO = {
     "lespaul": 600000,
-    "telecaster": 500000,
+    "stratocaster": 500000,
     "ibanezxp": 650000,
     "stingray": 600000,
-    "espex": 700000,
+    "ibanezrg": 700000,
     "danelectro": 450000,
 }
 
@@ -56,10 +56,10 @@ PRECIOS_PICKS = {
 
 MAPEO_MODELO = {
     "lespaul": "lespaul",
-    "telecaster": "telecaster",
+    "stratocaster": "stratocaster",
     "ibanezxp": "ibanezxp",
     "stingray": "stingray",
-    "espex": "espex",
+    "ibanezrg": "ibanezrg",
     "danelectro": "danelectro",
 }
 

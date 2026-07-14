@@ -14,7 +14,7 @@
 ### 🌟 Key Features / Características Principales
 
 - **3D Guitar Visualization** - Interactive 3D wireframe preview with Three.js
-- **Multiple Guitar Models** - 6 iconic guitar models (Les Paul, Telecaster, Ibanez XP, StingRay, ESP EX, Danelectro)
+- **Multiple Guitar Models** - 6 iconic guitar models (Les Paul, Stratocaster, Ibanez XP, StingRay, Ibanez RG, Danelectro)
 - **Real-time Pricing** - Dynamic price calculation with USD/COP conversion
 - **Stripe Integration** - Secure payment processing with webhooks
 - **Audio Previews** - Listen to guitar tones before purchasing
@@ -76,10 +76,10 @@ mindmap
                 Material Preview
             Guitar Models
                 Les Paul
-                Telecaster
+                Stratocaster
                 Ibanez XP
                 StingRay Bass
-                ESP EX
+                Ibanez RG
                 Danelectro
             Customization
                 Body Wood
